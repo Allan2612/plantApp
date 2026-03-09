@@ -1,7 +1,8 @@
 import { useColorScheme } from "react-native";
 import { Spacing } from "../constants/spacing";
 import { Typography } from "../constants/typography";
-import { DarkTheme, LightTheme } from "./colors";
+import { DarkTheme } from "./dark";
+import { LightTheme } from "./light";
 
 export const Radius = {
   sm: 8,
