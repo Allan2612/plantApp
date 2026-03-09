@@ -1,6 +1,7 @@
 import { useAppTheme } from "@/src/theme/designSystem";
-import { Pressable, PressableProps, StyleSheet } from "react-native";
-import AppText from "./AppText";
+import { Pressable, PressableProps } from "react-native";
+import AppText from "../AppText/AppText";
+import { createStyles } from "./AppButton.styles";
 
 type ButtonVariant = "primary" | "secondary";
 
@@ -16,15 +17,11 @@ export default function AppButton({
   style,
   ...rest
 }: AppButtonProps) {
-  const { colors, spacing, radius } = useAppTheme();
+  const theme = useAppTheme();
+  const { colors } = theme;
+  const styles = createStyles(theme);
 
   const isPrimary = variant === "primary";
-
-  const backgroundColor = disabled
-    ? colors.surfaceAlt
-    : isPrimary
-      ? colors.primary
-      : colors.surface;
 
   const textColor = disabled
     ? colors.textMuted
@@ -36,22 +33,17 @@ export default function AppButton({
     <Pressable
       style={[
         styles.base,
-        {
-          backgroundColor,
-          borderRadius: radius.md,
-          paddingVertical: spacing.sm + 4,
-          paddingHorizontal: spacing.lg,
-        },
-        !isPrimary && {
-          borderWidth: 1,
-          borderColor: colors.primary,
-        },
+        disabled
+          ? styles.disabledBg
+          : isPrimary
+            ? styles.primaryBg
+            : styles.secondaryBg,
         style as object,
       ]}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={title}
-      accessibilityState={{ disabled }}
+      accessibilityState={{ disabled: !!disabled }}
       {...rest}
     >
       <AppText variant="label" color={textColor} style={styles.label}>
@@ -60,13 +52,3 @@ export default function AppButton({
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  label: {
-    fontWeight: "600",
-  },
-});

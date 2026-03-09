@@ -1,6 +1,7 @@
 import { useAppTheme } from "@/src/theme/designSystem";
-import { Image, StyleSheet, View } from "react-native";
-import AppText from "./AppText";
+import { Image, View } from "react-native";
+import AppText from "../AppText/AppText";
+import { createStyles } from "./PlantCard.styles";
 
 interface PlantCardProps {
   name: string;
@@ -13,33 +14,27 @@ export default function PlantCard({
   description,
   image,
 }: PlantCardProps) {
-  const { colors, spacing, radius } = useAppTheme();
+  const theme = useAppTheme();
+  const { colors } = theme;
+  const styles = createStyles(theme);
 
   return (
     <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: colors.surface,
-          borderColor: colors.surfaceDivider,
-          borderRadius: radius.lg,
-          padding: spacing.md,
-        },
-      ]}
+      style={styles.card}
       accessibilityRole="summary"
       accessibilityLabel={`Planta: ${name}. ${description}`}
     >
       <Image
         source={{ uri: image }}
-        style={[styles.image, { borderRadius: radius.md }]}
+        style={styles.image}
         accessibilityLabel={`Foto de ${name}`}
       />
-      <View style={{ marginTop: spacing.sm }}>
+      <View style={styles.content}>
         <AppText variant="subheading">{name}</AppText>
         <AppText
           variant="body"
           color={colors.textSecondary}
-          style={{ marginTop: spacing.xs }}
+          style={styles.description}
           numberOfLines={2}
         >
           {description}
@@ -48,13 +43,3 @@ export default function PlantCard({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    borderWidth: 1,
-  },
-  image: {
-    width: "100%",
-    height: 140,
-  },
-});

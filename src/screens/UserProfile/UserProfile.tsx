@@ -1,4 +1,4 @@
-import AppText from "@/src/components/AppText";
+import AppText from "@/src/components/AppText/AppText";
 import ScreenWrapper from "@/src/components/ScreenWrapper/ScreenWrapper";
 import { useAppTheme } from "@/src/theme/designSystem";
 import { UserInterface } from "@/src/types-dtos/user.types";

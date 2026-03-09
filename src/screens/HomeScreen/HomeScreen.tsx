@@ -1,11 +1,11 @@
-import AppButton from "@/src/components/AppButton";
-import AppText from "@/src/components/AppText";
-import PlantCard from "@/src/components/PlantCard";
+import AppText from "@/src/components/AppText/AppText";
+import PlantCard from "@/src/components/PlantCard/PlantCard";
 import ScreenWrapper from "@/src/components/ScreenWrapper/ScreenWrapper";
 import { useAppTheme } from "@/src/theme/designSystem";
 import { Plant } from "@/src/types-dtos/plant.types";
-import { useRouter } from "expo-router";
-import { FlatList, StyleSheet, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { FlatList, View } from "react-native";
+import { createStyles } from "./HomeScreen.styles";
 
 const PLANTS: Plant[] = [
   {
@@ -37,33 +37,34 @@ const PLANTS: Plant[] = [
     name: "Pothos Dorado",
     description:
       "Planta colgante fácil de cuidar. Perfecta para principiantes.",
-    image: "https://images.unsplash.com/photo-1572688484438-313a56e6dc34?w=400",
+    image: "https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=400",
     category: "Tropical",
   },
 ];
 
 export default function HomeScreen() {
-  const { colors, spacing } = useAppTheme();
-  const router = useRouter();
+  const theme = useAppTheme();
+  const { colors } = theme;
+  const styles = createStyles(theme);
 
   return (
     <ScreenWrapper>
       <FlatList
         data={PLANTS}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={[
-          styles.list,
-          { padding: spacing.md, gap: spacing.md },
-        ]}
+        contentContainerStyle={styles.list}
         ListHeaderComponent={
-          <View style={{ marginBottom: spacing.sm }}>
-            <AppText variant="heading" accessibilityRole="header">
-              🌿 Mis Plantas
-            </AppText>
+          <View style={styles.headerContainer}>
+            <View style={styles.headerRow}>
+              <Ionicons name="leaf" size={24} color={colors.primary} />
+              <AppText variant="heading" accessibilityRole="header">
+                Mis Plantas
+              </AppText>
+            </View>
             <AppText
               variant="body"
               color={colors.textSecondary}
-              style={{ marginTop: spacing.xs }}
+              style={styles.headerSubtitle}
             >
               Tu colección personal de plantas
             </AppText>
@@ -76,22 +77,7 @@ export default function HomeScreen() {
             image={item.image}
           />
         )}
-        ListFooterComponent={
-          <View style={{ marginTop: spacing.sm }}>
-            <AppButton
-              title="Ver mi perfil"
-              variant="secondary"
-              onPress={() => router.push("/profile")}
-            />
-          </View>
-        }
       />
     </ScreenWrapper>
   );
 }
-
-const styles = StyleSheet.create({
-  list: {
-    paddingBottom: 32,
-  },
-});

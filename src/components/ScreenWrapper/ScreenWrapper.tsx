@@ -1,15 +1,22 @@
 import { useAppTheme } from "@/src/theme/designSystem";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Edge, SafeAreaView } from "react-native-safe-area-context";
+import { createStyles } from "./ScreenWrapper.styles";
+
+interface ScreenWrapperProps {
+  children: React.ReactNode | React.ReactNode[];
+  edges?: Edge[];
+}
 
 export default function ScreenWrapper({
   children,
-}: {
-  children: React.ReactNode | React.ReactNode[];
-}) {
-  const { colors } = useAppTheme();
+  edges = ["bottom", "left", "right"],
+}: ScreenWrapperProps) {
+  const theme = useAppTheme();
+  const styles = createStyles(theme);
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: colors.background }}
+      style={styles.container}
+      edges={edges}
       accessibilityRole="summary"
     >
       {children}
