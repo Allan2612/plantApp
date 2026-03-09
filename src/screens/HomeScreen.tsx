@@ -1,8 +1,10 @@
+import AppButton from "@/src/components/AppButton";
 import AppText from "@/src/components/AppText";
 import PlantCard from "@/src/components/PlantCard";
 import ScreenWrapper from "@/src/components/ScreenWrapper/ScreenWrapper";
 import { useAppTheme } from "@/src/theme/designSystem";
 import { Plant } from "@/src/types-dtos/plant.types";
+import { useRouter } from "expo-router";
 import { FlatList, StyleSheet, View } from "react-native";
 
 const PLANTS: Plant[] = [
@@ -41,7 +43,8 @@ const PLANTS: Plant[] = [
 ];
 
 export default function HomeScreen() {
-  const { spacing } = useAppTheme();
+  const { colors, spacing } = useAppTheme();
+  const router = useRouter();
 
   return (
     <ScreenWrapper>
@@ -57,7 +60,11 @@ export default function HomeScreen() {
             <AppText variant="heading" accessibilityRole="header">
               🌿 Mis Plantas
             </AppText>
-            <AppText variant="body" style={{ marginTop: spacing.xs }}>
+            <AppText
+              variant="body"
+              color={colors.textSecondary}
+              style={{ marginTop: spacing.xs }}
+            >
               Tu colección personal de plantas
             </AppText>
           </View>
@@ -69,6 +76,15 @@ export default function HomeScreen() {
             image={item.image}
           />
         )}
+        ListFooterComponent={
+          <View style={{ marginTop: spacing.sm }}>
+            <AppButton
+              title="Ver mi perfil"
+              variant="secondary"
+              onPress={() => router.push("/profile")}
+            />
+          </View>
+        }
       />
     </ScreenWrapper>
   );
