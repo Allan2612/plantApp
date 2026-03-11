@@ -1,50 +1,140 @@
-# Welcome to your Expo app 👋
+# PlanTica 🌿
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+App móvil para el cuidado y gestión de plantas, construida con **React Native** y **Expo Router**.
 
-## Get started
+---
 
-1. Install dependencies
+## Tecnologías
 
-   ```bash
-   npm install
-   ```
+- [Expo](https://expo.dev) + [Expo Router](https://expo.github.io/router) (navegación basada en archivos)
+- React Native (Animated API)
+- TypeScript
+- `react-native-safe-area-context`
+- `@expo-google-fonts/caveat`
+- `@expo/vector-icons` (Ionicons)
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Iniciar el proyecto
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Opciones disponibles al iniciar:
 
-## Learn more
+- Android emulator
+- iOS simulator
+- Expo Go
 
-To learn more about developing your project with Expo, look at the following resources:
+---
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Estructura del proyecto
 
-## Join the community
+```
+plantApp/
+├── app/                        # Rutas de Expo Router (solo navegación)
+│   ├── _layout.tsx             # Layout raíz: Stack Navigator + providers globales
+│   ├── index.tsx               # Redirección a /(tabs)/home
+│   ├── profile.tsx             # Pantalla de perfil (stack modal)
+│   ├── settings.tsx            # Pantalla de configuración (stack modal)
+│   └── (tabs)/                 # Grupo de tabs principales
+│       ├── _layout.tsx         # Tab Navigator con AnimatedTabBar y AppHeader
+│       ├── home.tsx
+│       ├── catalogo.tsx
+│       ├── calendario.tsx
+│       ├── identificar.tsx
+│       └── misplantas.tsx
+│
+├── src/                        # Lógica principal de la app
+│   ├── components/             # Componentes reutilizables
+│   │   ├── AnimatedTabBar/     # Tab bar animado (se oculta al scrollear)
+│   │   ├── AppButton/          # Botón con variantes primary/secondary
+│   │   ├── AppHeader/          # Header flotante animado con menú de usuario
+│   │   ├── AppText/            # Texto con tipografía del Design System
+│   │   ├── PlaceholderScreen/  # Pantalla placeholder genérica
+│   │   ├── PlantCard/          # Tarjeta de planta con imagen
+│   │   ├── PressableCard/      # Tarjeta interactiva con hover animado
+│   │   ├── ProfileMenu/        # Menú desplegable de perfil (modal)
+│   │   └── ScreenWrapper/      # Contenedor base con padding del header
+│   │
+│   ├── screens/                # Pantallas completas
+│   │   ├── HomeScreen/         # Home con búsqueda, acciones, tendencias, catálogo y plantas
+│   │   ├── CatalogoScreen/     # Catálogo de especies (placeholder)
+│   │   ├── CalendarioScreen/   # Calendario de cuidado (placeholder)
+│   │   ├── IdentificarScreen/  # Identificación por cámara (placeholder)
+│   │   ├── MisPlantasScreen/   # Plantas del usuario (placeholder)
+│   │   ├── Settings/           # Configuración de tema e idioma
+│   │   └── UserProfile/        # Perfil de usuario con stats
+│   │
+│   ├── context/
+│   │   └── ScrollAnimContext.tsx  # Animación sincronizada de header y tab bar
+│   │
+│   ├── theme/
+│   │   ├── ThemeContext.tsx    # Provider + hooks useAppTheme / useThemeContext
+│   │   ├── designSystem.ts    # Composición del tema (colors + spacing + typography + radius)
+│   │   ├── light.ts           # Tokens del tema claro
+│   │   └── dark.ts            # Tokens del tema oscuro
+│   │
+│   ├── constants/
+│   │   ├── colors.ts          # Paleta de colores (Palette)
+│   │   ├── spacing.ts         # Tokens de espaciado (xs/sm/md/lg/xl/xxl)
+│   │   └── typography.ts      # Estilos de texto (display/heading/subheading/body/caption/label)
+│   │
+│   └── types-dtos/
+│       ├── plant.types.ts     # Interface Plant
+│       └── user.types.ts      # Interface UserInterface
+│
+└── assets/                    # Fuentes, íconos e imágenes
+```
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Navegación
+
+La app combina **Stack Navigator** (raíz) con **Tab Navigator** (pantallas principales):
+
+```
+RootStack (_layout.tsx)
+ ├── (tabs)          → Tab Navigator con 5 tabs
+ │    ├── home
+ │    ├── catalogo
+ │    ├── calendario
+ │    ├── identificar
+ │    └── misplantas
+ ├── profile         → modal con header nativo
+ └── settings        → modal con header nativo
+```
+
+---
+
+## Design System
+
+Todos los estilos se obtienen a través de `useAppTheme()`. Nunca se usan valores hardcodeados.
+
+| Token      | Acceso                                                |
+| ---------- | ----------------------------------------------------- |
+| Colores    | `theme.colors.primary`, `theme.colors.surface`, etc.  |
+| Espaciado  | `theme.spacing.xs/sm/md/lg/xl/xxl`                    |
+| Tipografía | `theme.typography.display/heading/body/caption/label` |
+| Bordes     | `theme.radius.sm/md/lg/full`                          |
+
+Soporta **modo claro y oscuro** automáticamente. El usuario puede forzar un tema desde Configuración.
+
+---
+
+## Convenciones
+
+- `app/` → solo navegación. Cero lógica de UI.
+- `src/` → todo lo demás.
+- Cada componente tiene su carpeta: `Nombre.tsx` + `Nombre.styles.ts` + (opcional) `Nombre.data.ts`
+- Sin `StyleSheet.create` dentro de `.tsx`
+- Datos estáticos siempre en `.data.ts`
+- Animaciones: propiedades `transform/opacity` → `useNativeDriver: true`. Propiedades `backgroundColor/borderColor` → `useNativeDriver: false`
+
+---
+
+## Estándares completos
+
+Ver [Docs/STANDARDS.md](Docs/STANDARDS.md)
