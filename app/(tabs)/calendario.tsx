@@ -1,35 +1,5 @@
-import AppText from "@/src/components/AppText/AppText";
-import ScreenWrapper from "@/src/components/ScreenWrapper/ScreenWrapper";
-import { useAppTheme } from "@/src/theme/designSystem";
-import { Ionicons } from "@expo/vector-icons";
-import { View } from "react-native";
+import CalendarioScreen from "@/src/screens/CalendarioScreen/CalendarioScreen";
 
-export default function CalendarioScreen() {
-  const { colors, spacing } = useAppTheme();
-
-  return (
-    <ScreenWrapper>
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          padding: spacing.xl,
-          gap: spacing.md,
-        }}
-      >
-        <Ionicons name="calendar" size={48} color={colors.primary} />
-        <AppText variant="heading" accessibilityRole="header">
-          Calendario
-        </AppText>
-        <AppText
-          variant="body"
-          color={colors.textSecondary}
-          style={{ textAlign: "center" }}
-        >
-          Programa el riego y cuidado de tus plantas
-        </AppText>
-      </View>
-    </ScreenWrapper>
-  );
+export default function Calendario() {
+  return <CalendarioScreen />;
 }

@@ -1,28 +1,33 @@
+import { Palette } from "@/src/constants/colors";
 import { AppTheme } from "@/src/theme/designSystem";
 import { StyleSheet } from "react-native";
+
+const MENU_MIN_WIDTH = 200;
+const MENU_SHADOW_RADIUS = 12;
+const MENU_ELEVATION = 8;
 
 export function createStyles({ colors, spacing, radius }: AppTheme) {
   return StyleSheet.create({
     overlay: {
       flex: 1,
-      backgroundColor: "rgba(0,0,0,0.35)",
+      backgroundColor: colors.cardOverlay,
       justifyContent: "flex-start",
       alignItems: "flex-end",
       paddingTop: spacing.xxl + spacing.sm,
       paddingRight: spacing.sm + 4,
     },
     menu: {
-      minWidth: 200,
-      borderWidth: 1,
+      minWidth: MENU_MIN_WIDTH,
+      borderWidth: StyleSheet.hairlineWidth,
       backgroundColor: colors.surface,
       borderRadius: radius.lg,
       borderColor: colors.surfaceDivider,
       padding: spacing.xs,
-      elevation: 8,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.2,
-      shadowRadius: 8,
+      elevation: MENU_ELEVATION,
+      shadowColor: Palette.black,
+      shadowOffset: { width: 0, height: spacing.xs },
+      shadowOpacity: 0.3,
+      shadowRadius: MENU_SHADOW_RADIUS,
     },
     menuItem: {
       flexDirection: "row",
@@ -32,11 +37,14 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       borderRadius: radius.md,
     },
     menuItemDivider: {
-      borderBottomWidth: 1,
+      borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: colors.surfaceDivider,
     },
     menuItemLabel: {
       marginLeft: spacing.sm,
+    },
+    menuItemPressed: {
+      backgroundColor: colors.surfaceAlt,
     },
   });
 }

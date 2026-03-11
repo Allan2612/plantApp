@@ -1,18 +1,27 @@
 import { Palette } from "@/src/constants/colors";
 
 export const LightTheme = {
-  background: Palette.grey100,
+  background: Palette.pureWhite,
   surface: Palette.white,
-  surfaceAlt: Palette.grey200,
-  surfaceDivider: Palette.grey400,
+  surfaceAlt: Palette.grey100,
+  surfaceDivider: Palette.grey200,
 
-  primary: Palette.green400,
-  primaryLight: Palette.green400,
-  primaryMuted: Palette.green500,
+  primary: Palette.green600,
+  primaryLight: Palette.green500,
+  primaryMuted: Palette.green700,
 
-  textPrimary: Palette.grey900,
+  textPrimary: Palette.dark900,
   textSecondary: Palette.grey500,
-  textMuted: Palette.grey500,
+  textMuted: Palette.grey400,
 
-  avatarFallback: Palette.grey600,
+  avatarFallback: Palette.grey200,
+
+  searchBg: Palette.white,
+  searchBorder: Palette.grey200,
+  searchPlaceholder: Palette.grey400,
+
+  cardOverlay: "rgba(0,0,0,0.35)",
+  textOnOverlay: Palette.pureWhite,
+  tabBarBg: Palette.pureWhite,
+  danger: Palette.danger,
 } as const;

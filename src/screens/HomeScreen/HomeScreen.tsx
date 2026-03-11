@@ -1,81 +1,140 @@
 import AppText from "@/src/components/AppText/AppText";
-import PlantCard from "@/src/components/PlantCard/PlantCard";
+import PressableCard from "@/src/components/PressableCard/PressableCard";
 import ScreenWrapper from "@/src/components/ScreenWrapper/ScreenWrapper";
-import { useAppTheme } from "@/src/theme/designSystem";
-import { Plant } from "@/src/types-dtos/plant.types";
+import { useScrollAnim } from "@/src/context/ScrollAnimContext";
+import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { FlatList, View } from "react-native";
+import { FlatList, Image, ScrollView, View } from "react-native";
+import { ACTIONS, PLANTS, TRENDING } from "./HomeScreen.data";
 import { createStyles } from "./HomeScreen.styles";
-
-const PLANTS: Plant[] = [
-  {
-    id: "1",
-    name: "Monstera Deliciosa",
-    description:
-      "Planta tropical con hojas grandes y perforadas. Ideal para interiores con luz indirecta.",
-    image: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400",
-    category: "Tropical",
-  },
-  {
-    id: "2",
-    name: "Suculenta Echevería",
-    description:
-      "Planta compacta en forma de roseta. Requiere poca agua y mucha luz solar.",
-    image: "https://images.unsplash.com/photo-1509423350716-97f9360b4e09?w=400",
-    category: "Suculenta",
-  },
-  {
-    id: "3",
-    name: "Cactus San Pedro",
-    description:
-      "Cactus columnar de crecimiento rápido. Muy resistente a la sequía.",
-    image: "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400",
-    category: "Cactus",
-  },
-  {
-    id: "4",
-    name: "Pothos Dorado",
-    description:
-      "Planta colgante fácil de cuidar. Perfecta para principiantes.",
-    image: "https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=400",
-    category: "Tropical",
-  },
-];
 
 export default function HomeScreen() {
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
+  const scrollAnim = useScrollAnim();
 
   return (
     <ScreenWrapper>
       <FlatList
         data={PLANTS}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        onScroll={scrollAnim?.onScroll}
+        scrollEventThrottle={16}
         ListHeaderComponent={
-          <View style={styles.headerContainer}>
-            <View style={styles.headerRow}>
-              <Ionicons name="leaf" size={24} color={colors.primary} />
-              <AppText variant="heading" accessibilityRole="header">
-                Mis Plantas
-              </AppText>
+          <>
+            {/* Search bar */}
+            <View style={styles.searchContainer}>
+              <View style={styles.searchBar}>
+                <Ionicons
+                  name="search"
+                  size={18}
+                  color={colors.searchPlaceholder}
+                />
+                <AppText
+                  variant="body"
+                  color={colors.searchPlaceholder}
+                  style={styles.searchPlaceholder}
+                >
+                  Buscar plantas
+                </AppText>
+              </View>
             </View>
-            <AppText
-              variant="body"
-              color={colors.textSecondary}
-              style={styles.headerSubtitle}
+
+            {/* Action cards */}
+            <View style={styles.actionsRow}>
+              {ACTIONS.map((action) => (
+                <PressableCard
+                  key={action.label}
+                  containerStyle={{ flex: 1 }}
+                  style={styles.actionCard}
+                >
+                  <View style={styles.actionCardInner}>
+                    <Ionicons
+                      name={action.icon}
+                      size={28}
+                      color={colors.primary}
+                    />
+                    <AppText variant="caption" color={colors.textSecondary}>
+                      {action.label}
+                    </AppText>
+                  </View>
+                </PressableCard>
+              ))}
+            </View>
+
+            {/* Trending section */}
+            <View style={styles.sectionHeader}>
+              <AppText variant="subheading">Tendencias</AppText>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.trendingRow}
             >
-              Tu colección personal de plantas
-            </AppText>
-          </View>
+              {TRENDING.map((item) => (
+                <PressableCard
+                  key={item.id}
+                  style={styles.trendingCardWrapper}
+                  border={false}
+                >
+                  <View style={styles.trendingCard}>
+                    <Image
+                      source={{ uri: item.image }}
+                      style={styles.trendingImage}
+                    />
+                    <View style={styles.trendingOverlay}>
+                      <AppText variant="label" color={colors.textOnOverlay}>
+                        {item.name}
+                      </AppText>
+                    </View>
+                  </View>
+                </PressableCard>
+              ))}
+            </ScrollView>
+
+            {/* Plants list header */}
+            <View style={[styles.sectionHeader, styles.plantsSectionHeader]}>
+              <AppText variant="subheading">Mis Plantas</AppText>
+            </View>
+          </>
         }
         renderItem={({ item }) => (
-          <PlantCard
-            name={item.name}
-            description={item.description}
-            image={item.image}
-          />
+          <View style={styles.plantsList}>
+            <PressableCard style={styles.plantCardOuter} border={false}>
+              <View style={styles.plantRow}>
+                <Image
+                  source={{ uri: item.image }}
+                  style={styles.plantRowImage}
+                />
+                <View style={styles.plantRowContent}>
+                  <AppText variant="label">{item.name}</AppText>
+                  <AppText
+                    variant="caption"
+                    color={colors.textSecondary}
+                    numberOfLines={1}
+                  >
+                    {item.description}
+                  </AppText>
+                  <AppText
+                    variant="caption"
+                    color={colors.primary}
+                    style={styles.plantCategory}
+                  >
+                    {item.category}
+                  </AppText>
+                </View>
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color={colors.textMuted}
+                  style={styles.chevronIcon}
+                />
+              </View>
+            </PressableCard>
+          </View>
         )}
       />
     </ScreenWrapper>

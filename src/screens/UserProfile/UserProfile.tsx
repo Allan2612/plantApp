@@ -1,28 +1,14 @@
 import AppText from "@/src/components/AppText/AppText";
 import ScreenWrapper from "@/src/components/ScreenWrapper/ScreenWrapper";
-import { useAppTheme } from "@/src/theme/designSystem";
-import { UserInterface } from "@/src/types-dtos/user.types";
+import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Image, ScrollView, View } from "react-native";
+import { mockUser } from "./UserProfile.data";
 import { createStyles } from "./UserProfile.styles";
-
-const mockUser: UserInterface = {
-  nombre: "Allan Vargas",
-  apodo: "allan2612",
-  cantidadPlantas: 12,
-  categoriasPlantas: ["Suculentas", "Cactus", "Orquídeas"],
-  racha: 7,
-  cumpleanos: new Date(1998, 5, 12),
-  image: "https://i.imgur.com/vLgY64w.jpeg",
-  cantidadAmigos: 5,
-  privacidad: "publico",
-  descripcion: "Amante de las plantas y la naturaleza. Siempre aprendiendo.",
-  plantaFavorita: "Monstera deliciosa",
-};
 
 export default function UserProfile() {
   const theme = useAppTheme();
-  const { colors, spacing } = theme;
+  const { colors } = theme;
   const styles = createStyles(theme);
 
   return (
@@ -39,11 +25,7 @@ export default function UserProfile() {
         <AppText variant="heading" accessibilityRole="header">
           {mockUser.nombre}
         </AppText>
-        <AppText
-          variant="label"
-          color={colors.primary}
-          style={{ marginBottom: spacing.sm }}
-        >
+        <AppText variant="label" color={colors.primary} style={styles.apodo}>
           @{mockUser.apodo}
         </AppText>
 
@@ -56,7 +38,7 @@ export default function UserProfile() {
             name={mockUser.privacidad === "publico" ? "earth" : "lock-closed"}
             size={13}
             color={colors.primaryLight}
-            style={{ marginRight: spacing.xs }}
+            style={styles.badgeIcon}
           />
           <AppText variant="caption" color={colors.primaryLight}>
             {mockUser.privacidad === "publico" ? "Público" : "Privado"}
@@ -110,7 +92,7 @@ export default function UserProfile() {
                 name="leaf"
                 size={14}
                 color={colors.primaryMuted}
-                style={{ marginRight: spacing.xs + 2 }}
+                style={styles.infoIcon}
               />
               <AppText variant="label" color={colors.textMuted}>
                 Planta favorita
@@ -126,7 +108,7 @@ export default function UserProfile() {
                 name="gift"
                 size={14}
                 color={colors.primaryMuted}
-                style={{ marginRight: spacing.xs + 2 }}
+                style={styles.infoIcon}
               />
               <AppText variant="label" color={colors.textMuted}>
                 Cumpleaños
@@ -142,7 +124,7 @@ export default function UserProfile() {
                 name="pricetag"
                 size={14}
                 color={colors.primaryMuted}
-                style={{ marginRight: spacing.xs + 2 }}
+                style={styles.infoIcon}
               />
               <AppText variant="label" color={colors.textMuted}>
                 Categorías

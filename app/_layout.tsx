@@ -1,7 +1,11 @@
-import { useAppTheme } from "@/src/theme/designSystem";
-import { ThemeProvider } from "@/src/theme/ThemeContext";
+import { ThemeProvider, useAppTheme } from "@/src/theme/ThemeContext";
+import { Caveat_700Bold, useFonts } from "@expo-google-fonts/caveat";
 import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+
+SplashScreen.preventAutoHideAsync();
 
 function RootStack() {
   const { colors } = useAppTheme();
@@ -11,6 +15,10 @@ function RootStack() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: colors.background },
+        headerStyle: { backgroundColor: colors.background },
+        headerTintColor: colors.textPrimary,
+        headerTitleStyle: { fontWeight: "600" },
+        headerShadowVisible: false,
       }}
     >
       <Stack.Screen name="(tabs)" />
@@ -19,9 +27,6 @@ function RootStack() {
         options={{
           headerShown: true,
           title: "Mi Perfil",
-          headerStyle: { backgroundColor: colors.surface },
-          headerTintColor: colors.textPrimary,
-          headerTitleStyle: { fontWeight: "600" },
           presentation: "card",
         }}
       />
@@ -31,9 +36,6 @@ function RootStack() {
         options={{
           headerShown: true,
           title: "Configuración",
-          headerStyle: { backgroundColor: colors.surface },
-          headerTintColor: colors.textPrimary,
-          headerTitleStyle: { fontWeight: "600" },
           presentation: "card",
         }}
       />
@@ -42,6 +44,16 @@ function RootStack() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({ Caveat_700Bold });
+
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) return null;
+
   return (
     <SafeAreaProvider>
       <ThemeProvider>

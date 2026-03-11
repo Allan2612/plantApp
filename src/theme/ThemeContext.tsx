@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import { useColorScheme } from "react-native";
-import { getAppTheme, AppTheme } from "./designSystem";
+import { AppTheme, getAppTheme } from "./designSystem";
 
 type ThemeMode = "system" | "light" | "dark";
 
@@ -32,4 +32,8 @@ export function useThemeContext() {
   const ctx = useContext(ThemeContext);
   if (!ctx) throw new Error("useThemeContext must be inside ThemeProvider");
   return ctx;
+}
+
+export function useAppTheme() {
+  return useThemeContext().theme;
 }

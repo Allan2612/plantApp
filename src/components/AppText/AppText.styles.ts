@@ -1,6 +1,14 @@
 import { AppTheme } from "@/src/theme/designSystem";
-import { StyleSheet } from "react-native";
+import { StyleSheet, TextStyle } from "react-native";
 
-export function createStyles(_theme: AppTheme) {
-  return StyleSheet.create({});
+export function createStyles({ colors }: AppTheme) {
+  return StyleSheet.create({
+    defaultColor: {
+      color: colors.textPrimary,
+    },
+  });
+}
+
+export function textColor(color: string): TextStyle {
+  return { color };
 }

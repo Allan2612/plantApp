@@ -1,4 +1,6 @@
-import { useAppTheme } from "@/src/theme/designSystem";
+import { useScrollAnim } from "@/src/context/ScrollAnimContext";
+import { useAppTheme } from "@/src/theme/ThemeContext";
+import { Animated } from "react-native";
 import { Edge, SafeAreaView } from "react-native-safe-area-context";
 import { createStyles } from "./ScreenWrapper.styles";
 
@@ -13,13 +15,25 @@ export default function ScreenWrapper({
 }: ScreenWrapperProps) {
   const theme = useAppTheme();
   const styles = createStyles(theme);
+  const scrollAnim = useScrollAnim();
+
   return (
     <SafeAreaView
       style={styles.container}
       edges={edges}
       accessibilityRole="summary"
     >
-      {children}
+      <Animated.View
+        style={[
+          styles.container,
+          {
+            paddingTop:
+              scrollAnim?.headerPaddingAnim ?? scrollAnim?.headerHeight ?? 0,
+          },
+        ]}
+      >
+        {children}
+      </Animated.View>
     </SafeAreaView>
   );
 }

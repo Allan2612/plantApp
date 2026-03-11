@@ -1,23 +1,10 @@
 import AppText from "@/src/components/AppText/AppText";
 import ScreenWrapper from "@/src/components/ScreenWrapper/ScreenWrapper";
-import { useAppTheme } from "@/src/theme/designSystem";
-import { useThemeContext } from "@/src/theme/ThemeContext";
+import { useAppTheme, useThemeContext } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, ScrollView, View } from "react-native";
+import { LANGUAGE_OPTIONS, THEME_OPTIONS } from "./Settings.data";
 import { createStyles } from "./Settings.styles";
-
-type ThemeOption = { label: string; value: "system" | "light" | "dark"; icon: keyof typeof Ionicons.glyphMap };
-
-const THEME_OPTIONS: ThemeOption[] = [
-  { label: "Sistema", value: "system", icon: "phone-portrait-outline" },
-  { label: "Claro", value: "light", icon: "sunny-outline" },
-  { label: "Oscuro", value: "dark", icon: "moon-outline" },
-];
-
-const LANGUAGE_OPTIONS = [
-  { label: "Español", value: "es" },
-  { label: "English", value: "en" },
-];
 
 export default function Settings() {
   const theme = useAppTheme();

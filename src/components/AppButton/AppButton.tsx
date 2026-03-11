@@ -1,4 +1,4 @@
-import { useAppTheme } from "@/src/theme/designSystem";
+import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Pressable, PressableProps } from "react-native";
 import AppText from "../AppText/AppText";
 import { createStyles } from "./AppButton.styles";

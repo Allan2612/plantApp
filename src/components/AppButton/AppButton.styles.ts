@@ -6,7 +6,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
     base: {
       alignItems: "center",
       justifyContent: "center",
-      borderRadius: radius.md,
+      borderRadius: radius.full,
       paddingVertical: spacing.sm + 4,
       paddingHorizontal: spacing.lg,
     },
@@ -14,9 +14,9 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       backgroundColor: colors.primary,
     },
     secondaryBg: {
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.primary,
+      backgroundColor: "transparent",
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.surfaceDivider,
     },
     disabledBg: {
       backgroundColor: colors.surfaceAlt,

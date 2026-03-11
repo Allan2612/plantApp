@@ -1,6 +1,7 @@
 import { Typography } from "@/src/constants/typography";
-import { useAppTheme } from "@/src/theme/designSystem";
+import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Text, TextProps } from "react-native";
+import { createStyles, textColor } from "./AppText.styles";
 
 type TextVariant = keyof typeof Typography;
 
@@ -16,13 +17,15 @@ export default function AppText({
   children,
   ...rest
 }: AppTextProps) {
-  const { colors, typography } = useAppTheme();
+  const theme = useAppTheme();
+  const { typography } = theme;
+  const styles = createStyles(theme);
 
   return (
     <Text
       style={[
         typography[variant],
-        { color: color ?? colors.textPrimary },
+        color ? textColor(color) : styles.defaultColor,
         style,
       ]}
       {...rest}

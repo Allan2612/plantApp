@@ -1,4 +1,4 @@
-import { useAppTheme } from "@/src/theme/designSystem";
+import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -74,7 +74,7 @@ export default function ProfileMenu() {
                 accessibilityLabel={item.label}
                 style={({ pressed }) => [
                   styles.menuItem,
-                  pressed && { backgroundColor: colors.surfaceAlt },
+                  pressed && styles.menuItemPressed,
                   index < menuItems.length - 1 && styles.menuItemDivider,
                 ]}
               >
@@ -88,7 +88,7 @@ export default function ProfileMenu() {
                   style={styles.menuItemLabel}
                   color={
                     item.icon === "log-out-outline"
-                      ? "#e53935"
+                      ? colors.danger
                       : colors.textPrimary
                   }
                 >
