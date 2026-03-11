@@ -11,7 +11,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
     container: {
       alignItems: "center",
       paddingVertical: spacing.xl,
-      paddingHorizontal: spacing.md + 4,
+      paddingHorizontal: spacing.md + spacing.xs,
     },
     avatar: {
       width: AVATAR_SIZE,
@@ -19,7 +19,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       borderRadius: radius.full,
       borderWidth: AVATAR_BORDER_WIDTH,
       borderColor: colors.primary,
-      marginBottom: spacing.sm + 4,
+      marginBottom: spacing.sm + spacing.xs,
       backgroundColor: colors.avatarFallback,
     },
     badge: {
@@ -27,13 +27,13 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       alignItems: "center",
       backgroundColor: colors.surface,
       borderRadius: radius.md,
-      paddingHorizontal: spacing.sm + 4,
+      paddingHorizontal: spacing.sm + spacing.xs,
       paddingVertical: spacing.xs,
-      marginBottom: spacing.sm + 4,
+      marginBottom: spacing.sm + spacing.xs,
     },
     descripcion: {
       textAlign: "center",
-      marginBottom: spacing.md + 4,
+      marginBottom: spacing.md + spacing.xs,
     },
     statsRow: {
       flexDirection: "row",
@@ -44,7 +44,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       borderRadius: radius.lg,
       paddingVertical: spacing.sm + 6,
       paddingHorizontal: spacing.md,
-      marginBottom: spacing.md + 4,
+      marginBottom: spacing.md + spacing.xs,
     },
     stat: {
       alignItems: "center",
@@ -61,7 +61,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       backgroundColor: colors.surface,
       borderRadius: radius.lg,
       padding: spacing.md,
-      gap: spacing.sm + 4,
+      gap: spacing.sm + spacing.xs,
     },
     infoRow: {
       flexDirection: "row",

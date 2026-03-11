@@ -1,6 +1,10 @@
 import { TextStyle } from "react-native";
 
 export const Typography = {
+  display: {
+    fontSize: 28,
+    fontWeight: "bold",
+  } as TextStyle,
   heading: {
     fontSize: 22,
     fontWeight: "bold",

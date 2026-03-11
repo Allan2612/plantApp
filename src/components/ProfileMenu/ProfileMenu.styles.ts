@@ -1,4 +1,3 @@
-import { Palette } from "@/src/constants/colors";
 import { AppTheme } from "@/src/theme/designSystem";
 import { StyleSheet } from "react-native";
 
@@ -14,7 +13,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       justifyContent: "flex-start",
       alignItems: "flex-end",
       paddingTop: spacing.xxl + spacing.sm,
-      paddingRight: spacing.sm + 4,
+      paddingRight: spacing.sm + spacing.xs,
     },
     menu: {
       minWidth: MENU_MIN_WIDTH,
@@ -24,7 +23,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       borderColor: colors.surfaceDivider,
       padding: spacing.xs,
       elevation: MENU_ELEVATION,
-      shadowColor: Palette.black,
+      shadowColor: colors.textPrimary,
       shadowOffset: { width: 0, height: spacing.xs },
       shadowOpacity: 0.3,
       shadowRadius: MENU_SHADOW_RADIUS,
@@ -32,7 +31,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
     menuItem: {
       flexDirection: "row",
       alignItems: "center",
-      paddingVertical: spacing.sm + 4,
+      paddingVertical: spacing.sm + spacing.xs,
       paddingHorizontal: spacing.md,
       borderRadius: radius.md,
     },

@@ -70,6 +70,18 @@ export default function TabsLayout() {
             }}
           />
           <Tabs.Screen
+            name="misplantas"
+            options={{
+              tabBarIcon: ({ color, focused }) => (
+                <Ionicons
+                  name={focused ? "flower" : "flower-outline"}
+                  color={color}
+                  size={24}
+                />
+              ),
+            }}
+          />
+          <Tabs.Screen
             name="profile"
             options={{
               href: null,

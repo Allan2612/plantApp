@@ -1,13 +1,13 @@
-import { Spacing } from "@/src/constants/spacing";
 import { AppTheme } from "@/src/theme/designSystem";
 import { Dimensions, StyleSheet } from "react-native";
 
-const CARD_WIDTH = (Dimensions.get("window").width - Spacing.xxl) / 2;
+const SCREEN_WIDTH = Dimensions.get("window").width;
 const SEARCH_BAR_HEIGHT = 42;
 const PLANT_ROW_IMAGE_SIZE = 80;
 const MICRO_SPACE = 2;
 
 export function createStyles({ colors, spacing, radius }: AppTheme) {
+  const CARD_WIDTH = (SCREEN_WIDTH - spacing.xxl) / 2;
   return StyleSheet.create({
     scroll: {
       paddingBottom: spacing.xxl,
@@ -47,7 +47,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       flex: 1,
       alignItems: "center",
       justifyContent: "center",
-      paddingVertical: spacing.md + 4,
+      paddingVertical: spacing.md + spacing.xs,
       gap: spacing.sm,
     },
     sectionHeader: {
@@ -80,7 +80,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       bottom: 0,
       left: 0,
       right: 0,
-      paddingHorizontal: spacing.sm + 4,
+      paddingHorizontal: spacing.sm + spacing.xs,
       paddingVertical: spacing.sm,
       backgroundColor: colors.cardOverlay,
     },
@@ -106,7 +106,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
     },
     plantRowContent: {
       flex: 1,
-      paddingHorizontal: spacing.sm + 4,
+      paddingHorizontal: spacing.sm + spacing.xs,
       paddingVertical: spacing.sm,
       gap: MICRO_SPACE,
     },
@@ -117,7 +117,33 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       marginTop: spacing.lg,
     },
     chevronIcon: {
-      marginRight: spacing.sm + 4,
+      marginRight: spacing.sm + spacing.xs,
+    },
+    catalogRow: {
+      paddingLeft: spacing.md,
+      paddingRight: spacing.sm,
+      gap: spacing.sm,
+      marginBottom: spacing.lg,
+    },
+    catalogCard: {
+      width: CARD_WIDTH * 0.85,
+      borderRadius: radius.lg,
+      backgroundColor: colors.surface,
+      overflow: "hidden",
+    },
+    catalogImage: {
+      width: "100%",
+      height: CARD_WIDTH * 0.7,
+    },
+    catalogContent: {
+      padding: spacing.sm + spacing.xs,
+      gap: MICRO_SPACE,
+    },
+    catalogDifficulty: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.xs,
+      marginTop: spacing.xs,
     },
   });
 }

@@ -1,6 +1,7 @@
 import { useScrollAnim } from "@/src/context/ScrollAnimContext";
 import { useAppTheme } from "@/src/theme/ThemeContext";
-import { Animated, Image, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Animated, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AppText from "../AppText/AppText";
 import ProfileMenu from "../ProfileMenu/ProfileMenu";
@@ -18,7 +19,7 @@ export default function AppHeader() {
       onLayout={(e) => scrollAnim?.setHeaderHeight(e.nativeEvent.layout.height)}
       style={[
         styles.container,
-        containerInset(top),
+        containerInset(top, theme.spacing.sm),
         scrollAnim
           ? { transform: [{ translateY: scrollAnim.headerTranslateY }] }
           : undefined,
@@ -26,11 +27,11 @@ export default function AppHeader() {
       accessibilityRole="header"
     >
       <View style={styles.left}>
-        <Image
-          source={require("../../../assets/images/Logo.png")}
+        <Ionicons
+          name="leaf"
+          size={24}
+          color={colors.primary}
           style={styles.logo}
-          resizeMode="contain"
-          accessibilityLabel="PlanTica logo"
         />
         <AppText color={colors.primary} style={styles.appName}>
           PlanTica

@@ -65,6 +65,7 @@ export default function PressableCard({
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
+      accessibilityRole="button"
     >
       {/* Outer view: JS-driven borderColor only */}
       <Animated.View

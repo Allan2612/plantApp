@@ -7,7 +7,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       alignItems: "center",
       justifyContent: "center",
       borderRadius: radius.full,
-      paddingVertical: spacing.sm + 4,
+      paddingVertical: spacing.sm + spacing.xs,
       paddingHorizontal: spacing.lg,
     },
     primaryBg: {

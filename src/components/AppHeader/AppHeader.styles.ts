@@ -1,4 +1,3 @@
-import { Spacing } from "@/src/constants/spacing";
 import { AppTheme } from "@/src/theme/designSystem";
 import { StyleSheet, ViewStyle } from "react-native";
 
@@ -41,6 +40,6 @@ export function createStyles({ colors, spacing }: AppTheme) {
   });
 }
 
-export function containerInset(top: number): ViewStyle {
-  return { paddingTop: top + Spacing.sm };
+export function containerInset(top: number, sm: number): ViewStyle {
+  return { paddingTop: top + sm };
 }

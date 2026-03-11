@@ -4,8 +4,9 @@ import ScreenWrapper from "@/src/components/ScreenWrapper/ScreenWrapper";
 import { useScrollAnim } from "@/src/context/ScrollAnimContext";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { FlatList, Image, ScrollView, View } from "react-native";
-import { ACTIONS, PLANTS, TRENDING } from "./HomeScreen.data";
+import { ACTIONS, CATALOG, PLANTS, TRENDING } from "./HomeScreen.data";
 import { createStyles } from "./HomeScreen.styles";
 
 export default function HomeScreen() {
@@ -13,6 +14,7 @@ export default function HomeScreen() {
   const { colors } = theme;
   const styles = createStyles(theme);
   const scrollAnim = useScrollAnim();
+  const router = useRouter();
 
   return (
     <ScreenWrapper>
@@ -50,6 +52,7 @@ export default function HomeScreen() {
                   key={action.label}
                   containerStyle={{ flex: 1 }}
                   style={styles.actionCard}
+                  onPress={() => router.push(action.href as never)}
                 >
                   <View style={styles.actionCardInner}>
                     <Ionicons
@@ -88,6 +91,50 @@ export default function HomeScreen() {
                     <View style={styles.trendingOverlay}>
                       <AppText variant="label" color={colors.textOnOverlay}>
                         {item.name}
+                      </AppText>
+                    </View>
+                  </View>
+                </PressableCard>
+              ))}
+            </ScrollView>
+
+            {/* Catalog section */}
+            <View style={[styles.sectionHeader, styles.plantsSectionHeader]}>
+              <AppText variant="subheading">Catálogo</AppText>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.catalogRow}
+            >
+              {CATALOG.map((item) => (
+                <PressableCard
+                  key={item.id}
+                  style={styles.catalogCard}
+                  border={false}
+                >
+                  <Image
+                    source={{ uri: item.image }}
+                    style={styles.catalogImage}
+                    accessibilityLabel={`Foto de ${item.name}`}
+                  />
+                  <View style={styles.catalogContent}>
+                    <AppText variant="label">{item.name}</AppText>
+                    <AppText
+                      variant="caption"
+                      color={colors.textSecondary}
+                      numberOfLines={1}
+                    >
+                      {item.species}
+                    </AppText>
+                    <View style={styles.catalogDifficulty}>
+                      <Ionicons
+                        name="speedometer-outline"
+                        size={12}
+                        color={colors.primary}
+                      />
+                      <AppText variant="caption" color={colors.primary}>
+                        {item.difficulty}
                       </AppText>
                     </View>
                   </View>

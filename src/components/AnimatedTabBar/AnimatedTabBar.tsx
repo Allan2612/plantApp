@@ -1,4 +1,3 @@
-import { Spacing } from "@/src/constants/spacing";
 import { useScrollAnim } from "@/src/context/ScrollAnimContext";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
@@ -12,7 +11,7 @@ export default function AnimatedTabBar({
   descriptors,
   navigation,
 }: BottomTabBarProps) {
-  const { colors } = useAppTheme();
+  const { colors, spacing } = useAppTheme();
   const { bottom } = useSafeAreaInsets();
   const scrollAnim = useScrollAnim();
   const prevTabIndex = useRef(state.index);
@@ -25,7 +24,7 @@ export default function AnimatedTabBar({
     }
   }, [state.index, scrollAnim]);
 
-  const tabBarHeight = Spacing.xxl + bottom;
+  const tabBarHeight = spacing.xxl + bottom;
 
   return (
     <Animated.View

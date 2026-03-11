@@ -1,5 +1,51 @@
 import { Plant } from "@/src/types-dtos/plant.types";
 
+export interface CatalogItem {
+  id: string;
+  name: string;
+  species: string;
+  image: string;
+  difficulty: "Fácil" | "Media" | "Avanzada";
+}
+
+export const CATALOG: CatalogItem[] = [
+  {
+    id: "c1",
+    name: "Aloe Vera",
+    species: "Aloe barbadensis",
+    image: "https://images.unsplash.com/photo-1509423350716-97f9360b4e09?w=400",
+    difficulty: "Fácil",
+  },
+  {
+    id: "c2",
+    name: "Helecho Boston",
+    species: "Nephrolepis exaltata",
+    image: "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400",
+    difficulty: "Media",
+  },
+  {
+    id: "c3",
+    name: "Ficus Lyrata",
+    species: "Ficus lyrata",
+    image: "https://images.unsplash.com/photo-1545241047-6083a3684587?w=400",
+    difficulty: "Avanzada",
+  },
+  {
+    id: "c4",
+    name: "Sansevieria",
+    species: "Dracaena trifasciata",
+    image: "https://images.unsplash.com/photo-1620803366004-119b57f54cd6?w=400",
+    difficulty: "Fácil",
+  },
+  {
+    id: "c5",
+    name: "Calathea",
+    species: "Calathea orbifolia",
+    image: "https://images.unsplash.com/photo-1637967886160-fd78dc3ce3f5?w=400",
+    difficulty: "Avanzada",
+  },
+];
+
 export const TRENDING: { id: string; name: string; image: string }[] = [
   {
     id: "t1",
@@ -52,8 +98,9 @@ export const PLANTS: Plant[] = [
 export const ACTIONS: {
   icon: "camera-outline" | "leaf-outline" | "flower-outline";
   label: string;
+  href: string;
 }[] = [
-  { icon: "camera-outline", label: "Identificar" },
-  { icon: "leaf-outline", label: "Catálogo" },
-  { icon: "flower-outline", label: "Mi jardín" },
+  { icon: "camera-outline", label: "Identificar", href: "/(tabs)/identificar" },
+  { icon: "leaf-outline", label: "Catálogo", href: "/(tabs)/catalogo" },
+  { icon: "flower-outline", label: "Mis plantas", href: "/(tabs)/misplantas" },
 ];
