@@ -1,5 +1,5 @@
-import { View } from "react-native";
+import IdentificarScreen from "@/src/screens/IdentificarScreen/IdentificarScreen";
 
-export default function IdentificarScreen() {
-  return <View />;
+export default function Identificar() {
+  return <IdentificarScreen />;
 }

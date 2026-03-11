@@ -1,5 +1,5 @@
-import { View } from "react-native";
+import CalendarioScreen from "@/src/screens/CalendarioScreen/CalendarioScreen";
 
-export default function CalendarioScreen() {
-  return <View />;
+export default function Calendario() {
+  return <CalendarioScreen />;
 }

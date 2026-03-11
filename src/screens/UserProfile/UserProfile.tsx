@@ -1,65 +1,86 @@
+import AppText from "@/src/components/AppText/AppText";
 import ScreenWrapper from "@/src/components/ScreenWrapper/ScreenWrapper";
-import { UserInterface } from "@/src/types-dtos/user.types";
+import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { Image, Text, View } from "react-native";
-import { styles } from "./UserProfile.styles";
-
-const mockUser: UserInterface = {
-  nombre: "Allan Vargas",
-  apodo: "allan2612",
-  cantidadPlantas: 12,
-  categoriasPlantas: ["Suculentas", "Cactus", "Orquídeas"],
-  racha: 7,
-  cumpleanos: new Date(1998, 5, 12),
-  image: "https://i.imgur.com/vLgY64w.jpeg",
-  cantidadAmigos: 5,
-  privacidad: "publico",
-  descripcion: "Amante de las plantas y la naturaleza. Siempre aprendiendo.",
-  plantaFavorita: "Monstera deliciosa",
-};
+import { Image, ScrollView, View } from "react-native";
+import { mockUser } from "./UserProfile.data";
+import { createStyles } from "./UserProfile.styles";
 
 export default function UserProfile() {
+  const theme = useAppTheme();
+  const { colors } = theme;
+  const styles = createStyles(theme);
+
   return (
     <ScreenWrapper>
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
         {/* Avatar */}
-        <Image source={{ uri: mockUser.image }} style={styles.avatar} />
+        <Image
+          source={{ uri: mockUser.image }}
+          style={styles.avatar}
+          accessibilityLabel={`Foto de perfil de ${mockUser.nombre}`}
+        />
 
         {/* Nombre y apodo */}
-        <Text style={styles.nombre}>{mockUser.nombre}</Text>
-        <Text style={styles.apodo}>@{mockUser.apodo}</Text>
+        <AppText variant="heading" accessibilityRole="header">
+          {mockUser.nombre}
+        </AppText>
+        <AppText variant="label" color={colors.primary} style={styles.apodo}>
+          @{mockUser.apodo}
+        </AppText>
 
         {/* Privacidad */}
-        <View style={styles.badge}>
+        <View
+          style={styles.badge}
+          accessibilityLabel={`Perfil ${mockUser.privacidad}`}
+        >
           <Ionicons
             name={mockUser.privacidad === "publico" ? "earth" : "lock-closed"}
             size={13}
-            color="#b0e57c"
-            style={{ marginRight: 4 }}
+            color={colors.primaryLight}
+            style={styles.badgeIcon}
           />
-          <Text style={styles.badgeText}>
+          <AppText variant="caption" color={colors.primaryLight}>
             {mockUser.privacidad === "publico" ? "Público" : "Privado"}
-          </Text>
+          </AppText>
         </View>
 
         {/* Descripción */}
-        <Text style={styles.descripcion}>{mockUser.descripcion}</Text>
+        <AppText
+          variant="body"
+          color={colors.textSecondary}
+          style={styles.descripcion}
+        >
+          {mockUser.descripcion}
+        </AppText>
 
         {/* Stats */}
-        <View style={styles.statsRow}>
+        <View style={styles.statsRow} accessibilityRole="summary">
           <View style={styles.stat}>
-            <Text style={styles.statNumber}>{mockUser.cantidadPlantas}</Text>
-            <Text style={styles.statLabel}>Plantas</Text>
+            <AppText variant="subheading" color={colors.primaryLight}>
+              {mockUser.cantidadPlantas}
+            </AppText>
+            <AppText variant="caption" color={colors.primaryMuted}>
+              Plantas
+            </AppText>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.stat}>
-            <Text style={styles.statNumber}>{mockUser.racha}</Text>
-            <Text style={styles.statLabel}>Racha (días)</Text>
+            <AppText variant="subheading" color={colors.primaryLight}>
+              {mockUser.racha}
+            </AppText>
+            <AppText variant="caption" color={colors.primaryMuted}>
+              Racha (días)
+            </AppText>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.stat}>
-            <Text style={styles.statNumber}>{mockUser.cantidadAmigos}</Text>
-            <Text style={styles.statLabel}>Amigos</Text>
+            <AppText variant="subheading" color={colors.primaryLight}>
+              {mockUser.cantidadAmigos}
+            </AppText>
+            <AppText variant="caption" color={colors.primaryMuted}>
+              Amigos
+            </AppText>
           </View>
         </View>
 
@@ -70,43 +91,51 @@ export default function UserProfile() {
               <Ionicons
                 name="leaf"
                 size={14}
-                color="#9ab89a"
-                style={{ marginRight: 6 }}
+                color={colors.primaryMuted}
+                style={styles.infoIcon}
               />
-              <Text style={styles.infoLabel}>Planta favorita</Text>
+              <AppText variant="label" color={colors.textMuted}>
+                Planta favorita
+              </AppText>
             </View>
-            <Text style={styles.infoValue}>{mockUser.plantaFavorita}</Text>
+            <AppText variant="label" style={styles.infoValue}>
+              {mockUser.plantaFavorita}
+            </AppText>
           </View>
           <View style={styles.infoRow}>
             <View style={styles.infoLabelContainer}>
               <Ionicons
                 name="gift"
                 size={14}
-                color="#9ab89a"
-                style={{ marginRight: 6 }}
+                color={colors.primaryMuted}
+                style={styles.infoIcon}
               />
-              <Text style={styles.infoLabel}>Cumpleaños</Text>
+              <AppText variant="label" color={colors.textMuted}>
+                Cumpleaños
+              </AppText>
             </View>
-            <Text style={styles.infoValue}>
+            <AppText variant="label" style={styles.infoValue}>
               {mockUser.cumpleanos.toLocaleDateString()}
-            </Text>
+            </AppText>
           </View>
           <View style={styles.infoRow}>
             <View style={styles.infoLabelContainer}>
               <Ionicons
                 name="pricetag"
                 size={14}
-                color="#9ab89a"
-                style={{ marginRight: 6 }}
+                color={colors.primaryMuted}
+                style={styles.infoIcon}
               />
-              <Text style={styles.infoLabel}>Categorías</Text>
+              <AppText variant="label" color={colors.textMuted}>
+                Categorías
+              </AppText>
             </View>
-            <Text style={styles.infoValue}>
+            <AppText variant="label" style={styles.infoValue}>
               {mockUser.categoriasPlantas.join(", ")}
-            </Text>
+            </AppText>
           </View>
         </View>
-      </View>
+      </ScrollView>
     </ScreenWrapper>
   );
 }

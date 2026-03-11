@@ -1,18 +1,27 @@
 import { Palette } from "@/src/constants/colors";
 
 export const DarkTheme = {
-  background: Palette.green900,
-  surface: Palette.green700,
-  surfaceAlt: Palette.green600,
-  surfaceDivider: Palette.green500,
+  background: Palette.black,
+  surface: Palette.dark800,
+  surfaceAlt: Palette.dark600,
+  surfaceDivider: Palette.dark500,
 
-  primary: Palette.green400,
-  primaryLight: Palette.green200,
-  primaryMuted: Palette.green300,
+  primary: Palette.green500,
+  primaryLight: Palette.green400,
+  primaryMuted: Palette.green700,
 
   textPrimary: Palette.white,
-  textSecondary: Palette.grey400,
-  textMuted: Palette.green300,
+  textSecondary: Palette.grey500,
+  textMuted: Palette.grey600,
 
-  avatarFallback: Palette.grey600,
+  avatarFallback: Palette.dark600,
+
+  searchBg: Palette.dark700,
+  searchBorder: Palette.dark500,
+  searchPlaceholder: Palette.grey500,
+
+  cardOverlay: "rgba(0,0,0,0.45)",
+  textOnOverlay: Palette.pureWhite,
+  tabBarBg: Palette.dark900,
+  danger: Palette.danger,
 } as const;
