@@ -1,6 +1,7 @@
 import AppText from "@/src/components/shared/AppText/AppText";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Pressable, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { createStyles } from "./styles";
 
@@ -15,7 +16,8 @@ interface AppToastProps {
 export default function AppToast({ message, type, onDismiss }: AppToastProps) {
   const theme = useAppTheme();
   const { colors } = theme;
-  const styles = createStyles(theme);
+  const insets = useSafeAreaInsets();
+  const styles = createStyles(theme, insets.top);
 
   const backgroundColor =
     type === "error"

@@ -20,8 +20,9 @@ export default function VerifyEmailScreen({
 }: VerifyEmailScreenProps) {
   return (
     <AuthScreenLayout
-      title="Confirma tu cuenta"
-      subtitle={`Revisa tu correo (${email}) y confirma tu cuenta para continuar.`}
+      title="Verifica tu correo"
+      subtitle={`Revisa el correo (${email}) y confirma tu cuenta para continuar.`}
+      helperNote="Cuando termines, vuelve aqui y toca el boton para validar el estado."
     >
       <AuthActions
         submitLabel="Ya confirmé mi correo"

@@ -1,12 +1,12 @@
 import { AppTheme } from "@/src/theme/designSystem";
 import { StyleSheet } from "react-native";
 
-const AVATAR_SIZE = 100;
-const AVATAR_BORDER_WIDTH = 3;
-const STAT_DIVIDER_HEIGHT = 36;
-const STAT_MIN_WIDTH = 64;
-
 export function createStyles({ colors, spacing, radius }: AppTheme) {
+  const avatarSize = spacing.xxl * 2;
+  const avatarBorderWidth = StyleSheet.hairlineWidth * 3;
+  const statDividerHeight = spacing.xl + spacing.xs;
+  const statMinWidth = spacing.xxl + spacing.md;
+
   return StyleSheet.create({
     container: {
       alignItems: "center",
@@ -14,10 +14,10 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       paddingHorizontal: spacing.md + spacing.xs,
     },
     avatar: {
-      width: AVATAR_SIZE,
-      height: AVATAR_SIZE,
+      width: avatarSize,
+      height: avatarSize,
       borderRadius: radius.full,
-      borderWidth: AVATAR_BORDER_WIDTH,
+      borderWidth: avatarBorderWidth,
       borderColor: colors.primary,
       marginBottom: spacing.sm + spacing.xs,
       backgroundColor: colors.avatarFallback,
@@ -48,11 +48,11 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
     },
     stat: {
       alignItems: "center",
-      minWidth: STAT_MIN_WIDTH,
+      minWidth: statMinWidth,
     },
     statDivider: {
       width: 1,
-      height: STAT_DIVIDER_HEIGHT,
+      height: statDividerHeight,
       backgroundColor: colors.surfaceDivider,
       marginHorizontal: spacing.xs,
     },

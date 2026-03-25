@@ -1,6 +1,7 @@
 import AuthActions from "@/src/features/auth/components/AuthActions/AuthActions";
 import AuthInput from "@/src/features/auth/components/AuthInput/AuthInput";
 import AuthScreenLayout from "@/src/features/auth/components/AuthScreenLayout/AuthScreenLayout";
+import { useAppTheme } from "@/src/theme/ThemeContext";
 import { View } from "react-native";
 
 import { createStyles } from "./styles";
@@ -30,12 +31,14 @@ export default function RegisterScreen({
   onSubmit,
   onGoToLogin,
 }: RegisterScreenProps) {
-  const styles = createStyles();
+  const theme = useAppTheme();
+  const styles = createStyles(theme);
 
   return (
     <AuthScreenLayout
       title="Crear cuenta"
-      subtitle="Regístrate para sincronizar tu progreso en PlanTica."
+      subtitle="Completa tus datos para empezar a organizar tu rutina verde."
+      helperNote="Te enviaremos un correo para validar tu cuenta al finalizar." 
     >
       <View style={styles.form}>
         <AuthInput
@@ -44,14 +47,18 @@ export default function RegisterScreen({
           onChangeText={onEmailChange}
           placeholder="tu-correo@ejemplo.com"
           keyboardType="email-address"
+          autoComplete="email"
+          textContentType="emailAddress"
         />
 
         <AuthInput
           label="Contraseña"
           value={password}
           onChangeText={onPasswordChange}
-          placeholder="Mínimo 6 caracteres"
+          placeholder="Minimo 6 caracteres"
           secureTextEntry
+          textContentType="newPassword"
+          helperText="Combina letras y numeros para mayor seguridad."
         />
 
         <AuthInput
@@ -60,16 +67,17 @@ export default function RegisterScreen({
           onChangeText={onConfirmPasswordChange}
           placeholder="Repite tu contraseña"
           secureTextEntry
+          textContentType="newPassword"
         />
       </View>
 
       <AuthActions
-        submitLabel="Crear cuenta"
+        submitLabel="Crear mi cuenta"
         loading={loading}
         errorText={error}
         onSubmit={onSubmit}
-        footerText="¿Ya tienes cuenta?"
-        footerActionLabel="Iniciar sesión"
+        footerText="¿Ya tienes una cuenta?"
+        footerActionLabel="Iniciar sesion"
         onFooterAction={onGoToLogin}
       />
     </AuthScreenLayout>

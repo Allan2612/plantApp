@@ -1,11 +1,12 @@
 import { AppTheme } from "@/src/theme/designSystem";
 import { StyleSheet, ViewStyle } from "react-native";
 
-const LOGO_HEIGHT = 34;
 /** SVG viewBox is 250 × 350, so aspect ratio is 5 : 7 */
-const LOGO_WIDTH = Math.round(LOGO_HEIGHT * (250 / 350));
+export function createStyles({ colors, spacing, typography }: AppTheme) {
+  const logoHeight = spacing.xl + spacing.xs;
+  const logoWidth = Math.round(logoHeight * (250 / 350));
+  const displayFontSize = typography.display.fontSize ?? spacing.xl;
 
-export function createStyles({ colors, spacing }: AppTheme) {
   return StyleSheet.create({
     container: {
       flexDirection: "row",
@@ -28,13 +29,13 @@ export function createStyles({ colors, spacing }: AppTheme) {
       gap: spacing.xs,
     },
     logo: {
-      height: LOGO_HEIGHT,
-      width: LOGO_WIDTH,
+      height: logoHeight,
+      width: logoWidth,
     },
     appName: {
       fontFamily: "Caveat_700Bold",
-      fontSize: 26,
-      lineHeight: 30,
+      fontSize: displayFontSize,
+      lineHeight: displayFontSize + spacing.xs,
       color: colors.primary,
     },
   });

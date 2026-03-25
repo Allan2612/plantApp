@@ -1,19 +1,23 @@
 import AppText from "@/src/components/shared/AppText/AppText";
 import { useAppTheme } from "@/src/theme/ThemeContext";
-import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import { Image, KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const LOGO_IMAGE = require("@/assets/images/Logo.png");
 
 import { createStyles } from "./styles";
 
 interface AuthScreenLayoutProps {
-  title: string;
+  title?: string;
   subtitle: string;
+  helperNote?: string;
   children: React.ReactNode;
 }
 
 export default function AuthScreenLayout({
   title,
   subtitle,
+  helperNote,
   children,
 }: AuthScreenLayoutProps) {
   const theme = useAppTheme();
@@ -32,16 +36,32 @@ export default function AuthScreenLayout({
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <AppText variant="display" color={colors.primary}>
+            <Image
+              source={LOGO_IMAGE}
+              style={styles.logo}
+              resizeMode="contain"
+              accessibilityLabel="Logo de PlanTica"
+            />
+            <AppText color={colors.primary} style={styles.brandText}>
               PlanTica
             </AppText>
-            <AppText variant="heading">{title}</AppText>
-            <AppText variant="body" color={colors.textSecondary}>
+
+            {title ? <AppText variant="heading" style={styles.titleText}>{title}</AppText> : null}
+            <AppText variant="body" color={colors.textSecondary} style={styles.subtitleText}>
               {subtitle}
             </AppText>
           </View>
 
-          <View style={styles.card}>{children}</View>
+          <View style={styles.card}>
+            {children}
+            {helperNote ? (
+              <View style={styles.helperBox}>
+                <AppText variant="caption" color={colors.textSecondary}>
+                  {helperNote}
+                </AppText>
+              </View>
+            ) : null}
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

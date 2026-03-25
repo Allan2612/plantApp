@@ -1,9 +1,10 @@
+import { AppTheme } from "@/src/theme/designSystem";
 import { StyleSheet } from "react-native";
 
-export function createStyles() {
+export function createStyles({ spacing }: AppTheme) {
   return StyleSheet.create({
     form: {
-      gap: 12,
+      gap: spacing.sm + spacing.xs,
     },
   });
 }

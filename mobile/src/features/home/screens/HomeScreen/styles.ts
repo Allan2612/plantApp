@@ -2,11 +2,10 @@ import { AppTheme } from "@/src/theme/designSystem";
 import { Dimensions, StyleSheet } from "react-native";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const SEARCH_BAR_HEIGHT = 42;
-const PLANT_ROW_IMAGE_SIZE = 80;
-const MICRO_SPACE = 2;
-
 export function createStyles({ colors, spacing, radius }: AppTheme) {
+  const searchBarHeight = spacing.xl + spacing.sm + spacing.xs / 2;
+  const plantRowImageSize = spacing.xl * 2 + spacing.md;
+  const microSpace = spacing.xs / 2;
   const CARD_WIDTH = (SCREEN_WIDTH - spacing.xxl) / 2;
   return StyleSheet.create({
     scroll: {
@@ -25,7 +24,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.searchBorder,
       paddingHorizontal: spacing.md,
-      height: SEARCH_BAR_HEIGHT,
+      height: searchBarHeight,
       gap: spacing.sm,
     },
     searchPlaceholder: {
@@ -101,17 +100,17 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       overflow: "hidden",
     },
     plantRowImage: {
-      width: PLANT_ROW_IMAGE_SIZE,
-      height: PLANT_ROW_IMAGE_SIZE,
+      width: plantRowImageSize,
+      height: plantRowImageSize,
     },
     plantRowContent: {
       flex: 1,
       paddingHorizontal: spacing.sm + spacing.xs,
       paddingVertical: spacing.sm,
-      gap: MICRO_SPACE,
+      gap: microSpace,
     },
     plantCategory: {
-      marginTop: MICRO_SPACE,
+      marginTop: microSpace,
     },
     plantsSectionHeader: {
       marginTop: spacing.lg,
@@ -137,7 +136,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
     },
     catalogContent: {
       padding: spacing.sm + spacing.xs,
-      gap: MICRO_SPACE,
+      gap: microSpace,
     },
     catalogDifficulty: {
       flexDirection: "row",

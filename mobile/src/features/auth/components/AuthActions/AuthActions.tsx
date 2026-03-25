@@ -33,17 +33,18 @@ export default function AuthActions({
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
+  const actionHitSlop = theme.spacing.sm;
 
   return (
     <View style={styles.container}>
       {errorText ? (
-        <AppText variant="caption" color={colors.danger}>
+        <AppText variant="caption" color={colors.danger} style={styles.feedbackText}>
           {errorText}
         </AppText>
       ) : null}
 
       {successText ? (
-        <AppText variant="caption" color={colors.primary}>
+        <AppText variant="caption" color={colors.primary} style={styles.feedbackText}>
           {successText}
         </AppText>
       ) : null}
@@ -52,15 +53,20 @@ export default function AuthActions({
         title={loading ? "Procesando..." : submitLabel}
         onPress={onSubmit}
         disabled={loading}
+        style={styles.actionButton}
       />
 
       {secondaryActionLabel && onSecondaryAction ? (
-        <AppButton
-          title={secondaryActionLabel}
-          variant="secondary"
+        <Pressable
           onPress={onSecondaryAction}
+          hitSlop={actionHitSlop}
           disabled={loading}
-        />
+          style={styles.secondaryLinkContainer}
+        >
+          <AppText variant="caption" color={colors.primary} style={styles.secondaryLinkText}>
+            {secondaryActionLabel}
+          </AppText>
+        </Pressable>
       ) : null}
 
       {footerText && footerActionLabel && onFooterAction ? (
@@ -68,7 +74,7 @@ export default function AuthActions({
           <AppText variant="caption" color={colors.textSecondary}>
             {footerText}
           </AppText>
-          <Pressable onPress={onFooterAction}>
+          <Pressable onPress={onFooterAction} hitSlop={actionHitSlop}>
             <AppText variant="caption" color={colors.primary}>
               {footerActionLabel}
             </AppText>

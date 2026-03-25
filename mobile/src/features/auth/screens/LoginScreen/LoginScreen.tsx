@@ -1,6 +1,7 @@
 import AuthActions from "@/src/features/auth/components/AuthActions/AuthActions";
 import AuthInput from "@/src/features/auth/components/AuthInput/AuthInput";
 import AuthScreenLayout from "@/src/features/auth/components/AuthScreenLayout/AuthScreenLayout";
+import { useAppTheme } from "@/src/theme/ThemeContext";
 import { View } from "react-native";
 
 import { createStyles } from "./styles";
@@ -28,12 +29,14 @@ export default function LoginScreen({
   onGoToRegister,
   onGoToForgotPassword,
 }: LoginScreenProps) {
-  const styles = createStyles();
+  const theme = useAppTheme();
+  const styles = createStyles(theme);
 
   return (
     <AuthScreenLayout
-      title="Bienvenido"
-      subtitle="Inicia sesión para seguir cuidando tus plantas."
+      title="Iniciar sesion"
+      subtitle="Accede a tu cuenta para continuar con el cuidado de tus plantas."
+      helperNote="Tus datos se mantienen sincronizados en tu cuenta." 
     >
       <View style={styles.form}>
         <AuthInput
@@ -42,6 +45,9 @@ export default function LoginScreen({
           onChangeText={onEmailChange}
           placeholder="tu-correo@ejemplo.com"
           keyboardType="email-address"
+          autoComplete="email"
+          textContentType="emailAddress"
+          helperText="Usa el mismo correo con el que te registraste."
         />
 
         <AuthInput
@@ -50,17 +56,18 @@ export default function LoginScreen({
           onChangeText={onPasswordChange}
           placeholder="Tu contraseña"
           secureTextEntry
+          textContentType="password"
         />
       </View>
 
       <AuthActions
-        submitLabel="Iniciar sesión"
+        submitLabel="Iniciar sesion"
         loading={loading}
         errorText={error}
         onSubmit={onSubmit}
-        secondaryActionLabel="Recuperar contraseña"
+        secondaryActionLabel="Olvide mi contraseña"
         onSecondaryAction={onGoToForgotPassword}
-        footerText="¿No tienes cuenta?"
+        footerText="¿Primera vez en PlanTica?"
         footerActionLabel="Crear cuenta"
         onFooterAction={onGoToRegister}
       />

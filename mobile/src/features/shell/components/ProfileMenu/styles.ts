@@ -1,11 +1,12 @@
+import { Effects } from "@/src/constants/effects";
 import { AppTheme } from "@/src/theme/designSystem";
 import { StyleSheet } from "react-native";
 
-const MENU_MIN_WIDTH = 200;
-const MENU_SHADOW_RADIUS = 12;
-const MENU_ELEVATION = 8;
-
 export function createStyles({ colors, spacing, radius }: AppTheme) {
+  const menuMinWidth = spacing.xxl * 4 + spacing.xs;
+  const menuShadowRadius = spacing.md - spacing.xs;
+  const menuElevation = spacing.sm;
+
   return StyleSheet.create({
     overlay: {
       flex: 1,
@@ -16,17 +17,17 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       paddingRight: spacing.sm + spacing.xs,
     },
     menu: {
-      minWidth: MENU_MIN_WIDTH,
+      minWidth: menuMinWidth,
       borderWidth: StyleSheet.hairlineWidth,
       backgroundColor: colors.surface,
       borderRadius: radius.lg,
       borderColor: colors.surfaceDivider,
       padding: spacing.xs,
-      elevation: MENU_ELEVATION,
+      elevation: menuElevation,
       shadowColor: colors.textPrimary,
       shadowOffset: { width: 0, height: spacing.xs },
-      shadowOpacity: 0.3,
-      shadowRadius: MENU_SHADOW_RADIUS,
+      shadowOpacity: Effects.shadowOpacityStrong,
+      shadowRadius: menuShadowRadius,
     },
     menuItem: {
       flexDirection: "row",
