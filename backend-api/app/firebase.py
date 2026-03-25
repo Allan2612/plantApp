@@ -12,7 +12,9 @@ def get_firestore_client() -> firestore.Client:
 
     if not settings.firebase_service_account_path.exists():
         raise FileNotFoundError(
-            "No se encontro el archivo de credenciales de Firebase en "
+            "No se encontro el archivo de credenciales de Firebase. "
+            "Configura FIREBASE_SERVICE_ACCOUNT_PATH en .env. "
+            "Ruta resuelta actual: "
             f"{settings.firebase_service_account_path}"
         )
 
