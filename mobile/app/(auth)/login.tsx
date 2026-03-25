@@ -1,36 +1,5 @@
-import { useLogin } from "@/src/hooks/auth/useLogin";
-import LoginScreen from "@/src/screens/Auth/LoginScreen/LoginScreen";
-import { useToast } from "@/src/context/ToastContext/ToastContext";
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import LoginRouteComponent from "@/src/features/auth/components/LoginRoute";
 
-export default function LoginRoute() {
-  const router = useRouter();
-  const { submit, loading, error } = useLogin();
-  const { showToast } = useToast();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  useEffect(() => {
-    if (!error) return;
-    showToast(error, "error");
-  }, [error, showToast]);
-
-  const handleSubmit = () => {
-    submit(email, password);
-  };
-
-  return (
-    <LoginScreen
-      email={email}
-      password={password}
-      loading={loading}
-      error={error}
-      onEmailChange={setEmail}
-      onPasswordChange={setPassword}
-      onSubmit={handleSubmit}
-      onGoToRegister={() => router.push("/(auth)/register")}
-      onGoToForgotPassword={() => router.push("/(auth)/forgot-password")}
-    />
-  );
+export default function LoginPage() {
+  return <LoginRouteComponent />;
 }

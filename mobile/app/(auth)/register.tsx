@@ -1,50 +1,5 @@
-import { useRegister } from "@/src/hooks/auth/useRegister";
-import RegisterScreen from "@/src/screens/Auth/RegisterScreen/RegisterScreen";
-import { useToast } from "@/src/context/ToastContext/ToastContext";
-import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import RegisterRouteComponent from "@/src/features/auth/components/RegisterRoute";
 
-export default function RegisterRoute() {
-  const router = useRouter();
-  const { submit, loading, error } = useRegister();
-  const { showToast } = useToast();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-
-  const localError = useMemo(() => {
-    if (!confirmPassword) return null;
-    if (password !== confirmPassword) return "Las contraseñas no coinciden.";
-    return null;
-  }, [confirmPassword, password]);
-
-  const handleSubmit = async () => {
-    if (localError) return;
-
-    const result = await submit(email, password);
-
-    if (result.ok) {
-      showToast(result.message, "success");
-      router.replace("/(auth)/verify-email");
-      return;
-    }
-
-    showToast(result.message, "error");
-  };
-
-  return (
-    <RegisterScreen
-      email={email}
-      password={password}
-      confirmPassword={confirmPassword}
-      loading={loading}
-      error={localError ?? error}
-      onEmailChange={setEmail}
-      onPasswordChange={setPassword}
-      onConfirmPasswordChange={setConfirmPassword}
-      onSubmit={handleSubmit}
-      onGoToLogin={() => router.replace("/(auth)/login")}
-    />
-  );
+export default function RegisterPage() {
+  return <RegisterRouteComponent />;
 }

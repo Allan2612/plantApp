@@ -1,7 +1,7 @@
-import AnimatedTabBar from "@/src/components/AnimatedTabBar/AnimatedTabBar";
-import AppHeader from "@/src/components/AppHeader/AppHeader";
-import { ScrollAnimProvider } from "@/src/context/ScrollAnimContext";
-import { useAuthSession } from "@/src/hooks/auth/useAuthSession";
+import AnimatedTabBar from "@/src/features/shell/components/AnimatedTabBar/AnimatedTabBar";
+import AppHeader from "@/src/features/shell/components/AppHeader/AppHeader";
+import { ScrollAnimProvider } from "@/src/features/shell/hooks/ScrollAnimContext";
+import { useAuthSession } from "@/src/features/auth/hooks/useAuthSession";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";

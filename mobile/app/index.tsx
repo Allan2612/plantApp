@@ -1,5 +1,5 @@
 import { Redirect } from "expo-router";
-import { useAuthSession } from "@/src/hooks/auth/useAuthSession";
+import { useAuthSession } from "@/src/features/auth/hooks/useAuthSession";
 
 export default function Index() {
   const { isChecking, isAuthenticated, isEmailVerified } = useAuthSession();

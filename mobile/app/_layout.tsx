@@ -1,6 +1,6 @@
 import { ThemeProvider, useAppTheme } from "@/src/theme/ThemeContext";
-import { ToastProvider } from "@/src/context/ToastContext/ToastContext";
-import { useAuthBootstrap } from "@/src/hooks/auth/useAuthBootstrap";
+import { ToastProvider } from "@/src/providers/ToastProvider";
+import { useAuthBootstrap } from "@/src/features/auth/hooks/useAuthBootstrap";
 import { Caveat_700Bold, useFonts } from "@expo-google-fonts/caveat";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";

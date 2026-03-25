@@ -1,4 +1,4 @@
-import { useAuthSession } from "@/src/hooks/auth/useAuthSession";
+import { useAuthSession } from "@/src/features/auth/hooks/useAuthSession";
 import { Redirect, Stack } from "expo-router";
 
 export default function AuthLayout() {
