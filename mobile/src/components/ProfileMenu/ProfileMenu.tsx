@@ -1,4 +1,6 @@
 import { useAppTheme } from "@/src/theme/ThemeContext";
+import { useToast } from "@/src/context/ToastContext/ToastContext";
+import { useLogout } from "@/src/hooks/auth/useLogout";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -17,6 +19,8 @@ export default function ProfileMenu() {
   const { colors } = theme;
   const styles = createStyles(theme);
   const router = useRouter();
+  const { showToast } = useToast();
+  const { logout, loading } = useLogout();
   const [visible, setVisible] = useState(false);
 
   const menuItems: MenuItem[] = [
@@ -39,7 +43,17 @@ export default function ProfileMenu() {
     {
       label: "Cerrar sesión",
       icon: "log-out-outline",
-      onPress: () => setVisible(false),
+      onPress: async () => {
+        setVisible(false);
+        const result = await logout();
+
+        if (!result.ok) {
+          showToast(result.message, "error");
+          return;
+        }
+
+        showToast("Sesión cerrada correctamente.", "success");
+      },
     },
   ];
 
@@ -70,11 +84,12 @@ export default function ProfileMenu() {
               <Pressable
                 key={item.label}
                 onPress={item.onPress}
+                disabled={loading}
                 accessibilityRole="menuitem"
                 accessibilityLabel={item.label}
                 style={({ pressed }) => [
                   styles.menuItem,
-                  pressed && styles.menuItemPressed,
+                  (pressed || loading) && styles.menuItemPressed,
                   index < menuItems.length - 1 && styles.menuItemDivider,
                 ]}
               >

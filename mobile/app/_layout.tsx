@@ -1,4 +1,6 @@
 import { ThemeProvider, useAppTheme } from "@/src/theme/ThemeContext";
+import { ToastProvider } from "@/src/context/ToastContext/ToastContext";
+import { useAuthBootstrap } from "@/src/hooks/auth/useAuthBootstrap";
 import { Caveat_700Bold, useFonts } from "@expo-google-fonts/caveat";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -9,6 +11,7 @@ SplashScreen.preventAutoHideAsync();
 
 function RootStack() {
   const { colors } = useAppTheme();
+  useAuthBootstrap();
 
   return (
     <Stack
@@ -21,6 +24,7 @@ function RootStack() {
         headerShadowVisible: false,
       }}
     >
+      <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen
         name="profile"
@@ -57,7 +61,9 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <RootStack />
+        <ToastProvider>
+          <RootStack />
+        </ToastProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

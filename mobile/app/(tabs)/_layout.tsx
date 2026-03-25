@@ -1,13 +1,25 @@
 import AnimatedTabBar from "@/src/components/AnimatedTabBar/AnimatedTabBar";
 import AppHeader from "@/src/components/AppHeader/AppHeader";
 import { ScrollAnimProvider } from "@/src/context/ScrollAnimContext";
+import { useAuthSession } from "@/src/hooks/auth/useAuthSession";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import { View } from "react-native";
 
 export default function TabsLayout() {
   const { colors } = useAppTheme();
+  const { isChecking, isAuthenticated, isEmailVerified } = useAuthSession();
+
+  if (isChecking) return null;
+
+  if (!isAuthenticated) {
+    return <Redirect href="/(auth)/login" />;
+  }
+
+  if (!isEmailVerified) {
+    return <Redirect href="/(auth)/verify-email" />;
+  }
 
   return (
     <ScrollAnimProvider>
