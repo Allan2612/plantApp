@@ -1,12 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
+import * as FirebaseAuth from "@firebase/auth";
 import {
   Auth,
   Persistence,
   getAuth,
   initializeAuth,
 } from "@firebase/auth";
-import { getReactNativePersistence } from "@firebase/auth/dist/rn/index";
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY ?? "",
@@ -19,6 +19,12 @@ const firebaseConfig = {
 
 let firebaseAppInstance: FirebaseApp | null = null;
 let firebaseAuthInstance: Auth | null = null;
+
+const getReactNativePersistence = (
+  FirebaseAuth as unknown as {
+    getReactNativePersistence?: (storage: typeof AsyncStorage) => Persistence;
+  }
+).getReactNativePersistence;
 
 const REQUIRED_FIREBASE_KEYS = [
   "EXPO_PUBLIC_FIREBASE_API_KEY",
@@ -63,6 +69,10 @@ export function getFirebaseAuthOrThrow(): Auth {
   const app = getFirebaseAppOrThrow();
 
   try {
+    if (!getReactNativePersistence) {
+      throw new Error("No se pudo inicializar persistencia de auth en React Native.");
+    }
+
     firebaseAuthInstance = initializeAuth(app, {
       persistence: getReactNativePersistence(AsyncStorage) as Persistence,
     });

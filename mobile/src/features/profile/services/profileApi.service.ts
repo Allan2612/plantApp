@@ -1,6 +1,7 @@
+import { getApiBaseUrl } from "@/src/services/api/apiBaseUrl";
 import { BackendUserProfile } from "@/src/types/auth.types";
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
+const API_BASE_URL = getApiBaseUrl();
 
 export async function fetchUserProfile(userId: string): Promise<BackendUserProfile | null> {
   if (!userId.trim()) return null;

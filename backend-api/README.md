@@ -44,7 +44,7 @@ Se eliminaron dependencias del modelo viejo:
 
 3. Verifica la ruta relativa al service account:
 
-	API_HOST=127.0.0.1
+	API_HOST=0.0.0.0
 	API_PORT=8000
 	API_ENV=development
 	FIREBASE_SERVICE_ACCOUNT_PATH=../serviceAccountKey.json
@@ -55,7 +55,15 @@ Se eliminaron dependencias del modelo viejo:
 Desde /backend-api:
 
 	pip install -r requirements.txt
-	uvicorn main:app --reload --host 127.0.0.1 --port 8000
+	uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+Si vas a probar desde celular real (Expo Go), usa la IP LAN de tu PC en el frontend:
+
+	EXPO_PUBLIC_API_BASE_URL=http://<TU_IP_LOCAL>:8000
+
+Ejemplo:
+
+	EXPO_PUBLIC_API_BASE_URL=http://192.168.1.25:8000
 
 ## Endpoints disponibles
 
