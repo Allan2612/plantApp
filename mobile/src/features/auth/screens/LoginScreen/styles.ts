@@ -6,5 +6,8 @@ export function createStyles({ spacing }: AppTheme) {
     form: {
       gap: spacing.sm + spacing.xs,
     },
+    googleButton: {
+      marginTop: spacing.md,
+    },
   });
 }

@@ -1,9 +1,11 @@
 import {
+  GoogleAuthProvider,
   User,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   sendEmailVerification,
   sendPasswordResetEmail,
+  signInWithCredential,
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
@@ -62,6 +64,23 @@ export async function loginWithEmail(email: string, password: string): Promise<U
   } catch (error) {
     const firebaseError = error as { code?: string; message?: string };
     console.error("[Auth][loginWithEmail]", {
+      code: firebaseError.code,
+      message: firebaseError.message,
+    });
+    const message = mapFirebaseError(firebaseError.code);
+    throw new Error(message);
+  }
+}
+
+export async function loginWithGoogleIdToken(idToken: string): Promise<User> {
+  try {
+    const auth = getFirebaseAuthOrThrow();
+    const credential = GoogleAuthProvider.credential(idToken);
+    const userCredential = await signInWithCredential(auth, credential);
+    return userCredential.user;
+  } catch (error) {
+    const firebaseError = error as { code?: string; message?: string };
+    console.error("[Auth][loginWithGoogleIdToken]", {
       code: firebaseError.code,
       message: firebaseError.message,
     });

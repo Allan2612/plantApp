@@ -1,6 +1,7 @@
 import AuthActions from "@/src/features/auth/components/AuthActions/AuthActions";
 import AuthInput from "@/src/features/auth/components/AuthInput/AuthInput";
 import AuthScreenLayout from "@/src/features/auth/components/AuthScreenLayout/AuthScreenLayout";
+import AppButton from "@/src/components/shared/AppButton/AppButton";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { View } from "react-native";
 
@@ -14,6 +15,8 @@ interface LoginScreenProps {
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
   onSubmit: () => void;
+  onGoogleSubmit?: () => void;
+  googleLoading?: boolean;
   onGoToRegister: () => void;
   onGoToForgotPassword: () => void;
 }
@@ -26,6 +29,8 @@ export default function LoginScreen({
   onEmailChange,
   onPasswordChange,
   onSubmit,
+  onGoogleSubmit,
+  googleLoading = false,
   onGoToRegister,
   onGoToForgotPassword,
 }: LoginScreenProps) {
@@ -71,6 +76,16 @@ export default function LoginScreen({
         footerActionLabel="Crear cuenta"
         onFooterAction={onGoToRegister}
       />
+
+      {onGoogleSubmit ? (
+        <AppButton
+          title={googleLoading ? "Conectando con Google..." : "Continuar con Google"}
+          onPress={onGoogleSubmit}
+          disabled={loading || googleLoading}
+          variant="secondary"
+          style={styles.googleButton}
+        />
+      ) : null}
     </AuthScreenLayout>
   );
 }
