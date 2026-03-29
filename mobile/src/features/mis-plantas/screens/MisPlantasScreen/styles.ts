@@ -120,9 +120,9 @@ export function createStyles({ colors, spacing, radius, typography }: AppTheme) 
     clearDateAction: {
       alignSelf: "flex-start",
       marginTop: spacing.xs,
-      paddingVertical: 0,
-      paddingHorizontal: 0,
-      backgroundColor: "transparent",
+      paddingVertical: spacing.xs * 0,
+      paddingHorizontal: spacing.xs * 0,
+      backgroundColor: colors.transparent,
     },
     clearDateText: {
       ...typography.caption,
@@ -212,7 +212,7 @@ export function createStyles({ colors, spacing, radius, typography }: AppTheme) 
     },
     modalOverlay: {
       flex: 1,
-      backgroundColor: "rgba(0, 0, 0, 0.35)",
+      backgroundColor: colors.cardOverlay,
       justifyContent: "flex-end",
     },
     modalCard: {

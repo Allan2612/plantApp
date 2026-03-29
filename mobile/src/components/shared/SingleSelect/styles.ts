@@ -8,11 +8,11 @@ export function createStyles({ colors, spacing, radius, typography }: AppTheme) 
       flexDirection: "row",
       alignItems: "stretch",
       borderRadius: radius.lg,
-      borderWidth: 1,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.surfaceDivider,
       backgroundColor: colors.surfaceAlt,
-      padding: 2,
-      gap: 2,
+      padding: spacing.xs / 2,
+      gap: spacing.xs / 2,
       overflow: "hidden",
     },
     rowGrid: {
@@ -28,7 +28,7 @@ export function createStyles({ colors, spacing, radius, typography }: AppTheme) 
       paddingHorizontal: spacing.sm,
       paddingVertical: spacing.xs,
       gap: spacing.xs,
-      backgroundColor: "transparent",
+      backgroundColor: colors.transparent,
     },
     optionGrid: {
       flexGrow: 1,

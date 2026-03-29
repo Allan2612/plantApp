@@ -1,16 +1,16 @@
 import AppText from "@/src/components/shared/AppText/AppText";
 import ScreenWrapper from "@/src/components/shared/ScreenWrapper/ScreenWrapper";
-import { useAppTheme, useThemeContext } from "@/src/theme/ThemeContext";
+import { useSettingsScreen } from "@/src/features/settings/hooks/useSettingsScreen";
+import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, ScrollView, View } from "react-native";
-import { LANGUAGE_OPTIONS, THEME_OPTIONS } from "@/src/features/settings/services/settings.localData";
 import { createStyles } from "./styles";
 
 export default function Settings() {
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
-  const { themeMode, setThemeMode } = useThemeContext();
+  const { themeMode, setThemeMode, themeOptions, languageOptions } = useSettingsScreen();
 
   return (
     <ScreenWrapper>
@@ -20,7 +20,7 @@ export default function Settings() {
           <AppText variant="subheading" style={styles.sectionTitle}>
             Tema
           </AppText>
-          {THEME_OPTIONS.map((opt) => {
+          {themeOptions.map((opt) => {
             const isActive = themeMode === opt.value;
             return (
               <Pressable
@@ -63,7 +63,7 @@ export default function Settings() {
           <AppText variant="subheading" style={styles.sectionTitle}>
             Idioma
           </AppText>
-          {LANGUAGE_OPTIONS.map((opt) => {
+          {languageOptions.map((opt) => {
             const isActive = opt.value === "es";
             return (
               <View

@@ -1,17 +1,19 @@
 import { useScrollAnim } from "@/src/features/shell/hooks/ScrollAnimContext";
 import { useAppTheme } from "@/src/theme/ThemeContext";
-import { Animated } from "react-native";
+import { Animated, StyleProp, ViewStyle } from "react-native";
 import { Edge, SafeAreaView } from "react-native-safe-area-context";
 import { createStyles } from "./styles";
 
 interface ScreenWrapperProps {
   children: React.ReactNode | React.ReactNode[];
   edges?: Edge[];
+  contentContainerStyle?: StyleProp<ViewStyle>;
 }
 
 export default function ScreenWrapper({
   children,
   edges = ["bottom", "left", "right"],
+  contentContainerStyle,
 }: ScreenWrapperProps) {
   const theme = useAppTheme();
   const styles = createStyles(theme);
@@ -30,6 +32,7 @@ export default function ScreenWrapper({
             paddingTop:
               scrollAnim?.headerPaddingAnim ?? scrollAnim?.headerHeight ?? 0,
           },
+          contentContainerStyle,
         ]}
       >
         {children}

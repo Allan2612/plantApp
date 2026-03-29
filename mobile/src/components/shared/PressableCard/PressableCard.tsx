@@ -1,7 +1,10 @@
-import { useAppTheme } from "@/src/theme/ThemeContext";
-import { useRef } from "react";
+import { usePressableCardLogic } from "@/src/components/shared/PressableCard/usePressableCardLogic";
 import { Animated, Pressable, StyleProp, ViewStyle } from "react-native";
-import { CARD_BORDER_WIDTH } from "./styles";
+import {
+  CARD_BORDER_WIDTH,
+  createAnimatedContentStyle,
+  createBorderStyle,
+} from "./styles";
 
 interface PressableCardProps {
   children: React.ReactNode;
@@ -18,64 +21,25 @@ export default function PressableCard({
   border = true,
   onPress,
 }: PressableCardProps) {
-  const { colors } = useAppTheme();
-  const scale = useRef(new Animated.Value(1)).current;
-  const borderProgress = useRef(new Animated.Value(0)).current;
-
-  const handlePressIn = () => {
-    Animated.parallel([
-      Animated.spring(scale, {
-        toValue: 1.07,
-        useNativeDriver: true,
-        speed: 50,
-        bounciness: 8,
-      }),
-      Animated.timing(borderProgress, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.parallel([
-      Animated.spring(scale, {
-        toValue: 1,
-        useNativeDriver: true,
-        speed: 30,
-        bounciness: 5,
-      }),
-      Animated.timing(borderProgress, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  };
-
-  const borderColor = borderProgress.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["transparent", border ? colors.primary : "transparent"],
-  });
+  const { scale, borderColor, onPressIn, onPressOut } = usePressableCardLogic(border);
 
   return (
     <Pressable
       style={containerStyle}
       onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}
       accessibilityRole="button"
     >
       {/* Outer view: JS-driven borderColor only */}
       <Animated.View
         style={[
           style,
-          { borderWidth: border ? CARD_BORDER_WIDTH : 0, borderColor },
+          createBorderStyle(border ? CARD_BORDER_WIDTH : 0, borderColor),
         ]}
       >
         {/* Inner view: native-driven scale only */}
-        <Animated.View style={{ flex: 1, transform: [{ scale }] }}>
+        <Animated.View style={createAnimatedContentStyle(scale)}>
           {children}
         </Animated.View>
       </Animated.View>

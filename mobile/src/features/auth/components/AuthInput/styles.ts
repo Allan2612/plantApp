@@ -13,7 +13,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       fontWeight: "600",
     },
     input: {
-      borderWidth: 1,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.surfaceDivider,
       backgroundColor: colors.surfaceAlt,
       color: colors.textPrimary,

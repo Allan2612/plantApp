@@ -20,7 +20,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      paddingVertical: spacing.sm + 2,
+      paddingVertical: spacing.sm + spacing.xs / 2,
       paddingHorizontal: spacing.sm,
       borderRadius: radius.md,
     },
@@ -33,7 +33,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       backgroundColor: colors.surfaceAlt,
     },
     checkIcon: {
-      width: 24,
+      width: spacing.md + spacing.sm,
       alignItems: "center",
     },
   });

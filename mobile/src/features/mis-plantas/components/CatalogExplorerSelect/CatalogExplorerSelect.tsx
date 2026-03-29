@@ -1,10 +1,10 @@
 import AppText from "@/src/components/shared/AppText/AppText";
 import InputText from "@/src/components/shared/InputText";
+import { useCatalogExplorerSelect } from "@/src/features/mis-plantas/hooks/useCatalogExplorerSelect";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { PlantCatalogItem } from "@/src/types/plant.types";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useMemo, useState } from "react";
 import { FlatList, Modal, Pressable, View } from "react-native";
 
 import { createStyles } from "./styles";
@@ -24,30 +24,21 @@ export default function CatalogExplorerSelect({
 }: CatalogExplorerSelectProps) {
   const theme = useAppTheme();
   const styles = createStyles(theme);
-
-  const [query, setQuery] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
-
-  const selectedItem = useMemo(
-    () => items.find((item) => item.id === selectedId) ?? null,
-    [items, selectedId],
-  );
-
-  const filteredItems = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) return items;
-
-    return items.filter((item) => {
-      const name = item.name.toLowerCase();
-      const scientificName = item.scientificName.toLowerCase();
-      return name.includes(normalizedQuery) || scientificName.includes(normalizedQuery);
-    });
-  }, [items, query]);
+  const {
+    query,
+    setQuery,
+    isOpen,
+    selectedItem,
+    filteredItems,
+    close,
+    toggle,
+    selectAndClose,
+  } = useCatalogExplorerSelect(items, selectedId, onSelect);
 
   return (
     <View style={styles.container}>
       <Pressable
-        onPress={() => setIsOpen((prev) => !prev)}
+        onPress={toggle}
         style={[
           styles.trigger,
           isOpen && styles.triggerActive,
@@ -83,15 +74,15 @@ export default function CatalogExplorerSelect({
         visible={isOpen}
         transparent
         animationType="slide"
-        onRequestClose={() => setIsOpen(false)}
+        onRequestClose={close}
       >
         <View style={styles.overlay}>
-          <Pressable style={styles.overlayBackdrop} onPress={() => setIsOpen(false)} />
+          <Pressable style={styles.overlayBackdrop} onPress={close} />
 
           <View style={styles.panel}>
             <View style={styles.panelHeader}>
               <AppText variant="subheading">Explorar catálogo</AppText>
-              <Pressable onPress={() => setIsOpen(false)}>
+              <Pressable onPress={close}>
                 <AppText variant="caption" style={styles.closeText}>Cerrar</AppText>
               </Pressable>
             </View>
@@ -119,10 +110,7 @@ export default function CatalogExplorerSelect({
                 const selected = item.id === selectedId;
                 return (
                   <Pressable
-                    onPress={() => {
-                      onSelect(item.id);
-                      setIsOpen(false);
-                    }}
+                    onPress={() => selectAndClose(item.id)}
                     style={[styles.row, selected && styles.rowSelected]}
                   >
                     <View style={styles.rowHead}>

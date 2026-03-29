@@ -19,7 +19,7 @@ export function createStyles(
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm + spacing.xs / 2,
       shadowColor: colors.textPrimary,
-      shadowOffset: { width: 0, height: spacing.xs },
+      shadowOffset: { width: spacing.xs * 0, height: spacing.xs },
       shadowOpacity: Effects.shadowOpacityMedium,
       shadowRadius: spacing.sm,
       elevation: spacing.xs,

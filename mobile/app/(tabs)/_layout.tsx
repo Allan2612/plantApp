@@ -4,8 +4,9 @@ import { ScrollAnimProvider } from "@/src/features/shell/hooks/ScrollAnimContext
 import { useAuthSession } from "@/src/features/auth/hooks/useAuthSession";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { Redirect, Tabs } from "expo-router";
+import { Redirect, Tabs, type Href } from "expo-router";
 import { View } from "react-native";
+import { styles } from "@/src/features/shell/styles/tabsLayout.styles";
 
 export default function TabsLayout() {
   const { colors } = useAppTheme();
@@ -14,16 +15,16 @@ export default function TabsLayout() {
   if (isChecking) return null;
 
   if (!isAuthenticated) {
-    return <Redirect href="/(auth)/login" />;
+    return <Redirect href={"/(auth)/login" as Href} />;
   }
 
   if (!isEmailVerified) {
-    return <Redirect href="/(auth)/verify-email" />;
+    return <Redirect href={"/(auth)/verify-email" as Href} />;
   }
 
   return (
     <ScrollAnimProvider>
-      <View style={{ flex: 1 }}>
+      <View style={styles.root}>
         <Tabs
           screenOptions={{
             headerShown: false,

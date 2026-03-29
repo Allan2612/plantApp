@@ -14,7 +14,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       backgroundColor: colors.primary,
     },
     secondaryBg: {
-      backgroundColor: "transparent",
+      backgroundColor: colors.transparent,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.surfaceDivider,
     },

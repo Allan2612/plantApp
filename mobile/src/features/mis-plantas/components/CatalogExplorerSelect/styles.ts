@@ -11,7 +11,7 @@ export function createStyles({ colors, spacing, radius, typography }: AppTheme) 
       width: "100%",
       minHeight: spacing.xl + spacing.md,
       borderRadius: radius.lg,
-      borderWidth: 1,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.surfaceDivider,
       backgroundColor: colors.surfaceAlt,
       paddingHorizontal: spacing.sm,
@@ -30,7 +30,7 @@ export function createStyles({ colors, spacing, radius, typography }: AppTheme) 
     },
     triggerTextWrap: {
       flex: 1,
-      gap: 0,
+      gap: spacing.xs * 0,
     },
     triggerMain: {
       flex: 1,
@@ -46,7 +46,7 @@ export function createStyles({ colors, spacing, radius, typography }: AppTheme) 
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
-      backgroundColor: "rgba(0, 0, 0, 0.35)",
+      backgroundColor: colors.cardOverlay,
     },
     overlayBackdrop: {
       position: "absolute",
@@ -59,7 +59,7 @@ export function createStyles({ colors, spacing, radius, typography }: AppTheme) 
       width: "100%",
       maxHeight: "78%",
       borderRadius: radius.lg,
-      borderWidth: 1,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.surfaceDivider,
       backgroundColor: colors.surface,
       paddingVertical: spacing.sm,
@@ -91,7 +91,7 @@ export function createStyles({ colors, spacing, radius, typography }: AppTheme) 
     row: {
       width: "100%",
       borderRadius: radius.md,
-      borderWidth: 1,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.surfaceDivider,
       backgroundColor: colors.surfaceAlt,
       paddingVertical: spacing.sm,

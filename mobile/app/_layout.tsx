@@ -10,6 +10,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { createRootStackScreenOptions } from "@/src/features/shell/styles/rootLayout.styles";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -20,12 +21,8 @@ function RootStack() {
   return (
     <Stack
       screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.background },
-        headerStyle: { backgroundColor: colors.background },
+        ...createRootStackScreenOptions(colors),
         headerTintColor: colors.textPrimary,
-        headerTitleStyle: { fontWeight: "600" },
-        headerShadowVisible: false,
       }}
     >
       <Stack.Screen name="(auth)" />

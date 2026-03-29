@@ -2,7 +2,7 @@ import { AppTheme } from "@/src/theme/designSystem";
 import { StyleSheet } from "react-native";
 
 export function createStyles({ colors, spacing, radius }: AppTheme) {
-  const imageHeight = spacing.xxl * 2 + spacing.sm;
+  const imageHeight = spacing.xxl * 3;
 
   return StyleSheet.create({
     card: {

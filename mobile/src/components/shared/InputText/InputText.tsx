@@ -1,6 +1,7 @@
 import AppText from "@/src/components/shared/AppText/AppText";
+import { useInputTextLogic } from "@/src/components/shared/InputText/useInputTextLogic";
 import { useAppTheme } from "@/src/theme/ThemeContext";
-import { forwardRef, useState } from "react";
+import { forwardRef } from "react";
 import { TextInput, TextInputProps, View } from "react-native";
 
 import { createStyles } from "./styles";
@@ -29,7 +30,7 @@ const InputText = forwardRef<TextInput, InputTextProps>(function InputText(
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
-  const [isFocused, setIsFocused] = useState(false);
+  const { isFocused, onFocus, onBlur } = useInputTextLogic();
   const message = error ?? errorText;
 
   return (
@@ -45,8 +46,8 @@ const InputText = forwardRef<TextInput, InputTextProps>(function InputText(
         value={value}
         onChangeText={onChangeText}
         placeholderTextColor={colors.textMuted}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
+        onFocus={onFocus}
+        onBlur={onBlur}
         {...rest}
       />
 

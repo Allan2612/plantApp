@@ -9,7 +9,7 @@ export function createStyles({ colors, spacing, radius, typography }: AppTheme) 
     overlay: {
       flex: 1,
       justifyContent: "flex-end",
-      backgroundColor: "rgba(0, 0, 0, 0.35)",
+      backgroundColor: colors.cardOverlay,
     },
     panel: {
       width: "100%",

@@ -1,7 +1,7 @@
 import { AppTheme } from "@/src/theme/designSystem";
 import { StyleSheet } from "react-native";
 
-export function createStyles({ spacing, colors }: AppTheme) {
+export function createStyles({ spacing, colors, radius, typography }: AppTheme) {
   return StyleSheet.create({
     form: {
       gap: spacing.sm + spacing.xs,
@@ -13,17 +13,17 @@ export function createStyles({ spacing, colors }: AppTheme) {
       marginTop: spacing.xs,
     },
     checkbox: {
-      width: 20,
-      height: 20,
-      borderRadius: 4,
-      borderWidth: 1,
+      width: spacing.md + spacing.xs,
+      height: spacing.md + spacing.xs,
+      borderRadius: radius.sm / 2,
+      borderWidth: StyleSheet.hairlineWidth,
       alignItems: "center",
       justifyContent: "center",
-      marginTop: 2,
+      marginTop: spacing.xs / 2,
     },
     checkIcon: {
-      fontSize: 12,
-      lineHeight: 12,
+      fontSize: typography.caption.fontSize,
+      lineHeight: spacing.md - spacing.xs,
       color: colors.textOnOverlay,
       fontWeight: "700",
     },

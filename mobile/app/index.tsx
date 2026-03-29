@@ -1,4 +1,4 @@
-import { Redirect } from "expo-router";
+import { Redirect, type Href } from "expo-router";
 import { useAuthSession } from "@/src/features/auth/hooks/useAuthSession";
 
 export default function Index() {
@@ -7,12 +7,12 @@ export default function Index() {
   if (isChecking) return null;
 
   if (!isAuthenticated) {
-    return <Redirect href="/(auth)/login" />;
+    return <Redirect href={"/(auth)/login" as Href} />;
   }
 
   if (!isEmailVerified) {
-    return <Redirect href="/(auth)/verify-email" />;
+    return <Redirect href={"/(auth)/verify-email" as Href} />;
   }
 
-  return <Redirect href="/(tabs)/home" />;
+  return <Redirect href={"/(tabs)/home" as Href} />;
 }

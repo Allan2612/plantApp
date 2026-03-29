@@ -1,60 +1,19 @@
-import { useLogin } from "@/src/features/auth/hooks/useLogin";
+import { useLoginRoute } from "@/src/features/auth/hooks/useLoginRoute";
 import LoginScreen from "@/src/features/auth/screens/LoginScreen/LoginScreen";
-import { useToast } from "@/src/providers/ToastProvider";
-import { useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-type LoginFieldErrors = {
-  email?: string;
-  password?: string;
-};
 
 export default function LoginRoute() {
-  const router = useRouter();
-  const { submit, loading, error } = useLogin();
-  const { showToast } = useToast();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-
-  const fieldErrors = useMemo<LoginFieldErrors>(() => {
-    const normalizedEmail = email.trim().toLowerCase();
-    const errors: LoginFieldErrors = {};
-
-    if (!normalizedEmail) {
-      errors.email = "Ingresa tu correo.";
-    } else if (!EMAIL_REGEX.test(normalizedEmail)) {
-      errors.email = "Ingresa un correo valido.";
-    }
-
-    if (!password.trim()) {
-      errors.password = "Ingresa tu contraseña.";
-    }
-
-    return errors;
-  }, [email, password]);
-
-  const firstFieldError = useMemo(() => {
-    return fieldErrors.email || fieldErrors.password || null;
-  }, [fieldErrors.email, fieldErrors.password]);
-
-  useEffect(() => {
-    if (!error) return;
-    showToast(error, "error");
-  }, [error, showToast]);
-
-  const handleSubmit = () => {
-    setSubmitted(true);
-    if (firstFieldError) {
-      showToast(firstFieldError, "error");
-      return;
-    }
-
-    const normalizedEmail = email.trim().toLowerCase();
-    submit(normalizedEmail, password);
-  };
+  const {
+    email,
+    password,
+    loading,
+    error,
+    fieldErrors,
+    onEmailChange,
+    onPasswordChange,
+    onSubmit,
+    onGoToRegister,
+    onGoToForgotPassword,
+  } = useLoginRoute();
 
   return (
     <LoginScreen
@@ -62,12 +21,12 @@ export default function LoginRoute() {
       password={password}
       loading={loading}
       error={error}
-      fieldErrors={submitted ? fieldErrors : undefined}
-      onEmailChange={setEmail}
-      onPasswordChange={setPassword}
-      onSubmit={handleSubmit}
-      onGoToRegister={() => router.push("/(auth)/register")}
-      onGoToForgotPassword={() => router.push("/(auth)/forgot-password")}
+      fieldErrors={fieldErrors}
+      onEmailChange={onEmailChange}
+      onPasswordChange={onPasswordChange}
+      onSubmit={onSubmit}
+      onGoToRegister={onGoToRegister}
+      onGoToForgotPassword={onGoToForgotPassword}
     />
   );
 }

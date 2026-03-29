@@ -5,9 +5,9 @@ import LoadingState from "@/src/components/shared/LoadingState";
 import ScreenWrapper from "@/src/components/shared/ScreenWrapper/ScreenWrapper";
 import CatalogPlantCreateModal from "@/src/features/catalogo/components/CatalogPlantCreateModal";
 import CatalogPlantCard from "@/src/features/catalogo/components/CatalogPlantCard";
+import { useCatalogoScreen } from "@/src/features/catalogo/hooks/useCatalogoScreen";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { CreateCatalogPlantPayload, PlantCatalogItem } from "@/src/types/plant.types";
-import { useState } from "react";
 import { FlatList, View } from "react-native";
 import { createStyles } from "./styles";
 
@@ -35,15 +35,8 @@ export default function CatalogoScreen({
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-
-  const openCreateModal = () => setShowCreateModal(true);
-  const closeCreateModal = () => setShowCreateModal(false);
-
-  const handleCreatePlant = async (payload: CreateCatalogPlantPayload) => {
-    await onCreatePlant(payload);
-    closeCreateModal();
-  };
+  const { showCreateModal, openCreateModal, closeCreateModal, handleCreatePlant } =
+    useCatalogoScreen(onCreatePlant);
 
   if (loading) {
     return (

@@ -1,9 +1,6 @@
-import { useScrollAnim } from "@/src/features/shell/hooks/ScrollAnimContext";
-import { useAppTheme } from "@/src/theme/ThemeContext";
+import { useAnimatedTabBarLogic } from "@/src/features/shell/hooks/useAnimatedTabBarLogic";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { useEffect, useRef } from "react";
 import { Animated, Pressable } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./styles";
 
 export default function AnimatedTabBar({
@@ -11,35 +8,16 @@ export default function AnimatedTabBar({
   descriptors,
   navigation,
 }: BottomTabBarProps) {
-  const { colors, spacing } = useAppTheme();
-  const { bottom } = useSafeAreaInsets();
-  const scrollAnim = useScrollAnim();
-  const prevTabIndex = useRef(state.index);
-
-  // Reset header/tab bar visibility on tab switch
-  useEffect(() => {
-    if (prevTabIndex.current !== state.index) {
-      prevTabIndex.current = state.index;
-      scrollAnim?.resetScrollAnim();
-    }
-  }, [state.index, scrollAnim]);
-
-  const tabBarHeight = spacing.xxl + bottom;
+  const { colors, scrollAnim, dynamicStyle, translateStyle } =
+    useAnimatedTabBarLogic(state.index);
 
   return (
     <Animated.View
       onLayout={(e) => scrollAnim?.setTabBarHeight(e.nativeEvent.layout.height)}
       style={[
         styles.container,
-        {
-          backgroundColor: colors.tabBarBg,
-          borderTopColor: colors.surfaceDivider,
-          height: tabBarHeight,
-          paddingBottom: bottom,
-        },
-        scrollAnim
-          ? { transform: [{ translateY: scrollAnim.tabBarTranslateY }] }
-          : undefined,
+        dynamicStyle,
+        translateStyle,
       ]}
     >
       {state.routes.map((route, index) => {

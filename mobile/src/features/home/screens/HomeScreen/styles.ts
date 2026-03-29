@@ -1,5 +1,5 @@
 import { AppTheme } from "@/src/theme/designSystem";
-import { Dimensions, StyleSheet } from "react-native";
+import { Animated, Dimensions, StyleSheet, ViewStyle } from "react-native";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 export function createStyles({ colors, spacing, radius }: AppTheme) {
@@ -41,6 +41,9 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       backgroundColor: colors.surface,
       borderRadius: radius.lg,
       overflow: "hidden",
+    },
+    fullFlex: {
+      flex: 1,
     },
     actionCardInner: {
       flex: 1,
@@ -166,4 +169,12 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       marginTop: spacing.xs,
     },
   });
+}
+
+export function createScreenWrapperContentStyle(
+  paddingTop: number | Animated.Value,
+): ViewStyle {
+  return {
+    paddingTop,
+  };
 }

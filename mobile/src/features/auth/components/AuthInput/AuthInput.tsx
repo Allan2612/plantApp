@@ -1,6 +1,7 @@
 import AppText from "@/src/components/shared/AppText/AppText";
+import { useAuthInputLogic } from "@/src/features/auth/hooks/useAuthInputLogic";
 import { useAppTheme } from "@/src/theme/ThemeContext";
-import { forwardRef, useState } from "react";
+import { forwardRef } from "react";
 import { TextInput, TextInputProps, View } from "react-native";
 
 import { createStyles } from "./styles";
@@ -27,7 +28,7 @@ const AuthInput = forwardRef<TextInput, AuthInputProps>(function AuthInput(
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
-  const [isFocused, setIsFocused] = useState(false);
+  const { isFocused, onFocus, onBlur } = useAuthInputLogic();
 
   return (
     <View style={styles.container}>
@@ -45,8 +46,8 @@ const AuthInput = forwardRef<TextInput, AuthInputProps>(function AuthInput(
         onChangeText={onChangeText}
         placeholderTextColor={colors.textMuted}
         autoCapitalize="none"
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
+        onFocus={onFocus}
+        onBlur={onBlur}
         {...rest}
       />
       {!errorText && helperText ? (

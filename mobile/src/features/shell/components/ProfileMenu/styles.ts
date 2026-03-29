@@ -26,7 +26,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       padding: spacing.xs,
       elevation: menuElevation,
       shadowColor: colors.textPrimary,
-      shadowOffset: { width: 0, height: spacing.xs },
+      shadowOffset: { width: spacing.xs * 0, height: spacing.xs },
       shadowOpacity: Effects.shadowOpacityStrong,
       shadowRadius: menuShadowRadius,
     },
