@@ -4,7 +4,8 @@ import GoogleSignInButton from "@/src/features/auth/components/GoogleSignInButto
 import AuthScreenLayout from "@/src/features/auth/components/AuthScreenLayout/AuthScreenLayout";
 import AppText from "@/src/components/shared/AppText/AppText";
 import { useAppTheme } from "@/src/theme/ThemeContext";
-import { View } from "react-native";
+import { useRef } from "react";
+import { TextInput, View } from "react-native";
 
 import { createStyles } from "./styles";
 
@@ -13,6 +14,10 @@ interface LoginScreenProps {
   password: string;
   loading: boolean;
   error: string | null;
+  fieldErrors?: {
+    email?: string;
+    password?: string;
+  };
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
   onSubmit: () => void;
@@ -25,6 +30,7 @@ export default function LoginScreen({
   password,
   loading,
   error,
+  fieldErrors,
   onEmailChange,
   onPasswordChange,
   onSubmit,
@@ -35,6 +41,7 @@ export default function LoginScreen({
   const { colors } = theme;
   const styles = createStyles(theme);
   const handleGooglePress = () => undefined;
+  const passwordRef = useRef<TextInput>(null);
 
   return (
     <AuthScreenLayout
@@ -46,19 +53,28 @@ export default function LoginScreen({
           label="Correo"
           value={email}
           onChangeText={onEmailChange}
+          errorText={fieldErrors?.email}
           placeholder="tu-correo@ejemplo.com"
           keyboardType="email-address"
           autoComplete="email"
           textContentType="emailAddress"
+          autoFocus
+          returnKeyType="next"
+          onSubmitEditing={() => passwordRef.current?.focus()}
+          blurOnSubmit={false}
         />
 
         <AuthInput
+          ref={passwordRef}
           label="Contraseña"
           value={password}
           onChangeText={onPasswordChange}
+          errorText={fieldErrors?.password}
           placeholder="Tu contraseña"
           secureTextEntry
           textContentType="password"
+          returnKeyType="done"
+          onSubmitEditing={onSubmit}
         />
       </View>
 

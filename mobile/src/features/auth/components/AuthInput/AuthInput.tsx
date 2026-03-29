@@ -1,6 +1,6 @@
 import AppText from "@/src/components/shared/AppText/AppText";
 import { useAppTheme } from "@/src/theme/ThemeContext";
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 import { TextInput, TextInputProps, View } from "react-native";
 
 import { createStyles } from "./styles";
@@ -13,14 +13,17 @@ interface AuthInputProps extends Omit<TextInputProps, "value" | "onChangeText"> 
   helperText?: string;
 }
 
-export default function AuthInput({
-  label,
-  value,
-  onChangeText,
-  errorText,
-  helperText,
-  ...rest
-}: AuthInputProps) {
+const AuthInput = forwardRef<TextInput, AuthInputProps>(function AuthInput(
+  {
+    label,
+    value,
+    onChangeText,
+    errorText,
+    helperText,
+    ...rest
+  },
+  ref,
+) {
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
@@ -32,6 +35,7 @@ export default function AuthInput({
         {label}
       </AppText>
       <TextInput
+        ref={ref}
         style={[
           styles.input,
           isFocused && styles.inputFocused,
@@ -57,4 +61,6 @@ export default function AuthInput({
       ) : null}
     </View>
   );
-}
+});
+
+export default AuthInput;

@@ -40,7 +40,7 @@ export default function CatalogPlantCard({ plant }: CatalogPlantCardProps) {
     <View style={styles.card}>
       {shouldRenderImage ? (
         <Image
-          source={{ uri: plant.imageUrl }}
+          source={{ uri: plant.imageUrl ?? "" }}
           style={styles.image}
           contentFit="cover"
           transition={120}

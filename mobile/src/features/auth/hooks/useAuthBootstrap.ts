@@ -1,13 +1,17 @@
 import { useEffect } from "react";
 
-import { fetchUserProfile } from "@/src/features/profile/services/profileApi.service";
-import { subscribeAuthState } from "@/src/features/auth/services/authFirebase.service";
+import { fetchProfileForSession } from "@/src/features/profile/services/profileApi.service";
+import {
+  logoutUser,
+  subscribeAuthState,
+} from "@/src/features/auth/services/authFirebase.service";
 import { useAuthStore } from "@/src/store/auth.store";
 
 export function useAuthBootstrap() {
   const setSessionStatus = useAuthStore((state) => state.setSessionStatus);
   const setFirebaseUser = useAuthStore((state) => state.setFirebaseUser);
   const setProfile = useAuthStore((state) => state.setProfile);
+  const resetAuthState = useAuthStore((state) => state.resetAuthState);
 
   useEffect(() => {
     const unsubscribe = subscribeAuthState(async (user) => {
@@ -18,13 +22,30 @@ export function useAuthBootstrap() {
         return;
       }
 
-      setFirebaseUser(user);
-      setSessionStatus("authenticated");
+      try {
+        const resolution = await fetchProfileForSession({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          providerId: user.providerData?.[0]?.providerId ?? null,
+        });
 
-      const profile = await fetchUserProfile(user.uid);
-      setProfile(profile);
+        if (!resolution?.profile) {
+          await logoutUser();
+          resetAuthState();
+          return;
+        }
+
+        setFirebaseUser(user);
+        setProfile(resolution.profile);
+        setSessionStatus("authenticated");
+      } catch (error) {
+        console.warn("[Auth][bootstrap] profile resolution failed", error);
+        await logoutUser();
+        resetAuthState();
+      }
     });
 
     return unsubscribe;
-  }, [setFirebaseUser, setProfile, setSessionStatus]);
+  }, [resetAuthState, setFirebaseUser, setProfile, setSessionStatus]);
 }

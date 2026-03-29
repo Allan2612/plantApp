@@ -1,4 +1,5 @@
 import AppToast, { ToastType } from "@/src/components/shared/AppToast/AppToast";
+import { normalizeErrorMessage } from "@/src/services/errors/errorMessages";
 import { createContext, useCallback, useContext, useRef, useState } from "react";
 
 interface ToastContextValue {
@@ -29,7 +30,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   const showToast = useCallback(
     (message: string, type: ToastType = "info") => {
-      setToast({ message, type });
+      const safeMessage = type === "error" ? normalizeErrorMessage(message) : message;
+      setToast({ message: safeMessage, type });
 
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);

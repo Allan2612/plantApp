@@ -1,10 +1,12 @@
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { useToast } from "@/src/providers/ToastProvider";
 import { useLogout } from "@/src/features/auth/hooks/useLogout";
+import { useAuthSession } from "@/src/features/auth/hooks/useAuthSession";
+import { useAuthStore } from "@/src/store/auth.store";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Modal, Pressable, View } from "react-native";
+import { Image, Modal, Pressable, View } from "react-native";
 import AppText from "@/src/components/shared/AppText/AppText";
 import { createStyles } from "./styles";
 
@@ -14,6 +16,15 @@ interface MenuItem {
   onPress: () => void;
 }
 
+function getAvatarUri(avatarId?: string | null): string | null {
+  if (!avatarId?.trim()) return null;
+  const normalized = avatarId.trim();
+  if (normalized.startsWith("http://") || normalized.startsWith("https://")) {
+    return normalized;
+  }
+  return null;
+}
+
 export default function ProfileMenu() {
   const theme = useAppTheme();
   const { colors } = theme;
@@ -21,7 +32,12 @@ export default function ProfileMenu() {
   const router = useRouter();
   const { showToast } = useToast();
   const { logout, loading } = useLogout();
+  const { user } = useAuthSession();
   const [visible, setVisible] = useState(false);
+  const profile = useAuthStore((state) => state.profile);
+  const avatarUri =
+    getAvatarUri(profile?.user?.avatarId) ??
+    getAvatarUri(user?.photoURL ?? null);
 
   const menuItems: MenuItem[] = [
     {
@@ -65,11 +81,17 @@ export default function ProfileMenu() {
         accessibilityLabel="Abrir menú de usuario"
         hitSlop={8}
       >
-        <Ionicons
-          name="person-circle-outline"
-          size={32}
-          color={colors.primary}
-        />
+        <View style={styles.avatarButton}>
+          {avatarUri ? (
+            <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
+          ) : (
+            <Ionicons
+              name="person-circle-outline"
+              size={32}
+              color={colors.primary}
+            />
+          )}
+        </View>
       </Pressable>
 
       <Modal

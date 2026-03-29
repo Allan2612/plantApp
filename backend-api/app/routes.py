@@ -7,21 +7,33 @@ from .models import (
     CareHistoryItemModel,
     CareScheduleItemModel,
     CategoryModel,
+    CreateCatalogPlantRequest,
+    CreateUserPlantRequest,
     PlantCatalogModel,
     PlantTagModel,
     ProfileResponse,
+    SyncAuthUserRequest,
+    UpdateUserPlantRequest,
+    UpdateUserRequest,
     UserPlantDetailResponse,
+    UserPlantModel,
     UserPlantsResponse,
     UserInfoTileModel,
     UserModel,
     UserStatModel,
 )
 from .services import (
+    create_catalog_plant,
+    create_user_plant,
     get_collection,
     get_document,
+    get_user_by_email,
     get_user_plant_detail_payload,
     get_user_plants_payload,
     get_user_profile_payload,
+    sync_user_from_auth,
+    update_user_fields,
+    update_user_plant_fields,
 )
 
 router = APIRouter()
@@ -39,6 +51,32 @@ def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
 
 
+@router.get("/api/users/by-email", response_model=UserModel)
+def read_user_by_email(email: str) -> dict:
+    validated_email = email.strip().lower()
+    if not validated_email:
+        raise HTTPException(status_code=400, detail="email es requerido")
+
+    try:
+        return get_user_by_email(validated_email)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error inesperado en read_user_by_email. email=%s", validated_email)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.post("/api/users/sync-auth", response_model=UserModel)
+def post_sync_auth_user(payload: SyncAuthUserRequest) -> dict:
+    try:
+        return sync_user_from_auth(payload.model_dump())
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error inesperado en post_sync_auth_user")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
 @router.get("/api/users/{user_id}", response_model=UserModel)
 def read_user(user_id: str) -> dict:
     validated_user_id = _validate_required_id(user_id, "user_id")
@@ -48,6 +86,18 @@ def read_user(user_id: str) -> dict:
         raise
     except Exception:
         logger.exception("Error inesperado en read_user. user_id=%s", validated_user_id)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.patch("/api/users/{user_id}", response_model=UserModel)
+def patch_user(user_id: str, payload: UpdateUserRequest) -> dict:
+    validated_user_id = _validate_required_id(user_id, "user_id")
+    try:
+        return update_user_fields(validated_user_id, payload.model_dump())
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error inesperado en patch_user. user_id=%s", validated_user_id)
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 
@@ -92,6 +142,32 @@ def read_user_plant_detail(user_plant_id: str) -> dict:
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 
+@router.patch("/api/user-plants/{user_plant_id}", response_model=UserPlantModel)
+def patch_user_plant(user_plant_id: str, payload: UpdateUserPlantRequest) -> dict:
+    validated_user_plant_id = _validate_required_id(user_plant_id, "user_plant_id")
+    try:
+        return update_user_plant_fields(validated_user_plant_id, payload.model_dump())
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception(
+            "Error inesperado en patch_user_plant. user_plant_id=%s",
+            validated_user_plant_id,
+        )
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.post("/api/user-plants", response_model=UserPlantModel)
+def post_user_plant(payload: CreateUserPlantRequest) -> dict:
+    try:
+        return create_user_plant(payload.model_dump())
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error inesperado en post_user_plant")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
 @router.get("/api/catalog/plants", response_model=list[PlantCatalogModel])
 def read_catalog_plants() -> list[dict]:
     try:
@@ -100,6 +176,17 @@ def read_catalog_plants() -> list[dict]:
         raise
     except Exception:
         logger.exception("Error inesperado en read_catalog_plants")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.post("/api/catalog/plants", response_model=PlantCatalogModel)
+def post_catalog_plant(payload: CreateCatalogPlantRequest) -> dict:
+    try:
+        return create_catalog_plant(payload.model_dump())
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error inesperado en post_catalog_plant")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 

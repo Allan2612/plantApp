@@ -6,6 +6,7 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
   const menuMinWidth = spacing.xxl * 4 + spacing.xs;
   const menuShadowRadius = spacing.md - spacing.xs;
   const menuElevation = spacing.sm;
+  const avatarSize = spacing.xl + spacing.xs;
 
   return StyleSheet.create({
     overlay: {
@@ -28,6 +29,20 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       shadowOffset: { width: 0, height: spacing.xs },
       shadowOpacity: Effects.shadowOpacityStrong,
       shadowRadius: menuShadowRadius,
+    },
+    avatarButton: {
+      width: avatarSize,
+      height: avatarSize,
+      borderRadius: radius.full,
+      overflow: "hidden",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.surfaceAlt,
+    },
+    avatarImage: {
+      width: "100%",
+      height: "100%",
+      borderRadius: radius.full,
     },
     menuItem: {
       flexDirection: "row",

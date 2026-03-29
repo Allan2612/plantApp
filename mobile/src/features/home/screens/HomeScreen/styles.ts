@@ -74,6 +74,13 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       width: "100%",
       height: "100%",
     },
+    imageFallback: {
+      width: "100%",
+      height: "100%",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.surfaceAlt,
+    },
     trendingOverlay: {
       position: "absolute",
       bottom: 0,
@@ -102,6 +109,13 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
     plantRowImage: {
       width: plantRowImageSize,
       height: plantRowImageSize,
+    },
+    plantRowImageFallback: {
+      width: plantRowImageSize,
+      height: plantRowImageSize,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.surfaceAlt,
     },
     plantRowContent: {
       flex: 1,
@@ -133,6 +147,13 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
     catalogImage: {
       width: "100%",
       height: CARD_WIDTH * 0.7,
+    },
+    catalogImageFallback: {
+      width: "100%",
+      height: CARD_WIDTH * 0.7,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.surfaceAlt,
     },
     catalogContent: {
       padding: spacing.sm + spacing.xs,

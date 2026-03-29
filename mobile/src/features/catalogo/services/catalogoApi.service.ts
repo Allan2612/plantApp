@@ -1,6 +1,6 @@
 import { getApiBaseUrlResolution } from "@/src/services/api/apiBaseUrl";
-import { httpGet } from "@/src/services/api/httpClient";
-import { PlantCatalogItem } from "@/src/types/plant.types";
+import { httpGet, httpPost } from "@/src/services/api/httpClient";
+import { CreateCatalogPlantPayload, PlantCatalogItem } from "@/src/types/plant.types";
 
 const apiResolution = getApiBaseUrlResolution();
 const API_BASE_URL = apiResolution.baseUrl;
@@ -124,4 +124,25 @@ export async function fetchCatalogPlants(): Promise<PlantCatalogItem[]> {
       `Catalog fetch failed. endpoint=${endpoint} source=${apiResolution.source} expoHost=${apiResolution.expoHost ?? "null"} error=${message}`,
     );
   }
+}
+
+export async function createCatalogPlant(
+  payload: CreateCatalogPlantPayload,
+): Promise<PlantCatalogItem> {
+  if (!payload.name.trim()) {
+    throw new Error("name es requerido para crear una especie.");
+  }
+  if (!payload.scientificName.trim()) {
+    throw new Error("scientificName es requerido para crear una especie.");
+  }
+  if (!payload.description.trim()) {
+    throw new Error("description es requerido para crear una especie.");
+  }
+
+  const endpoint = `${API_BASE_URL}/api/catalog/plants`;
+  const created = await httpPost<CatalogApiItem, CreateCatalogPlantPayload>(endpoint, payload);
+  return {
+    ...created,
+    imageUrl: resolveCatalogImageUrl(created),
+  };
 }

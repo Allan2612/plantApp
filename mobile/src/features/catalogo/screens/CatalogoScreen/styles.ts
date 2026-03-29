@@ -12,6 +12,10 @@ export function createStyles({ spacing }: AppTheme) {
 			marginBottom: spacing.md,
 			gap: spacing.xs,
 		},
+		addButton: {
+			width: "100%",
+			marginTop: spacing.xs,
+		},
 		separator: {
 			height: spacing.sm + spacing.xs,
 		},

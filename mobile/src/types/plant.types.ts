@@ -28,3 +28,43 @@ export interface PlantCatalogItem {
   difficulty: "easy" | "medium" | "hard";
   imageUrl: string | null;
 }
+
+export type PlantHealthStatus = "good" | "regular" | "bad";
+
+export interface UpdateUserPlantPayload {
+  plantCatalogId?: string;
+  nickname?: string;
+  healthStatus?: PlantHealthStatus;
+  locationHome?: string;
+  acquiredDate?: string;
+  notes?: string;
+  customImageUrl?: string;
+}
+
+export interface CreateUserPlantPayload {
+  userId: string;
+  plantCatalogId: string;
+  nickname: string;
+  healthStatus?: PlantHealthStatus;
+  locationHome?: string;
+  acquiredDate?: string;
+  notes?: string;
+  customImageUrl?: string;
+  favorite?: boolean;
+}
+
+export type CatalogDifficulty = "easy" | "medium" | "hard";
+
+export interface CreateCatalogPlantPayload {
+  name: string;
+  scientificName: string;
+  description: string;
+  difficulty: CatalogDifficulty;
+  isToxic?: boolean;
+  climate?: string;
+  origin?: string;
+  lightNotes?: string;
+  generalCareNotes?: string;
+  imageUrl?: string;
+  categoryIds?: string[];
+}

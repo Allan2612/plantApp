@@ -1,90 +1,188 @@
 import { AppTheme } from "@/src/theme/designSystem";
 import { StyleSheet } from "react-native";
 
-export function createStyles({ colors, spacing, radius }: AppTheme) {
-  const avatarSize = spacing.xxl * 2;
-  const avatarBorderWidth = StyleSheet.hairlineWidth * 3;
-  const statDividerHeight = spacing.xl + spacing.xs;
-  const statMinWidth = spacing.xxl + spacing.md;
-
+export function createStyles({ colors, spacing, radius, typography }: AppTheme) {
   return StyleSheet.create({
+    flex: {
+      flex: 1,
+    },
     container: {
-      alignItems: "center",
-      paddingVertical: spacing.xl,
-      paddingHorizontal: spacing.md + spacing.xs,
-    },
-    avatar: {
-      width: avatarSize,
-      height: avatarSize,
-      borderRadius: radius.full,
-      borderWidth: avatarBorderWidth,
-      borderColor: colors.primary,
-      marginBottom: spacing.sm + spacing.xs,
-      backgroundColor: colors.avatarFallback,
-    },
-    badge: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: colors.surface,
-      borderRadius: radius.md,
-      paddingHorizontal: spacing.sm + spacing.xs,
-      paddingVertical: spacing.xs,
-      marginBottom: spacing.sm + spacing.xs,
-    },
-    descripcion: {
-      textAlign: "center",
-      marginBottom: spacing.md + spacing.xs,
-    },
-    statsRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-around",
       width: "100%",
-      backgroundColor: colors.surface,
-      borderRadius: radius.lg,
-      paddingVertical: spacing.sm + 6,
+      paddingVertical: spacing.xl,
       paddingHorizontal: spacing.md,
-      marginBottom: spacing.md + spacing.xs,
+      gap: spacing.md,
     },
-    stat: {
+    headerRow: {
+      width: "100%",
+      flexDirection: "row",
       alignItems: "center",
-      minWidth: statMinWidth,
+      justifyContent: "space-between",
+      gap: spacing.sm,
     },
-    statDivider: {
-      width: 1,
-      height: statDividerHeight,
-      backgroundColor: colors.surfaceDivider,
-      marginHorizontal: spacing.xs,
+    headerIdentity: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.sm,
     },
-    infoCard: {
+    headerAvatarBox: {
+      width: spacing.xl + spacing.lg,
+      height: spacing.xl + spacing.lg,
+      borderRadius: radius.full,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.surfaceDivider,
+      backgroundColor: colors.surfaceAlt,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    headerAvatarImage: {
+      width: "100%",
+      height: "100%",
+      borderRadius: radius.full,
+    },
+    titleBlock: {
+      flex: 1,
+      gap: spacing.xs,
+    },
+    subtitle: {
+      ...typography.body,
+      color: colors.textSecondary,
+    },
+    summaryCard: {
       width: "100%",
       backgroundColor: colors.surface,
       borderRadius: radius.lg,
       padding: spacing.md,
-      gap: spacing.sm + spacing.xs,
+      gap: spacing.md,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.surfaceDivider,
     },
-    infoRow: {
-      flexDirection: "row",
-      alignItems: "flex-start",
-    },
-    infoLabelContainer: {
+    summaryHero: {
+      width: "100%",
       flexDirection: "row",
       alignItems: "center",
-      width: "45%",
+      gap: spacing.md,
     },
-    infoValue: {
-      fontWeight: "600",
-      width: "55%",
-      textAlign: "right",
+    avatarBox: {
+      width: spacing.xxl + spacing.lg,
+      height: spacing.xxl + spacing.lg,
+      borderRadius: radius.full,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.surfaceDivider,
+      backgroundColor: colors.surfaceAlt,
+      alignItems: "center",
+      justifyContent: "center",
     },
-    apodo: {
-      marginBottom: spacing.sm,
+    avatarImage: {
+      width: "100%",
+      height: "100%",
+      borderRadius: radius.full,
     },
-    badgeIcon: {
-      marginRight: spacing.xs,
+    summaryTopRow: {
+      flex: 1,
+      gap: spacing.xs,
     },
-    infoIcon: {
-      marginRight: spacing.xs + 2,
+    userHandle: {
+      ...typography.caption,
+      color: colors.primary,
+    },
+    emailText: {
+      ...typography.caption,
+      color: colors.textMuted,
+    },
+    headlineText: {
+      ...typography.body,
+      color: colors.textSecondary,
+    },
+    infoGrid: {
+      width: "100%",
+      gap: spacing.sm,
+    },
+    infoItem: {
+      width: "100%",
+      gap: spacing.xs,
+      borderRadius: radius.md,
+      backgroundColor: colors.surfaceAlt,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.surfaceDivider,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.sm,
+    },
+    infoLabel: {
+      ...typography.caption,
+      color: colors.textMuted,
+    },
+    formCard: {
+      width: "100%",
+      backgroundColor: colors.surface,
+      borderRadius: radius.lg,
+      padding: spacing.md,
+      gap: spacing.md,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.surfaceDivider,
+    },
+    fieldBlock: {
+      width: "100%",
+      gap: spacing.xs,
+    },
+    fieldLabel: {
+      ...typography.label,
+      color: colors.textSecondary,
+    },
+    dateSelector: {
+      width: "100%",
+      minHeight: spacing.xl + spacing.sm,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.surfaceDivider,
+      borderRadius: radius.lg + spacing.xs,
+      backgroundColor: colors.surfaceAlt,
+      paddingHorizontal: spacing.sm,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: spacing.sm,
+    },
+    dateSelectorText: {
+      ...typography.body,
+      color: colors.textPrimary,
+      flex: 1,
+    },
+    clearDateAction: {
+      alignSelf: "flex-start",
+      marginTop: spacing.xs,
+      paddingVertical: 0,
+      paddingHorizontal: 0,
+      backgroundColor: "transparent",
+    },
+    clearDateText: {
+      ...typography.caption,
+      color: colors.primary,
+    },
+    errorText: {
+      ...typography.caption,
+      color: colors.danger,
+    },
+    previewRow: {
+      width: "100%",
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.sm,
+      paddingVertical: spacing.xs,
+      paddingHorizontal: spacing.xs,
+      borderRadius: radius.md,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.surfaceDivider,
+      backgroundColor: colors.surfaceAlt,
+    },
+    previewAvatar: {
+      width: spacing.xl,
+      height: spacing.xl,
+      borderRadius: radius.full,
+    },
+    previewText: {
+      ...typography.caption,
+      color: colors.textSecondary,
+      flex: 1,
     },
   });
 }

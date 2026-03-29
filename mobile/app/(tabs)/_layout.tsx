@@ -58,11 +58,11 @@ export default function TabsLayout() {
             }}
           />
           <Tabs.Screen
-            name="calendario"
+            name="identificar"
             options={{
               tabBarIcon: ({ color, focused }) => (
                 <Ionicons
-                  name={focused ? "calendar" : "calendar-outline"}
+                  name={focused ? "scan" : "scan-outline"}
                   color={color}
                   size={24}
                 />
@@ -70,11 +70,11 @@ export default function TabsLayout() {
             }}
           />
           <Tabs.Screen
-            name="identificar"
+            name="calendario"
             options={{
               tabBarIcon: ({ color, focused }) => (
                 <Ionicons
-                  name={focused ? "scan" : "scan-outline"}
+                  name={focused ? "calendar" : "calendar-outline"}
                   color={color}
                   size={24}
                 />
