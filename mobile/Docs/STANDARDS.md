@@ -1,404 +1,165 @@
-# PlantApp — Estándares y Arquitectura
+﻿# PlanTica - Estandares y Arquitectura Frontend
 
-## Índice
+## 1. Principios base
 
-1. Estructura del proyecto  
-2. Convenciones de archivos y nomenclatura  
-3. Sistema de tema (Design System)  
-4. Navegación y flujo de pantallas  
-5. Componentes  
-6. Pantallas (Screens)  
-7. Contextos  
-8. Animaciones  
-9. Accesibilidad  
+- `app/` es solo routing con Expo Router.
+- `src/` contiene UI, estado, hooks, servicios y tipos.
+- No mezclar codigo global con codigo especifico de feature.
+- Mantener imports internos sin extension (`.ts` o `.tsx`).
 
----
+## 2. Estructura oficial
 
-# 1. Estructura del proyecto
+```text
+mobile/
+|- app/                              # Solo rutas
+|  |- _layout.tsx                    # Providers globales
+|  |- index.tsx
+|  |- (auth)/
+|  |- (tabs)/
+|
+|- src/
+|  |- components/
+|  |  |- shared/                     # Solo componentes globales reutilizables
+|  |
+|  |- features/                      # Arquitectura por feature
+|  |  |- auth/
+|  |  |  |- components/
+|  |  |  |- hooks/
+|  |  |  |- screens/
+|  |  |  |- services/
+|  |  |  |- store/
+|  |  |- home/
+|  |  |- profile/
+|  |  |- settings/
+|  |  |- catalogo/
+|  |  |- calendario/
+|  |  |- identificar/
+|  |  |- mis-plantas/
+|  |  |- shell/
+|  |
+|  |- providers/                     # Providers transversales de app
+|  |  |- ToastProvider.tsx
+|  |  |- index.ts
+|  |
+|  |- services/                      # Servicios globales cross-feature
+|  |  |- api/
+|  |
+|  |- store/                         # Stores globales cross-feature
+|  |  |- auth.store.ts
+|  |
+|  |- theme/
+|  |- constants/
+|  |- types/
+```
 
-El proyecto utiliza **Expo Router** para manejar la navegación basada en archivos.
+## 3. Convencion estricta de carpetas
 
-La carpeta `app/` define únicamente las rutas de navegación, mientras que toda la lógica, UI y estructura del proyecto vive dentro de `src/`.
+### 3.1 Componentes
 
-plantApp/
-├── app/                        # Rutas de Expo Router (solo navegación)
-│   ├── _layout.tsx             # Layout raíz (providers globales)
-│   ├── index.tsx               # Redirección inicial
-│   ├── profile.tsx             # Ruta stack/modal
-│   ├── settings.tsx            # Ruta stack/modal
-│   └── (tabs)/                 # Grupo de tabs principales
-│       ├── _layout.tsx
-│       ├── home.tsx
-│       ├── catalogo.tsx
-│       ├── calendario.tsx
-│       └── identificar.tsx
-│
-├── src/                        # Lógica principal de la app
-│   ├── components/             # Componentes reutilizables
-│   ├── screens/                # Pantallas completas
-│   ├── context/                # Contextos globales
-│   ├── theme/                  # Sistema de tema
-│   ├── constants/              # Tokens de diseño
-│   └── types-dtos/             # Tipos TypeScript
-│
-└── assets/                     # Imágenes, íconos, fuentes
+Cada componente debe vivir en su carpeta y respetar:
 
-Regla principal:
-
-- `app/` → navegación
-- `src/` → UI, lógica y estado
-
-Esto mantiene una separación clara entre **routing y lógica de aplicación**.
-
----
-
-# 2. Convenciones de archivos y nomenclatura
-
-## Nomenclatura
-
-| Elemento | Convención |
-|--------|--------|
-Componentes | PascalCase |
-Pantallas | PascalCase |
-Contextos | PascalCase |
-Hooks | camelCase |
-Archivos de estilos | `.styles.ts` |
-Archivos de datos | `.data.ts` |
-
-Ejemplos:
-
-AppHeader  
-PressableCard  
-HomeScreen  
-UserProfile  
-
----
-
-## Estructura de un componente
-
-Cada componente vive dentro de su propia carpeta.
-
+```text
 ComponentName/
- ├ ComponentName.tsx
- ├ ComponentName.styles.ts
- └ ComponentName.data.ts
+|- index.ts
+|- ComponentName.tsx
+|- styles.ts
+```
 
-Archivo | Contenido
------- | ------
-.tsx | JSX y lógica
-.styles.ts | StyleSheet
-.data.ts | datos estáticos opcionales
+### 3.2 Screens
 
----
+Cada screen debe vivir en su carpeta y respetar:
 
-## Reglas importantes
+```text
+ScreenName/
+|- ScreenName.tsx
+|- styles.ts
+|- index.ts
+```
 
-- no escribir `StyleSheet.create` dentro del `.tsx`
-- separar datos estáticos en `.data.ts`
-- mantener componentes pequeños y reutilizables
-- evitar lógica compleja dentro de componentes UI
+## 4. Reglas de ubicacion
 
----
+- `src/components/shared`:
+  - solo componentes verdaderamente globales y reutilizables.
+  - ejemplo: `AppText`, `AppButton`, `AppToast`, `ScreenWrapper`, `PressableCard`.
+- `src/features/auth/components`:
+  - componentes propios de auth (ejemplo: `AuthInput`, `AuthActions`, `AuthScreenLayout`, route components de auth).
+- `src/features/shell/components`:
+  - componentes de shell/navegacion (ejemplo: `AppHeader`, `AnimatedTabBar`, `ProfileMenu`).
+- contexts/providers transversales:
+  - no van dentro de `components`.
+  - deben vivir en `src/providers` (ejemplo: `ToastProvider`).
 
-# 3. Sistema de tema (Design System)
+## 5. Firebase: global vs feature
 
-El proyecto utiliza un **Design System centralizado** para garantizar consistencia visual.
+### Decision actual del proyecto
 
-El sistema de tema define:
+`firebaseClient` vive en `src/features/auth/services/firebaseClient.ts` y es correcto en el estado actual porque su uso real es de autenticacion (feature auth).
 
-- colores
-- tipografía
-- espaciado
-- bordes
+### Regla
 
----
+- Si Firebase se usa solo para auth: mantener cliente en `features/auth/services`.
+- Si otra feature empieza a depender de Firebase (por ejemplo Firestore/Storage compartido):
+  - crear cliente base global en `src/services/firebase/`.
+  - cada feature consume ese cliente desde su propio `features/<feature>/services`.
 
-## Estructura del tema
+Esto evita sobre-generalizar antes de tiempo y mantiene ownership claro por feature.
 
-src/theme/
- ├ colors.ts
- ├ light.ts
- ├ dark.ts
- └ designSystem.ts
+## 6. Estado global y stores
 
----
+- `src/store/` (singular) es el unico lugar para estado global cross-feature.
+- `src/features/*/store/` es para estado local de cada feature.
+- no usar `src/stores/` (plural).
 
-## Tokens disponibles
+## 7. Providers transversales
 
-### Colores
+- Providers globales deben registrarse en `app/_layout.tsx`.
+- `ToastProvider` es transversal y debe importarse desde `src/providers/ToastProvider`.
 
-theme.colors.primary  
-theme.colors.surface  
-theme.colors.textPrimary  
-theme.colors.textSecondary  
+## 8. Importaciones
 
-### Espaciado
+- Nunca usar imports internos con extension:
+  - incorrecto: `from "@/src/.../Foo.tsx"`
+  - correcto: `from "@/src/.../Foo"`
+- Preferir alias `@/src/...` para imports internos.
+- Exponer modulos con `index.ts` donde corresponda.
 
-theme.spacing.xs  
-theme.spacing.sm  
-theme.spacing.md  
-theme.spacing.lg  
-theme.spacing.xl  
+## 9. Checklist de PR
 
-### Bordes
+Antes de mergear:
 
-theme.radius.sm  
-theme.radius.md  
-theme.radius.lg  
-theme.radius.full  
+- `npx tsc --noEmit` sin errores.
+- `npm run lint` sin errores relevantes.
+- No hay codigo feature-specific en `shared`.
+- Cada componente/screen cumple carpeta + `index.ts` + `styles.ts` + archivo principal.
+- `app/` contiene solo routing y wrappers de ruta.
 
-### Tipografía
+## 10. Limpieza aplicada en esta correccion
 
-theme.typography.display  
-theme.typography.heading  
-theme.typography.body  
+- Eliminada carpeta legacy vacia `src/stores`.
+- Eliminada carpeta legacy vacia `src/context/ToastContext`.
+- Eliminada carpeta vacia `src/context` tras mover provider transversal a `src/providers`.
 
----
+## 11. Estandar de estilos (obligatorio)
 
-## Reglas del Design System
+Regla general:
 
-Nunca usar valores hardcodeados como:
+- En archivos `styles.ts` no se permite hardcodear valores de estilo visual (espaciados, tamanos, colores, radios, sombras, tipografia).
 
-"#fff"  
-"#000"  
-16  
-24  
+Se debe usar:
 
-Siempre usar tokens del tema:
+- `theme.spacing.*` para paddings, margins, gaps, alturas y anchos.
+- `theme.colors.*` para cualquier color (incluyendo sombras cuando aplique).
+- `theme.radius.*` para borderRadius.
+- `theme.typography.*` para fontSize y lineHeight.
+- `StyleSheet.hairlineWidth` para bordes finos.
+- `src/constants/*` para valores visuales compartidos que no existan aun en theme (ejemplo: opacidades de sombra en `src/constants/effects.ts`).
 
-theme.colors.primary  
-theme.spacing.md  
+Excepciones permitidas:
 
-Esto mantiene **consistencia visual y facilita mantenimiento del código**.
+- Valores estructurales de layout: `flex: 1`, `width: "100%"`, `position`, `zIndex`.
+- Proporciones calculadas y formulas derivadas de tokens (por ejemplo relaciones de aspecto).
 
----
+Checklist rapido de PR para estilos:
 
-## Soporte para tema claro y oscuro
-
-El proyecto soporta **modo claro y modo oscuro**.
-
-React Native permite detectar el modo del sistema mediante:
-
-useColorScheme()
-
-Valores posibles:
-
-light  
-dark  
-null  
-
-El tema activo se obtiene mediante:
-
-useAppTheme()
-
----
-
-# 4. Navegación y flujo de pantallas
-
-La navegación se implementa utilizando **Expo Router**, basado en estructura de archivos.
-
----
-
-## Flujo de entrada
-
-app/index.tsx  
-↓  
-(tabs)/home  
-
----
-
-## Árbol de navegación
-
-RootLayout  
- └ Stack Navigator  
-     ├ Tabs  
-     │   ├ Home  
-     │   ├ Catalogo  
-     │   ├ Calendario  
-     │   └ Identificar  
-     │
-     ├ Profile  
-     └ Settings  
-
----
-
-## Reglas de navegación
-
-- máximo **4–5 tabs principales**
-- nombres de rutas claros
-- evitar demasiados niveles de navegación
-- permitir regresar fácilmente a la pantalla anterior
-
-Esto mejora la experiencia de usuario y evita confusión en la navegación.
-
----
-
-# 5. Componentes
-
-Los componentes reutilizables viven en:
-
-src/components/
-
----
-
-## Componentes principales del proyecto
-
-Componente | Uso
----|---
-AppText | Texto con estilos del Design System
-AppButton | Botón reutilizable
-AppHeader | Encabezado principal
-ScreenWrapper | Contenedor base de pantallas
-PressableCard | Tarjeta interactiva
-AnimatedTabBar | Tab bar animado
-ProfileMenu | Menú de perfil
-
----
-
-## Reglas de componentes
-
-Los componentes deben:
-
-- ser reutilizables
-- usar `useAppTheme()` para estilos
-- no depender de pantallas específicas
-- manejar accesibilidad básica
-
-Los componentes UI deben enfocarse únicamente en **presentación**.
-
----
-
-# 6. Pantallas (Screens)
-
-Las pantallas viven en:
-
-src/screens/
-
-Ejemplo:
-
-HomeScreen/
- ├ HomeScreen.tsx
- ├ HomeScreen.styles.ts
- └ HomeScreen.data.ts
-
----
-
-## Responsabilidades de una pantalla
-
-Las pantallas son responsables de:
-
-- organizar componentes
-- manejar estado local
-- consumir contextos
-- definir layout general
-
-Las pantallas **no deben duplicar lógica de componentes reutilizables**.
-
----
-
-# 7. Contextos
-
-Los contextos manejan **estado global compartido**.
-
-Ubicación:
-
-src/context/
-
----
-
-## ThemeContext
-
-Responsable de:
-
-- proveer el tema global
-- manejar modo claro / oscuro
-- exponer `useAppTheme()`
-
----
-
-## ScrollAnimContext
-
-Responsable de:
-
-- animación del header
-- animación del tab bar
-- sincronización del scroll
-
-Este contexto se utiliza únicamente dentro del grupo de tabs.
-
----
-
-# 8. Animaciones
-
-Las animaciones utilizan la API **Animated de React Native**.
-
----
-
-## Native Driver
-
-Se usa para propiedades como:
-
-transform  
-scale  
-opacity  
-translate  
-
-Ventaja: mayor rendimiento porque se ejecuta en el hilo nativo.
-
----
-
-## JS Driver
-
-Se usa para propiedades como:
-
-padding  
-borderColor  
-height  
-backgroundColor  
-
----
-
-## Regla importante
-
-Un `Animated.Value` **no debe mezclarse entre drivers**.
-
-Si se necesitan animar propiedades distintas, se utilizan **dos Animated.View anidados**.
-
----
-
-# 9. Accesibilidad
-
-La aplicación debe seguir principios básicos de accesibilidad.
-
----
-
-## Reglas generales
-
-- contraste adecuado entre texto y fondo
-- tamaños de texto legibles
-- roles accesibles en componentes interactivos
-
-Ejemplos:
-
-accessibilityRole="header"  
-accessibilityRole="button"  
-accessibilityRole="tab"  
-
-Estados accesibles:
-
-accessibilityState={{ selected: true }}
-
-Esto mejora la experiencia para usuarios con tecnologías asistivas.
-
----
-
-# Objetivo del documento
-
-Este documento define los estándares de desarrollo del proyecto **PlanTica**.
-
-Su objetivo es:
-
-- mantener consistencia en el código
-- facilitar mantenimiento
-- mejorar escalabilidad del proyecto
-- garantizar una experiencia de usuario clara y coherente.
+- No hay literales tipo `fontSize: 14`, `gap: 12`, `minHeight: 46`, `"#000"` dentro de `styles.ts`.
+- Si aparece un valor que no existe en theme, se agrega primero a `src/constants/*` o theme y luego se consume.

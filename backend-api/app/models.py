@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class FirestoreBaseModel(BaseModel):
@@ -92,6 +92,73 @@ class UserPlantModel(FirestoreBaseModel):
     acquiredDate: str | None = None
     lastWateredAt: str | None = None
     notes: str | None = None
+
+
+class UpdateUserRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    displayName: str | None = None
+    firstName: str | None = None
+    lastName: str | None = None
+    username: str | None = None
+    avatarId: str | None = None
+    headline: str | None = None
+    visibility: Literal["public", "private", "friends"] | None = None
+    birthDate: str | None = None
+    themePreference: Literal["light", "dark", "system"] | None = None
+    city: str | None = None
+
+
+class UpdateUserPlantRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    plantCatalogId: str | None = None
+    nickname: str | None = None
+    healthStatus: Literal["good", "regular", "bad"] | None = None
+    locationHome: str | None = None
+    acquiredDate: str | None = None
+    notes: str | None = None
+    customImageUrl: str | None = None
+
+
+class CreateUserPlantRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    userId: str
+    plantCatalogId: str
+    nickname: str
+    healthStatus: Literal["good", "regular", "bad"] | None = None
+    locationHome: str | None = None
+    acquiredDate: str | None = None
+    notes: str | None = None
+    customImageUrl: str | None = None
+    favorite: bool | None = None
+
+
+class CreateCatalogPlantRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str
+    scientificName: str
+    description: str
+    difficulty: Literal["easy", "medium", "hard"]
+    isToxic: bool | None = None
+    climate: str | None = None
+    origin: str | None = None
+    lightNotes: str | None = None
+    generalCareNotes: str | None = None
+    imageUrl: str | None = None
+    categoryIds: list[str] | None = None
+
+
+class SyncAuthUserRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    email: str
+    displayName: str | None = None
+    provider: Literal["password", "google", "apple"] | str | None = None
+    avatarId: str | None = None
+    acceptedTerms: bool | None = None
 
 
 class PlantTagModel(FirestoreBaseModel):

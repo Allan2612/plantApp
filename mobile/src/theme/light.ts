@@ -24,4 +24,10 @@ export const LightTheme = {
   textOnOverlay: Palette.pureWhite,
   tabBarBg: Palette.pureWhite,
   danger: Palette.danger,
+  transparent: "transparent",
+
+  googleButtonBackground: Palette.dark700,
+  googleButtonBorder: Palette.dark500,
+  googleButtonText: Palette.pureWhite,
+  googleIcon: Palette.green500,
 } as const;

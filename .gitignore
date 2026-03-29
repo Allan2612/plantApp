@@ -1,6 +1,7 @@
 serviceAccountKey.json
 backend-api/serviceAccountKey.json
 backend-api/serviceAccountKey.json.json
+.venv/
 backend-api/.venv/
 backend-api/__pycache__/
 backend-api/app/__pycache__/

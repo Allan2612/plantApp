@@ -1,5 +1,5 @@
-import CatalogoScreen from "@/src/screens/CatalogoScreen/CatalogoScreen";
+import CatalogoRoute from "@/src/features/catalogo/components/CatalogoRoute";
 
 export default function Catalogo() {
-  return <CatalogoScreen />;
+  return <CatalogoRoute />;
 }

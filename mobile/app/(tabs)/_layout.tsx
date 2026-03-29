@@ -1,17 +1,30 @@
-import AnimatedTabBar from "@/src/components/AnimatedTabBar/AnimatedTabBar";
-import AppHeader from "@/src/components/AppHeader/AppHeader";
-import { ScrollAnimProvider } from "@/src/context/ScrollAnimContext";
+import AnimatedTabBar from "@/src/features/shell/components/AnimatedTabBar/AnimatedTabBar";
+import AppHeader from "@/src/features/shell/components/AppHeader/AppHeader";
+import { ScrollAnimProvider } from "@/src/features/shell/hooks/ScrollAnimContext";
+import { useAuthSession } from "@/src/features/auth/hooks/useAuthSession";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs, type Href } from "expo-router";
 import { View } from "react-native";
+import { styles } from "@/src/features/shell/styles/tabsLayout.styles";
 
 export default function TabsLayout() {
   const { colors } = useAppTheme();
+  const { isChecking, isAuthenticated, isEmailVerified } = useAuthSession();
+
+  if (isChecking) return null;
+
+  if (!isAuthenticated) {
+    return <Redirect href={"/(auth)/login" as Href} />;
+  }
+
+  if (!isEmailVerified) {
+    return <Redirect href={"/(auth)/verify-email" as Href} />;
+  }
 
   return (
     <ScrollAnimProvider>
-      <View style={{ flex: 1 }}>
+      <View style={styles.root}>
         <Tabs
           screenOptions={{
             headerShown: false,
@@ -46,11 +59,11 @@ export default function TabsLayout() {
             }}
           />
           <Tabs.Screen
-            name="calendario"
+            name="identificar"
             options={{
               tabBarIcon: ({ color, focused }) => (
                 <Ionicons
-                  name={focused ? "calendar" : "calendar-outline"}
+                  name={focused ? "scan" : "scan-outline"}
                   color={color}
                   size={24}
                 />
@@ -58,11 +71,11 @@ export default function TabsLayout() {
             }}
           />
           <Tabs.Screen
-            name="identificar"
+            name="calendario"
             options={{
               tabBarIcon: ({ color, focused }) => (
                 <Ionicons
-                  name={focused ? "scan" : "scan-outline"}
+                  name={focused ? "calendar" : "calendar-outline"}
                   color={color}
                   size={24}
                 />

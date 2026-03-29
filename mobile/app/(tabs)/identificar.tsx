@@ -1,4 +1,4 @@
-import IdentificarScreen from "@/src/screens/IdentificarScreen/IdentificarScreen";
+import IdentificarScreen from "@/src/features/identificar/screens/IdentificarScreen/IdentificarScreen";
 
 export default function Identificar() {
   return <IdentificarScreen />;

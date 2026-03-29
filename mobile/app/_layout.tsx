@@ -1,26 +1,31 @@
 import { ThemeProvider, useAppTheme } from "@/src/theme/ThemeContext";
-import { Caveat_700Bold, useFonts } from "@expo-google-fonts/caveat";
+import { ToastProvider } from "@/src/providers/ToastProvider";
+import { useAuthBootstrap } from "@/src/features/auth/hooks/useAuthBootstrap";
+import {
+  Caveat_400Regular,
+  Caveat_700Bold,
+  useFonts,
+} from "@expo-google-fonts/caveat";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { createRootStackScreenOptions } from "@/src/features/shell/styles/rootLayout.styles";
 
 SplashScreen.preventAutoHideAsync();
 
 function RootStack() {
   const { colors } = useAppTheme();
+  useAuthBootstrap();
 
   return (
     <Stack
       screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.background },
-        headerStyle: { backgroundColor: colors.background },
+        ...createRootStackScreenOptions(colors),
         headerTintColor: colors.textPrimary,
-        headerTitleStyle: { fontWeight: "600" },
-        headerShadowVisible: false,
       }}
     >
+      <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen
         name="profile"
@@ -44,7 +49,10 @@ function RootStack() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({ Caveat_700Bold });
+  const [fontsLoaded, fontError] = useFonts({
+    Caveat_400Regular,
+    Caveat_700Bold,
+  });
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -57,7 +65,9 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <RootStack />
+        <ToastProvider>
+          <RootStack />
+        </ToastProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );
