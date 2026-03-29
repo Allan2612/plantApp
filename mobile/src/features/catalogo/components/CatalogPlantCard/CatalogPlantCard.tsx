@@ -2,7 +2,9 @@ import AppText from "@/src/components/shared/AppText/AppText";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { PlantCatalogItem } from "@/src/types/plant.types";
 import { Ionicons } from "@expo/vector-icons";
-import { Image, View } from "react-native";
+import { Image } from "expo-image";
+import { useEffect, useState } from "react";
+import { View } from "react-native";
 import { createStyles } from "./styles";
 
 interface CatalogPlantCardProps {
@@ -19,14 +21,31 @@ export default function CatalogPlantCard({ plant }: CatalogPlantCardProps) {
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [plant.imageUrl]);
+
+  const shouldRenderImage = Boolean(plant.imageUrl) && !imageFailed;
+
+  const handleImageError = () => {
+    if (__DEV__) {
+      console.warn("[Catalogo][ImageError]", { plantId: plant.id, imageUrl: plant.imageUrl });
+    }
+    setImageFailed(true);
+  };
 
   return (
     <View style={styles.card}>
-      {plant.imageUrl ? (
+      {shouldRenderImage ? (
         <Image
           source={{ uri: plant.imageUrl }}
           style={styles.image}
+          contentFit="cover"
+          transition={120}
           accessibilityLabel={`Imagen de ${plant.name}`}
+          onError={handleImageError}
         />
       ) : (
         <View style={styles.imageFallback}>
