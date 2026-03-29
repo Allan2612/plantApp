@@ -1,6 +1,8 @@
 import AuthActions from "@/src/features/auth/components/AuthActions/AuthActions";
 import AuthInput from "@/src/features/auth/components/AuthInput/AuthInput";
+import GoogleSignInButton from "@/src/features/auth/components/GoogleSignInButton";
 import AuthScreenLayout from "@/src/features/auth/components/AuthScreenLayout/AuthScreenLayout";
+import AppText from "@/src/components/shared/AppText/AppText";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { View } from "react-native";
 
@@ -30,13 +32,14 @@ export default function LoginScreen({
   onGoToForgotPassword,
 }: LoginScreenProps) {
   const theme = useAppTheme();
+  const { colors } = theme;
   const styles = createStyles(theme);
+  const handleGooglePress = () => undefined;
 
   return (
     <AuthScreenLayout
       title="Iniciar sesion"
       subtitle="Accede a tu cuenta para continuar con el cuidado de tus plantas."
-      helperNote="Tus datos se mantienen sincronizados en tu cuenta." 
     >
       <View style={styles.form}>
         <AuthInput
@@ -47,7 +50,6 @@ export default function LoginScreen({
           keyboardType="email-address"
           autoComplete="email"
           textContentType="emailAddress"
-          helperText="Usa el mismo correo con el que te registraste."
         />
 
         <AuthInput
@@ -71,6 +73,16 @@ export default function LoginScreen({
         footerActionLabel="Crear cuenta"
         onFooterAction={onGoToRegister}
       />
+
+      <View style={styles.separatorRow}>
+        <View style={styles.separatorLine} />
+        <AppText variant="caption" color={colors.textSecondary} style={styles.separatorText}>
+          o
+        </AppText>
+        <View style={styles.separatorLine} />
+      </View>
+
+      <GoogleSignInButton onPress={handleGooglePress} />
     </AuthScreenLayout>
   );
 }

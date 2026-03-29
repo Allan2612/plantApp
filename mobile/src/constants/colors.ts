@@ -30,6 +30,9 @@ export const Palette = {
   green800: "#0d3117",
   green700: "#15803d",
 
+  // Google branding
+  googleBlue: "#4285f4",
+
   // Semánticos
   danger: "#ef4444",
   warning: "#f59e0b",

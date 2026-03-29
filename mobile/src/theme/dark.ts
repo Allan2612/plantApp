@@ -24,4 +24,9 @@ export const DarkTheme = {
   textOnOverlay: Palette.pureWhite,
   tabBarBg: Palette.dark900,
   danger: Palette.danger,
+
+  googleButtonBackground: Palette.dark700,
+  googleButtonBorder: Palette.dark500,
+  googleButtonText: Palette.pureWhite,
+  googleIcon: Palette.green400,
 } as const;
