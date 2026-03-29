@@ -53,12 +53,17 @@ function normalizeWikimediaUrl(rawUrl: string): string {
 }
 
 function safeEncodeUri(url: string): string {
-  try {
-    // Prevent double-encoding for values that already contain escaped sequences.
-    return encodeURI(decodeURI(url));
-  } catch {
-    return url;
+  // Collapse double-escaped octets like %2520 -> %20 without touching valid escapes.
+  let normalized = url;
+  for (let index = 0; index < 3; index += 1) {
+    const collapsed = normalized.replace(/%25([0-9a-f]{2})/gi, "%$1");
+    if (collapsed === normalized) {
+      break;
+    }
+    normalized = collapsed;
   }
+
+  return normalized.replace(/ /g, "%20");
 }
 
 function normalizeImageUrl(value: unknown): string | null {
