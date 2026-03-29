@@ -92,7 +92,11 @@ export default function LoginScreen({
 
       <View style={styles.separatorRow}>
         <View style={styles.separatorLine} />
-        <AppText variant="caption" color={colors.textSecondary} style={styles.separatorText}>
+        <AppText
+          variant="caption"
+          color={colors.textSecondary}
+          style={styles.separatorText}
+        >
           o
         </AppText>
         <View style={styles.separatorLine} />

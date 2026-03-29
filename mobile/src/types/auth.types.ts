@@ -1,6 +1,9 @@
 import { User } from "firebase/auth";
 
-export type AuthSessionStatus = "checking" | "authenticated" | "unauthenticated";
+export type AuthSessionStatus =
+  | "checking"
+  | "authenticated"
+  | "unauthenticated";
 
 export type UserVisibility = "public" | "private" | "friends";
 export type ThemePreference = "system" | "light" | "dark";

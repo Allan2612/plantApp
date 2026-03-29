@@ -5,8 +5,16 @@ import { useCallback } from "react";
 
 export function useCatalogoRoute() {
   const { showToast } = useToast();
-  const { items, loading, refreshing, creating, error, retry, refresh, addCatalogPlant } =
-    useCatalogo();
+  const {
+    items,
+    loading,
+    refreshing,
+    creating,
+    error,
+    retry,
+    refresh,
+    addCatalogPlant,
+  } = useCatalogo();
 
   const onCreatePlant = useCallback(
     async (payload: CreateCatalogPlantPayload) => {
@@ -15,7 +23,9 @@ export function useCatalogoRoute() {
         showToast("Especie agregada al catálogo.", "success");
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : "No se pudo crear la especie.";
+          error instanceof Error
+            ? error.message
+            : "No se pudo crear la especie.";
         showToast(message, "error");
         throw error;
       }

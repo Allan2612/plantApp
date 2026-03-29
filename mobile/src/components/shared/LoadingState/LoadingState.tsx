@@ -8,7 +8,9 @@ interface LoadingStateProps {
   message?: string;
 }
 
-export default function LoadingState({ message = "Cargando información..." }: LoadingStateProps) {
+export default function LoadingState({
+  message = "Cargando información...",
+}: LoadingStateProps) {
   const theme = useAppTheme();
   const styles = createStyles(theme);
 

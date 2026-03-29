@@ -31,8 +31,16 @@ export default function GoogleSignInButton({
       {...rest}
     >
       <View style={styles.content}>
-        <AntDesign name="google" size={theme.spacing.md + theme.spacing.xs} color={colors.googleIcon} />
-        <AppText variant="label" color={colors.googleButtonText} style={styles.label}>
+        <AntDesign
+          name="google"
+          size={theme.spacing.md + theme.spacing.xs}
+          color={colors.googleIcon}
+        />
+        <AppText
+          variant="label"
+          color={colors.googleButtonText}
+          style={styles.label}
+        >
           {label}
         </AppText>
       </View>

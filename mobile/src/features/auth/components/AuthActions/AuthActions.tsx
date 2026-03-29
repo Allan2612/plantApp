@@ -38,13 +38,21 @@ export default function AuthActions({
   return (
     <View style={styles.container}>
       {errorText ? (
-        <AppText variant="caption" color={colors.danger} style={styles.feedbackText}>
+        <AppText
+          variant="caption"
+          color={colors.danger}
+          style={styles.feedbackText}
+        >
           {errorText}
         </AppText>
       ) : null}
 
       {successText ? (
-        <AppText variant="caption" color={colors.primary} style={styles.feedbackText}>
+        <AppText
+          variant="caption"
+          color={colors.primary}
+          style={styles.feedbackText}
+        >
           {successText}
         </AppText>
       ) : null}
@@ -63,7 +71,11 @@ export default function AuthActions({
           disabled={loading}
           style={styles.secondaryLinkContainer}
         >
-          <AppText variant="caption" color={colors.primary} style={styles.secondaryLinkText}>
+          <AppText
+            variant="caption"
+            color={colors.primary}
+            style={styles.secondaryLinkText}
+          >
             {secondaryActionLabel}
           </AppText>
         </Pressable>

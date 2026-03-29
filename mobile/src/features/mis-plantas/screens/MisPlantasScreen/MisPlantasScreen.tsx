@@ -22,7 +22,9 @@ import {
   useMisPlantasScreen,
 } from "@/src/features/mis-plantas/hooks/useMisPlantasScreen";
 import { useAppTheme } from "@/src/theme/ThemeContext";
-import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { Controller } from "react-hook-form";
@@ -84,12 +86,16 @@ export default function MisPlantasScreen() {
 
   return (
     <ScreenWrapper>
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.headerRow}>
           <View style={styles.titleBlock}>
             <AppText variant="heading">Mi jardín</AppText>
             <AppText variant="caption" style={styles.subtitle}>
-              Selecciona especie del catálogo, sube foto de tu planta y administra todo en tarjetas.
+              Selecciona especie del catálogo, sube foto de tu planta y
+              administra todo en tarjetas.
             </AppText>
           </View>
 
@@ -112,16 +118,28 @@ export default function MisPlantasScreen() {
 
         <View style={styles.summaryRow}>
           <View style={styles.summaryCard}>
-            <AppText variant="caption" style={styles.summaryLabel}>Total</AppText>
-            <AppText variant="subheading" style={styles.summaryValue}>{plants.length}</AppText>
+            <AppText variant="caption" style={styles.summaryLabel}>
+              Total
+            </AppText>
+            <AppText variant="subheading" style={styles.summaryValue}>
+              {plants.length}
+            </AppText>
           </View>
           <View style={styles.summaryCard}>
-            <AppText variant="caption" style={styles.summaryLabel}>Saludables</AppText>
-            <AppText variant="subheading" style={styles.summaryValue}>{healthyCount}</AppText>
+            <AppText variant="caption" style={styles.summaryLabel}>
+              Saludables
+            </AppText>
+            <AppText variant="subheading" style={styles.summaryValue}>
+              {healthyCount}
+            </AppText>
           </View>
           <View style={styles.summaryCard}>
-            <AppText variant="caption" style={styles.summaryLabel}>Catálogo</AppText>
-            <AppText variant="subheading" style={styles.summaryValue}>{catalog.length}</AppText>
+            <AppText variant="caption" style={styles.summaryLabel}>
+              Catálogo
+            </AppText>
+            <AppText variant="subheading" style={styles.summaryValue}>
+              {catalog.length}
+            </AppText>
           </View>
         </View>
 
@@ -129,8 +147,14 @@ export default function MisPlantasScreen() {
 
         {loadError ? (
           <View style={styles.errorCard}>
-            <AppText variant="body" style={styles.errorCardText}>{loadError}</AppText>
-            <AppButton title="Reintentar carga" variant="secondary" onPress={refresh} />
+            <AppText variant="body" style={styles.errorCardText}>
+              {loadError}
+            </AppText>
+            <AppButton
+              title="Reintentar carga"
+              variant="secondary"
+              onPress={refresh}
+            />
           </View>
         ) : null}
 
@@ -156,13 +180,26 @@ export default function MisPlantasScreen() {
                   const plantImage = resolvePlantImage(item);
 
                   return (
-                    <PressableCard key={id} style={styles.galleryCard} border={false}>
+                    <PressableCard
+                      key={id}
+                      style={styles.galleryCard}
+                      border={false}
+                    >
                       <View style={styles.imageFrame}>
                         {plantImage ? (
-                          <Image source={{ uri: plantImage }} style={styles.image} contentFit="cover" transition={120} />
+                          <Image
+                            source={{ uri: plantImage }}
+                            style={styles.image}
+                            contentFit="cover"
+                            transition={120}
+                          />
                         ) : (
                           <View style={styles.imageFallback}>
-                            <Ionicons name="leaf-outline" size={theme.spacing.xl} color={theme.colors.primary} />
+                            <Ionicons
+                              name="leaf-outline"
+                              size={theme.spacing.xl}
+                              color={theme.colors.primary}
+                            />
                           </View>
                         )}
                       </View>
@@ -171,7 +208,11 @@ export default function MisPlantasScreen() {
                         <AppText variant="label" numberOfLines={1}>
                           {getStringField(payload, "nickname") || "Sin nombre"}
                         </AppText>
-                        <AppText variant="caption" style={styles.metaText} numberOfLines={1}>
+                        <AppText
+                          variant="caption"
+                          style={styles.metaText}
+                          numberOfLines={1}
+                        >
                           {getCatalogPlantName(item)}
                         </AppText>
                         <AppText variant="caption" style={styles.healthBadge}>
@@ -208,7 +249,9 @@ export default function MisPlantasScreen() {
             <View style={styles.editHeaderRow}>
               <AppText variant="subheading">Añadir planta a mi jardín</AppText>
               <Pressable onPress={closeCreateModal}>
-                <AppText variant="caption" style={styles.closeEditText}>Cerrar</AppText>
+                <AppText variant="caption" style={styles.closeEditText}>
+                  Cerrar
+                </AppText>
               </Pressable>
             </View>
 
@@ -218,14 +261,19 @@ export default function MisPlantasScreen() {
               keyboardShouldPersistTaps="handled"
             >
               <View style={styles.fieldBlock}>
-                <AppText variant="label" style={styles.fieldLabel}>Especie del catálogo</AppText>
+                <AppText variant="label" style={styles.fieldLabel}>
+                  Especie del catálogo
+                </AppText>
                 <CatalogExplorerSelect
                   items={catalog}
                   selectedId={selectedCatalogId}
-                  onSelect={(nextValue) => setCreateValue("plantCatalogId", nextValue, { shouldValidate: true })}
+                  onSelect={(nextValue) =>
+                    setCreateValue("plantCatalogId", nextValue, {
+                      shouldValidate: true,
+                    })
+                  }
                   errorText={createErrors.plantCatalogId?.message}
                 />
-
               </View>
 
               <Controller
@@ -264,7 +312,12 @@ export default function MisPlantasScreen() {
 
               {createImagePreview ? (
                 <View style={styles.previewWrap}>
-                  <Image source={{ uri: createImagePreview }} style={styles.previewImage} contentFit="cover" transition={120} />
+                  <Image
+                    source={{ uri: createImagePreview }}
+                    style={styles.previewImage}
+                    contentFit="cover"
+                    transition={120}
+                  />
                 </View>
               ) : null}
 
@@ -273,10 +326,18 @@ export default function MisPlantasScreen() {
                 name="healthStatus"
                 render={({ field: { value, onChange } }) => (
                   <View style={styles.fieldBlock}>
-                    <AppText variant="label" style={styles.fieldLabel}>Estado inicial</AppText>
-                    <SingleSelect options={healthSelectOptions} value={value} onChange={onChange} />
+                    <AppText variant="label" style={styles.fieldLabel}>
+                      Estado inicial
+                    </AppText>
+                    <SingleSelect
+                      options={healthSelectOptions}
+                      value={value}
+                      onChange={onChange}
+                    />
                     {createErrors.healthStatus?.message ? (
-                      <AppText variant="caption" style={styles.errorText}>{createErrors.healthStatus.message}</AppText>
+                      <AppText variant="caption" style={styles.errorText}>
+                        {createErrors.healthStatus.message}
+                      </AppText>
                     ) : null}
                   </View>
                 )}
@@ -304,7 +365,9 @@ export default function MisPlantasScreen() {
                 name="acquiredDate"
                 render={({ field: { value, onChange } }) => (
                   <View style={styles.fieldBlock}>
-                    <AppText variant="label" style={styles.fieldLabel}>Fecha de adquisición</AppText>
+                    <AppText variant="label" style={styles.fieldLabel}>
+                      Fecha de adquisición
+                    </AppText>
                     <Pressable
                       onPress={() => {
                         const initialDate = parseInputDate(value);
@@ -328,13 +391,17 @@ export default function MisPlantasScreen() {
                         value={createDatePickerValue}
                         mode="date"
                         display={Platform.OS === "ios" ? "spinner" : "default"}
-                        onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
+                        onChange={(
+                          event: DateTimePickerEvent,
+                          selectedDate?: Date,
+                        ) => {
                           if (event.type === "dismissed") {
                             setShowCreateDatePicker(false);
                             return;
                           }
 
-                          const nextDate = selectedDate ?? createDatePickerValue;
+                          const nextDate =
+                            selectedDate ?? createDatePickerValue;
                           setCreateDatePickerValue(nextDate);
                           onChange(toIsoDate(nextDate));
                           setShowCreateDatePicker(false);
@@ -343,13 +410,20 @@ export default function MisPlantasScreen() {
                     ) : null}
 
                     {value?.trim() ? (
-                      <Pressable onPress={() => onChange("")} style={styles.clearDateAction}>
-                        <AppText variant="caption" style={styles.clearDateText}>Limpiar fecha</AppText>
+                      <Pressable
+                        onPress={() => onChange("")}
+                        style={styles.clearDateAction}
+                      >
+                        <AppText variant="caption" style={styles.clearDateText}>
+                          Limpiar fecha
+                        </AppText>
                       </Pressable>
                     ) : null}
 
                     {createErrors.acquiredDate?.message ? (
-                      <AppText variant="caption" style={styles.errorText}>{createErrors.acquiredDate.message}</AppText>
+                      <AppText variant="caption" style={styles.errorText}>
+                        {createErrors.acquiredDate.message}
+                      </AppText>
                     ) : null}
                   </View>
                 )}
@@ -375,12 +449,19 @@ export default function MisPlantasScreen() {
 
               <Pressable
                 onPress={() => setCreateValue("favorite", !selectedFavorite)}
-                style={[styles.favoriteToggle, selectedFavorite && styles.favoriteToggleActive]}
+                style={[
+                  styles.favoriteToggle,
+                  selectedFavorite && styles.favoriteToggleActive,
+                ]}
               >
                 <Ionicons
                   name={selectedFavorite ? "star" : "star-outline"}
                   size={theme.spacing.md + theme.spacing.xs}
-                  color={selectedFavorite ? theme.colors.primary : theme.colors.textSecondary}
+                  color={
+                    selectedFavorite
+                      ? theme.colors.primary
+                      : theme.colors.textSecondary
+                  }
                 />
                 <AppText variant="caption" style={styles.favoriteText}>
                   Marcar como favorita
@@ -408,7 +489,9 @@ export default function MisPlantasScreen() {
             <View style={styles.editHeaderRow}>
               <AppText variant="subheading">Editar planta</AppText>
               <Pressable onPress={closeEditModal}>
-                <AppText variant="caption" style={styles.closeEditText}>Cerrar</AppText>
+                <AppText variant="caption" style={styles.closeEditText}>
+                  Cerrar
+                </AppText>
               </Pressable>
             </View>
 
@@ -418,12 +501,16 @@ export default function MisPlantasScreen() {
               keyboardShouldPersistTaps="handled"
             >
               <View style={styles.fieldBlock}>
-                <AppText variant="label" style={styles.fieldLabel}>Especie del catálogo</AppText>
+                <AppText variant="label" style={styles.fieldLabel}>
+                  Especie del catálogo
+                </AppText>
                 <CatalogExplorerSelect
                   items={catalog}
                   selectedId={selectedEditCatalogId}
                   onSelect={(nextValue) =>
-                    setEditValue("plantCatalogId", nextValue, { shouldValidate: true })
+                    setEditValue("plantCatalogId", nextValue, {
+                      shouldValidate: true,
+                    })
                   }
                   errorText={editErrors.plantCatalogId?.message}
                 />
@@ -465,7 +552,12 @@ export default function MisPlantasScreen() {
 
               {editImagePreview ? (
                 <View style={styles.previewWrap}>
-                  <Image source={{ uri: editImagePreview }} style={styles.previewImage} contentFit="cover" transition={120} />
+                  <Image
+                    source={{ uri: editImagePreview }}
+                    style={styles.previewImage}
+                    contentFit="cover"
+                    transition={120}
+                  />
                 </View>
               ) : null}
 
@@ -474,14 +566,18 @@ export default function MisPlantasScreen() {
                 name="healthStatus"
                 render={({ field: { value, onChange } }) => (
                   <View style={styles.fieldBlock}>
-                    <AppText variant="label" style={styles.fieldLabel}>Estado de salud</AppText>
+                    <AppText variant="label" style={styles.fieldLabel}>
+                      Estado de salud
+                    </AppText>
                     <SingleSelect
                       options={healthSelectOptions}
                       value={value}
                       onChange={onChange}
                     />
                     {editErrors.healthStatus?.message ? (
-                      <AppText variant="caption" style={styles.errorText}>{editErrors.healthStatus.message}</AppText>
+                      <AppText variant="caption" style={styles.errorText}>
+                        {editErrors.healthStatus.message}
+                      </AppText>
                     ) : null}
                   </View>
                 )}
@@ -509,7 +605,9 @@ export default function MisPlantasScreen() {
                 name="acquiredDate"
                 render={({ field: { value, onChange } }) => (
                   <View style={styles.fieldBlock}>
-                    <AppText variant="label" style={styles.fieldLabel}>Fecha de adquisición</AppText>
+                    <AppText variant="label" style={styles.fieldLabel}>
+                      Fecha de adquisición
+                    </AppText>
                     <Pressable
                       onPress={() => {
                         const initialDate = parseInputDate(value);
@@ -533,7 +631,10 @@ export default function MisPlantasScreen() {
                         value={editDatePickerValue}
                         mode="date"
                         display={Platform.OS === "ios" ? "spinner" : "default"}
-                        onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
+                        onChange={(
+                          event: DateTimePickerEvent,
+                          selectedDate?: Date,
+                        ) => {
                           if (event.type === "dismissed") {
                             setShowEditDatePicker(false);
                             return;
@@ -548,13 +649,20 @@ export default function MisPlantasScreen() {
                     ) : null}
 
                     {value?.trim() ? (
-                      <Pressable onPress={() => onChange("")} style={styles.clearDateAction}>
-                        <AppText variant="caption" style={styles.clearDateText}>Limpiar fecha</AppText>
+                      <Pressable
+                        onPress={() => onChange("")}
+                        style={styles.clearDateAction}
+                      >
+                        <AppText variant="caption" style={styles.clearDateText}>
+                          Limpiar fecha
+                        </AppText>
                       </Pressable>
                     ) : null}
 
                     {editErrors.acquiredDate?.message ? (
-                      <AppText variant="caption" style={styles.errorText}>{editErrors.acquiredDate.message}</AppText>
+                      <AppText variant="caption" style={styles.errorText}>
+                        {editErrors.acquiredDate.message}
+                      </AppText>
                     ) : null}
                   </View>
                 )}

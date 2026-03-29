@@ -38,14 +38,17 @@ export function useRegister() {
       const user = await registerWithEmail(email, password, displayName);
       createdAuthUser = true;
 
-      const resolution = await fetchProfileForSession({
-        uid: user.uid,
-        email: user.email ?? email,
-        displayName,
-        providerId: user.providerData?.[0]?.providerId ?? null,
-      }, {
-        acceptedTerms,
-      });
+      const resolution = await fetchProfileForSession(
+        {
+          uid: user.uid,
+          email: user.email ?? email,
+          displayName,
+          providerId: user.providerData?.[0]?.providerId ?? null,
+        },
+        {
+          acceptedTerms,
+        },
+      );
 
       if (!resolution?.profile || !resolution.backendUserId) {
         throw new Error(
@@ -66,7 +69,9 @@ export function useRegister() {
       });
 
       if (!refreshedResolution?.profile) {
-        throw new Error("No pudimos validar tu perfil recién creado. Inténtalo nuevamente.");
+        throw new Error(
+          "No pudimos validar tu perfil recién creado. Inténtalo nuevamente.",
+        );
       }
 
       setFirebaseUser(user);
@@ -82,11 +87,17 @@ export function useRegister() {
         try {
           await deleteCurrentUser();
         } catch (rollbackError) {
-          console.warn("[Auth][register] rollback delete user failed", rollbackError);
+          console.warn(
+            "[Auth][register] rollback delete user failed",
+            rollbackError,
+          );
           try {
             await logoutUser();
           } catch (logoutError) {
-            console.warn("[Auth][register] rollback logout failed", logoutError);
+            console.warn(
+              "[Auth][register] rollback logout failed",
+              logoutError,
+            );
           }
         }
       }

@@ -44,7 +44,8 @@ export function useRegisterRoute() {
     }
 
     if (!USERNAME_REGEX.test(normalizedUsername)) {
-      errors.username = "El usuario debe tener 3-20 caracteres (letras, numeros, _ o -).";
+      errors.username =
+        "El usuario debe tener 3-20 caracteres (letras, numeros, _ o -).";
     }
 
     if (!EMAIL_REGEX.test(normalizedEmail)) {
@@ -52,7 +53,8 @@ export function useRegisterRoute() {
     }
 
     if (!STRONG_PASSWORD_REGEX.test(password)) {
-      errors.password = "Usa minimo 8 caracteres con letras, numeros y simbolos.";
+      errors.password =
+        "Usa minimo 8 caracteres con letras, numeros y simbolos.";
     }
 
     if (!confirmPassword) {
@@ -64,7 +66,8 @@ export function useRegisterRoute() {
     }
 
     if (!acceptedTerms) {
-      errors.acceptedTerms = "Debes aceptar los terminos de uso y la politica de privacidad.";
+      errors.acceptedTerms =
+        "Debes aceptar los terminos de uso y la politica de privacidad.";
     }
 
     return errors;

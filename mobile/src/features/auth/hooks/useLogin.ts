@@ -42,7 +42,9 @@ export function useLogin() {
       setSessionStatus("authenticated");
     } catch (err) {
       resetAuthState();
-      setError(err instanceof Error ? err.message : "No se pudo iniciar sesión.");
+      setError(
+        err instanceof Error ? err.message : "No se pudo iniciar sesión.",
+      );
     } finally {
       setLoading(false);
     }

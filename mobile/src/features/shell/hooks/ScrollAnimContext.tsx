@@ -1,14 +1,14 @@
 import React, {
-    createContext,
-    useCallback,
-    useContext,
-    useRef,
-    useState,
+  createContext,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
 } from "react";
 import {
-    Animated,
-    NativeScrollEvent,
-    NativeSyntheticEvent,
+  Animated,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
 } from "react-native";
 
 interface ScrollAnimContextValue {

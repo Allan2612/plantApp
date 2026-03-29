@@ -1,7 +1,10 @@
 const firebaseAuthMessages: Record<string, string> = {
-  "auth/invalid-api-key": "La configuración de Firebase es inválida (API key). Revisa tu .env.",
-  "auth/operation-not-allowed": "El proveedor Email/Password no está habilitado en Firebase.",
-  "auth/network-request-failed": "No hay conexión con Firebase. Revisa tu conexión e inténtalo de nuevo.",
+  "auth/invalid-api-key":
+    "La configuración de Firebase es inválida (API key). Revisa tu .env.",
+  "auth/operation-not-allowed":
+    "El proveedor Email/Password no está habilitado en Firebase.",
+  "auth/network-request-failed":
+    "No hay conexión con Firebase. Revisa tu conexión e inténtalo de nuevo.",
   "auth/missing-email": "Debes ingresar un correo.",
   "auth/invalid-email": "Ingresa un correo válido.",
   "auth/missing-password": "Debes ingresar una contraseña.",
@@ -36,11 +39,16 @@ function getRawMessage(input: unknown): string {
 
 export function mapFirebaseAuthCode(code?: string): string {
   if (!code) return "Ocurrió un error de autenticación.";
-  return firebaseAuthMessages[code] ?? "No fue posible autenticarte en este momento.";
+  return (
+    firebaseAuthMessages[code] ?? "No fue posible autenticarte en este momento."
+  );
 }
 
 export function mapHttpStatus(status: number): string {
-  return httpStatusMessages[status] ?? `No se pudo completar la solicitud (HTTP ${status}).`;
+  return (
+    httpStatusMessages[status] ??
+    `No se pudo completar la solicitud (HTTP ${status}).`
+  );
 }
 
 export function extractFirebaseAuthCode(message: string): string | null {

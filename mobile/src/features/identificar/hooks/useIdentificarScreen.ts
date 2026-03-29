@@ -12,11 +12,20 @@ const identifyFormSchema = z.object({
     .trim()
     .min(1, "Toma una foto para continuar con el formulario.")
     .refine(
-      (value) => /^(file:\/\/|content:\/\/|https?:\/\/|data:image\/)/i.test(value),
+      (value) =>
+        /^(file:\/\/|content:\/\/|https?:\/\/|data:image\/)/i.test(value),
       "La ruta de la foto no es valida. Intenta capturar nuevamente.",
     ),
-  nickname: z.string().trim().max(60, "Usa un maximo de 60 caracteres.").optional(),
-  context: z.string().trim().max(500, "Usa un maximo de 500 caracteres.").optional(),
+  nickname: z
+    .string()
+    .trim()
+    .max(60, "Usa un maximo de 60 caracteres.")
+    .optional(),
+  context: z
+    .string()
+    .trim()
+    .max(500, "Usa un maximo de 500 caracteres.")
+    .optional(),
 });
 
 type IdentifyFormValues = z.infer<typeof identifyFormSchema>;

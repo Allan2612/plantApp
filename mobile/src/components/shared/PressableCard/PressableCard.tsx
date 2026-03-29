@@ -21,7 +21,8 @@ export default function PressableCard({
   border = true,
   onPress,
 }: PressableCardProps) {
-  const { scale, borderColor, onPressIn, onPressOut } = usePressableCardLogic(border);
+  const { scale, borderColor, onPressIn, onPressOut } =
+    usePressableCardLogic(border);
 
   return (
     <Pressable

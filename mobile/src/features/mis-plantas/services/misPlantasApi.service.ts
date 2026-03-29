@@ -1,6 +1,9 @@
 import { getApiBaseUrl } from "@/src/services/api/apiBaseUrl";
 import { httpGet, httpPatch, httpPost } from "@/src/services/api/httpClient";
-import { CreateUserPlantPayload, UpdateUserPlantPayload } from "@/src/types/plant.types";
+import {
+  CreateUserPlantPayload,
+  UpdateUserPlantPayload,
+} from "@/src/types/plant.types";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -17,7 +20,9 @@ export interface UserPlantsResponse {
   items: UserPlantListItem[];
 }
 
-export async function fetchUserPlants(userId: string): Promise<UserPlantsResponse> {
+export async function fetchUserPlants(
+  userId: string,
+): Promise<UserPlantsResponse> {
   const normalizedUserId = userId.trim();
   if (!normalizedUserId) {
     throw new Error("userId es requerido para consultar plantas.");

@@ -9,7 +9,8 @@ export default function ProfileMenu() {
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
-  const { visible, setVisible, avatarUri, loading, menuItems } = useProfileMenu();
+  const { visible, setVisible, avatarUri, loading, menuItems } =
+    useProfileMenu();
 
   return (
     <>

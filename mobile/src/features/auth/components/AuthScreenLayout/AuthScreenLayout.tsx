@@ -1,6 +1,12 @@
 import AppText from "@/src/components/shared/AppText/AppText";
 import { useAppTheme } from "@/src/theme/ThemeContext";
-import { Image, KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { createStyles } from "./styles";
 
@@ -24,7 +30,10 @@ export default function AuthScreenLayout({
   const styles = createStyles(theme);
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right", "bottom"]}>
+    <SafeAreaView
+      style={styles.safeArea}
+      edges={["top", "left", "right", "bottom"]}
+    >
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -48,8 +57,16 @@ export default function AuthScreenLayout({
               PlanTica
             </AppText>
 
-            {title ? <AppText variant="heading" style={styles.titleText}>{title}</AppText> : null}
-            <AppText variant="body" color={colors.textSecondary} style={styles.subtitleText}>
+            {title ? (
+              <AppText variant="heading" style={styles.titleText}>
+                {title}
+              </AppText>
+            ) : null}
+            <AppText
+              variant="body"
+              color={colors.textSecondary}
+              style={styles.subtitleText}
+            >
               {subtitle}
             </AppText>
           </View>

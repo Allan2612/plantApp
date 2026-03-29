@@ -1,6 +1,9 @@
 import { getApiBaseUrlResolution } from "@/src/services/api/apiBaseUrl";
 import { httpGet, httpPost } from "@/src/services/api/httpClient";
-import { CreateCatalogPlantPayload, PlantCatalogItem } from "@/src/types/plant.types";
+import {
+  CreateCatalogPlantPayload,
+  PlantCatalogItem,
+} from "@/src/types/plant.types";
 import { Platform } from "react-native";
 
 const apiResolution = getApiBaseUrlResolution();
@@ -18,7 +21,9 @@ function isLoopbackHost(host: string): boolean {
 }
 
 function isConnectivityError(errorMessage: string): boolean {
-  return /(Network request failed|Failed to fetch|network|No hay conexi[oó]n)/i.test(errorMessage);
+  return /(Network request failed|Failed to fetch|network|No hay conexi[oó]n)/i.test(
+    errorMessage,
+  );
 }
 
 function buildApiBaseUrlCandidates(): string[] {
@@ -51,7 +56,9 @@ function resolveImageUrl(rawUrl: string, apiBaseUrl: string): string {
   }
 
   if (isRelativeImagePath(rawUrl)) {
-    const normalizedPath = rawUrl.startsWith("/") ? rawUrl : `/${rawUrl.replace(/^\.\/?/, "")}`;
+    const normalizedPath = rawUrl.startsWith("/")
+      ? rawUrl
+      : `/${rawUrl.replace(/^\.\/?/, "")}`;
     return `${apiBaseUrl}${normalizedPath}`;
   }
 
@@ -61,7 +68,9 @@ function resolveImageUrl(rawUrl: string, apiBaseUrl: string): string {
 function normalizeWikimediaUrl(rawUrl: string): string {
   try {
     const parsed = new URL(rawUrl);
-    const isCommonsHost = /(^|\.)commons\.wikimedia\.org$/i.test(parsed.hostname);
+    const isCommonsHost = /(^|\.)commons\.wikimedia\.org$/i.test(
+      parsed.hostname,
+    );
 
     if (!isCommonsHost) {
       return rawUrl;
@@ -102,12 +111,17 @@ function normalizeImageUrl(value: unknown, apiBaseUrl: string): string | null {
   const trimmed = value.trim();
   if (!trimmed) return null;
 
-  const resolved = isAbsoluteUrl(trimmed) ? trimmed : resolveImageUrl(trimmed, apiBaseUrl);
+  const resolved = isAbsoluteUrl(trimmed)
+    ? trimmed
+    : resolveImageUrl(trimmed, apiBaseUrl);
   const wikimediaResolved = normalizeWikimediaUrl(resolved);
   return safeEncodeUri(wikimediaResolved);
 }
 
-function resolveCatalogImageUrl(item: CatalogApiItem, apiBaseUrl: string): string | null {
+function resolveCatalogImageUrl(
+  item: CatalogApiItem,
+  apiBaseUrl: string,
+): string | null {
   const candidates: unknown[] = [
     item.imageUrl,
     item.imageURL,
@@ -153,7 +167,8 @@ export async function fetchCatalogPlants(): Promise<PlantCatalogItem[]> {
         imageUrl: resolveCatalogImageUrl(item, baseUrl),
       }));
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error desconocido";
+      const message =
+        error instanceof Error ? error.message : "Error desconocido";
       attempts.push(`${endpoint} -> ${message}`);
 
       if (!isConnectivityError(message)) {
@@ -188,13 +203,17 @@ export async function createCatalogPlant(
     const endpoint = `${baseUrl}/api/catalog/plants`;
 
     try {
-      const created = await httpPost<CatalogApiItem, CreateCatalogPlantPayload>(endpoint, payload);
+      const created = await httpPost<CatalogApiItem, CreateCatalogPlantPayload>(
+        endpoint,
+        payload,
+      );
       return {
         ...created,
         imageUrl: resolveCatalogImageUrl(created, baseUrl),
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error desconocido";
+      const message =
+        error instanceof Error ? error.message : "Error desconocido";
       attempts.push(`${endpoint} -> ${message}`);
 
       if (!isConnectivityError(message)) {
@@ -203,5 +222,7 @@ export async function createCatalogPlant(
     }
   }
 
-  throw new Error(`No se pudo crear la especie. Intentos: ${attempts.join(" | ")}`);
+  throw new Error(
+    `No se pudo crear la especie. Intentos: ${attempts.join(" | ")}`,
+  );
 }

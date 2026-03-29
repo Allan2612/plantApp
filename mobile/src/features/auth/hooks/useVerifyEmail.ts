@@ -24,7 +24,9 @@ export function useVerifyEmail() {
         "Correo de verificación reenviado. Revisa también spam o promociones.",
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo reenviar el correo.");
+      setError(
+        err instanceof Error ? err.message : "No se pudo reenviar el correo.",
+      );
     } finally {
       setLoading(false);
     }
@@ -41,7 +43,9 @@ export function useVerifyEmail() {
         setError("Tu correo aún no está verificado.");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo verificar el estado.");
+      setError(
+        err instanceof Error ? err.message : "No se pudo verificar el estado.",
+      );
     } finally {
       setLoading(false);
     }

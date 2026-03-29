@@ -11,7 +11,7 @@ import { useAppTheme } from "@/src/theme/ThemeContext";
 import { CreateCatalogPlantPayload } from "@/src/types/plant.types";
 import { Image } from "expo-image";
 import { Controller } from "react-hook-form";
-import { Modal, Pressable, ScrollView, TextInput, View } from "react-native";
+import { Modal, Pressable, ScrollView, View } from "react-native";
 
 import { createStyles } from "./styles";
 
@@ -34,7 +34,12 @@ export default function CatalogPlantCreateModal({
     useCatalogPlantCreateModal(visible, onSubmit);
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
       <Pressable style={styles.overlay} onPress={onClose}>
         <Pressable style={styles.panel} onPress={() => null}>
           <View style={styles.header}>
@@ -62,7 +67,9 @@ export default function CatalogPlantCreateModal({
                   onChangeText={onChange}
                   error={errors.name?.message}
                   returnKeyType="next"
-                  onSubmitEditing={() => refs.scientificNameRef.current?.focus()}
+                  onSubmitEditing={() =>
+                    refs.scientificNameRef.current?.focus()
+                  }
                 />
               )}
             />
@@ -103,7 +110,9 @@ export default function CatalogPlantCreateModal({
             />
 
             <View style={styles.groupedField}>
-              <AppText variant="label" style={styles.fieldLabel}>Dificultad de cuidado</AppText>
+              <AppText variant="label" style={styles.fieldLabel}>
+                Dificultad de cuidado
+              </AppText>
               <Controller
                 control={control}
                 name="difficulty"
@@ -123,7 +132,9 @@ export default function CatalogPlantCreateModal({
             </View>
 
             <View style={styles.groupedField}>
-              <AppText variant="label" style={styles.fieldLabel}>Toxicidad</AppText>
+              <AppText variant="label" style={styles.fieldLabel}>
+                Toxicidad
+              </AppText>
               <Controller
                 control={control}
                 name="toxicity"
@@ -196,7 +207,12 @@ export default function CatalogPlantCreateModal({
 
             <View style={styles.previewFrame}>
               {imagePreview ? (
-                <Image source={{ uri: imagePreview }} style={styles.previewImage} contentFit="cover" transition={120} />
+                <Image
+                  source={{ uri: imagePreview }}
+                  style={styles.previewImage}
+                  contentFit="cover"
+                  transition={120}
+                />
               ) : (
                 <AppText variant="caption" style={styles.fallbackText}>
                   Previsualizacion de imagen
@@ -241,7 +257,8 @@ export default function CatalogPlantCreateModal({
             />
 
             <AppText variant="caption" style={styles.helperText}>
-              Se crean campos base del catalogo con valores por defecto para datos avanzados.
+              Se crean campos base del catalogo con valores por defecto para
+              datos avanzados.
             </AppText>
 
             <View style={styles.actions}>

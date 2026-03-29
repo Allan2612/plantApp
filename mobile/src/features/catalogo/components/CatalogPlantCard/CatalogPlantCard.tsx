@@ -15,7 +15,8 @@ export default function CatalogPlantCard({ plant }: CatalogPlantCardProps) {
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
-  const { difficultyLabel, shouldRenderImage, onImageError } = useCatalogPlantCard(plant);
+  const { difficultyLabel, shouldRenderImage, onImageError } =
+    useCatalogPlantCard(plant);
 
   return (
     <View style={styles.card}>
@@ -30,7 +31,11 @@ export default function CatalogPlantCard({ plant }: CatalogPlantCardProps) {
         />
       ) : (
         <View style={styles.imageFallback}>
-          <Ionicons name="leaf" size={theme.spacing.xl} color={colors.primary} />
+          <Ionicons
+            name="leaf"
+            size={theme.spacing.xl}
+            color={colors.primary}
+          />
         </View>
       )}
 

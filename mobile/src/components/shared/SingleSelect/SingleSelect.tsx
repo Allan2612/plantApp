@@ -10,7 +10,10 @@ export interface SingleSelectOption<T extends string> {
   label: string;
 }
 
-interface SingleSelectProps<T extends string, OptionT extends SingleSelectOption<T>> {
+interface SingleSelectProps<
+  T extends string,
+  OptionT extends SingleSelectOption<T>,
+> {
   options: OptionT[];
   value: T;
   onChange: (value: T) => void;
@@ -18,7 +21,10 @@ interface SingleSelectProps<T extends string, OptionT extends SingleSelectOption
   layout?: "segmented" | "grid";
 }
 
-export default function SingleSelect<T extends string, OptionT extends SingleSelectOption<T>>({
+export default function SingleSelect<
+  T extends string,
+  OptionT extends SingleSelectOption<T>,
+>({
   options,
   value,
   onChange,
@@ -38,12 +44,19 @@ export default function SingleSelect<T extends string, OptionT extends SingleSel
           <Pressable
             key={option.value}
             onPress={() => onChange(option.value)}
-            style={[styles.option, isGrid && styles.optionGrid, selected && styles.optionActive]}
+            style={[
+              styles.option,
+              isGrid && styles.optionGrid,
+              selected && styles.optionActive,
+            ]}
             accessibilityRole="radio"
             accessibilityState={{ selected }}
           >
             {renderIcon ? renderIcon(option, selected) : null}
-            <AppText variant="caption" style={[styles.label, selected && styles.labelActive]}>
+            <AppText
+              variant="caption"
+              style={[styles.label, selected && styles.labelActive]}
+            >
               {option.label}
             </AppText>
           </Pressable>

@@ -3,7 +3,12 @@ import { Dimensions, StyleSheet } from "react-native";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
-export function createStyles({ colors, spacing, radius, typography }: AppTheme) {
+export function createStyles({
+  colors,
+  spacing,
+  radius,
+  typography,
+}: AppTheme) {
   const cardWidth = (SCREEN_WIDTH - spacing.md * 2 - spacing.sm) / 2;
 
   return StyleSheet.create({

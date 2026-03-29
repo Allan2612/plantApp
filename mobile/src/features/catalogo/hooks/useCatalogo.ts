@@ -2,7 +2,10 @@ import {
   createCatalogPlant,
   fetchCatalogPlants,
 } from "@/src/features/catalogo/services/catalogoApi.service";
-import { CreateCatalogPlantPayload, PlantCatalogItem } from "@/src/types/plant.types";
+import {
+  CreateCatalogPlantPayload,
+  PlantCatalogItem,
+} from "@/src/types/plant.types";
 import { useCallback, useEffect, useState } from "react";
 
 export function useCatalogo() {
@@ -18,7 +21,8 @@ export function useCatalogo() {
       const data = await fetchCatalogPlants();
       setItems(data);
     } catch (error) {
-      const details = error instanceof Error ? error.message : "Error desconocido";
+      const details =
+        error instanceof Error ? error.message : "Error desconocido";
       if (__DEV__) {
         console.error("[Catalogo][loadCatalog]", details);
       }
@@ -43,20 +47,23 @@ export function useCatalogo() {
     void initialLoad();
   }, [initialLoad]);
 
-  const addCatalogPlant = useCallback(async (payload: CreateCatalogPlantPayload) => {
-    setCreating(true);
-    try {
-      const created = await createCatalogPlant(payload);
-      setItems((previous) => {
-        const next = [...previous, created];
-        next.sort((left, right) => left.name.localeCompare(right.name, "es"));
-        return next;
-      });
-      return created;
-    } finally {
-      setCreating(false);
-    }
-  }, []);
+  const addCatalogPlant = useCallback(
+    async (payload: CreateCatalogPlantPayload) => {
+      setCreating(true);
+      try {
+        const created = await createCatalogPlant(payload);
+        setItems((previous) => {
+          const next = [...previous, created];
+          next.sort((left, right) => left.name.localeCompare(right.name, "es"));
+          return next;
+        });
+        return created;
+      } finally {
+        setCreating(false);
+      }
+    },
+    [],
+  );
 
   return {
     items,

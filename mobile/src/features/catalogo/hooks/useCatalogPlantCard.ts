@@ -18,7 +18,10 @@ export function useCatalogPlantCard(plant: PlantCatalogItem) {
 
   const onImageError = () => {
     if (__DEV__) {
-      console.warn("[Catalogo][ImageError]", { plantId: plant.id, imageUrl: plant.imageUrl });
+      console.warn("[Catalogo][ImageError]", {
+        plantId: plant.id,
+        imageUrl: plant.imageUrl,
+      });
     }
     setImageFailed(true);
   };

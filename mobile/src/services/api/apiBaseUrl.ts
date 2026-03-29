@@ -23,11 +23,14 @@ function getExpoHost(): string | null {
   const fromLinking = Linking.parse(Linking.createURL("/")).hostname;
   if (fromLinking) return fromLinking;
 
-  const fromExpoConfig = (Constants.expoConfig as { hostUri?: string } | null)?.hostUri;
+  const fromExpoConfig = (Constants.expoConfig as { hostUri?: string } | null)
+    ?.hostUri;
   if (fromExpoConfig) return fromExpoConfig.split(":")[0] ?? null;
 
   const fromManifest2 = (
-    Constants as unknown as { manifest2?: { extra?: { expoClient?: { hostUri?: string } } } }
+    Constants as unknown as {
+      manifest2?: { extra?: { expoClient?: { hostUri?: string } } };
+    }
   ).manifest2?.extra?.expoClient?.hostUri;
   if (fromManifest2) return fromManifest2.split(":")[0] ?? null;
 

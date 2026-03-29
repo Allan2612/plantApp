@@ -1,4 +1,7 @@
-import { LANGUAGE_OPTIONS, THEME_OPTIONS } from "@/src/features/settings/services/settings.localData";
+import {
+  LANGUAGE_OPTIONS,
+  THEME_OPTIONS,
+} from "@/src/features/settings/services/settings.localData";
 import { useThemeContext } from "@/src/theme/ThemeContext";
 
 export function useSettingsScreen() {

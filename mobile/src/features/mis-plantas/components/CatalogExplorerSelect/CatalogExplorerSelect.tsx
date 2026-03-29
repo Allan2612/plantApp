@@ -48,16 +48,29 @@ export default function CatalogExplorerSelect({
         <View style={styles.triggerMain}>
           <View style={styles.thumbnailFrame}>
             {selectedItem?.imageUrl ? (
-              <Image source={{ uri: selectedItem.imageUrl }} style={styles.thumbnailImage} contentFit="cover" transition={90} />
+              <Image
+                source={{ uri: selectedItem.imageUrl }}
+                style={styles.thumbnailImage}
+                contentFit="cover"
+                transition={90}
+              />
             ) : (
               <View style={styles.thumbnailFallback}>
-                <Ionicons name="leaf-outline" size={theme.spacing.md} color={theme.colors.primary} />
+                <Ionicons
+                  name="leaf-outline"
+                  size={theme.spacing.md}
+                  color={theme.colors.primary}
+                />
               </View>
             )}
           </View>
 
           <View style={styles.triggerTextWrap}>
-            <AppText variant="body" style={styles.triggerTitle} numberOfLines={1}>
+            <AppText
+              variant="body"
+              style={styles.triggerTitle}
+              numberOfLines={1}
+            >
               {selectedItem?.name ?? "Selecciona una especie"}
             </AppText>
           </View>
@@ -83,7 +96,9 @@ export default function CatalogExplorerSelect({
             <View style={styles.panelHeader}>
               <AppText variant="subheading">Explorar catálogo</AppText>
               <Pressable onPress={close}>
-                <AppText variant="caption" style={styles.closeText}>Cerrar</AppText>
+                <AppText variant="caption" style={styles.closeText}>
+                  Cerrar
+                </AppText>
               </Pressable>
             </View>
 
@@ -97,7 +112,8 @@ export default function CatalogExplorerSelect({
             />
 
             <AppText variant="caption" style={styles.resultMeta}>
-              {filteredItems.length} resultado{filteredItems.length === 1 ? "" : "s"}
+              {filteredItems.length} resultado
+              {filteredItems.length === 1 ? "" : "s"}
             </AppText>
 
             <FlatList
@@ -117,10 +133,19 @@ export default function CatalogExplorerSelect({
                       <View style={styles.rowMain}>
                         <View style={styles.thumbnailFrame}>
                           {item.imageUrl ? (
-                            <Image source={{ uri: item.imageUrl }} style={styles.thumbnailImage} contentFit="cover" transition={90} />
+                            <Image
+                              source={{ uri: item.imageUrl }}
+                              style={styles.thumbnailImage}
+                              contentFit="cover"
+                              transition={90}
+                            />
                           ) : (
                             <View style={styles.thumbnailFallback}>
-                              <Ionicons name="leaf-outline" size={theme.spacing.md} color={theme.colors.primary} />
+                              <Ionicons
+                                name="leaf-outline"
+                                size={theme.spacing.md}
+                                color={theme.colors.primary}
+                              />
                             </View>
                           )}
                         </View>
@@ -128,14 +153,20 @@ export default function CatalogExplorerSelect({
                         <View style={styles.rowTextWrap}>
                           <AppText
                             variant="label"
-                            style={[styles.rowTitle, selected && styles.rowTitleSelected]}
+                            style={[
+                              styles.rowTitle,
+                              selected && styles.rowTitleSelected,
+                            ]}
                             numberOfLines={1}
                           >
                             {item.name}
                           </AppText>
                           <AppText
                             variant="caption"
-                            style={[styles.rowSubtitle, selected && styles.rowSubtitleSelected]}
+                            style={[
+                              styles.rowSubtitle,
+                              selected && styles.rowSubtitleSelected,
+                            ]}
                             numberOfLines={1}
                           >
                             {item.scientificName}
@@ -143,7 +174,11 @@ export default function CatalogExplorerSelect({
                         </View>
                       </View>
                       {selected ? (
-                        <Ionicons name="checkmark-circle" size={theme.spacing.md + theme.spacing.xs} color={theme.colors.primary} />
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={theme.spacing.md + theme.spacing.xs}
+                          color={theme.colors.primary}
+                        />
                       ) : null}
                     </View>
                   </Pressable>

@@ -16,7 +16,10 @@ import { TextInput } from "react-native";
 import { z } from "zod";
 
 const healthStatusOptions = ["good", "regular", "bad"] as const;
-export const healthLabels: Record<(typeof healthStatusOptions)[number], string> = {
+export const healthLabels: Record<
+  (typeof healthStatusOptions)[number],
+  string
+> = {
   good: "Buena",
   regular: "Regular",
   bad: "Crítica",
@@ -37,7 +40,10 @@ const imagePathSchema = z
   );
 
 const editPlantSchema = z.object({
-  plantCatalogId: z.string().trim().min(1, "Selecciona una especie del catálogo."),
+  plantCatalogId: z
+    .string()
+    .trim()
+    .min(1, "Selecciona una especie del catálogo."),
   nickname: z.string().trim().min(1, "El nombre de la planta es requerido."),
   customImageUrl: z
     .string()
@@ -47,27 +53,40 @@ const editPlantSchema = z.object({
       (value) => !value || /^(https?:\/\/|file:\/\/|data:image\/)/i.test(value),
       "Usa una URL válida (https://...) o una ruta file://.",
     ),
-  healthStatus: z.enum(healthStatusOptions, { message: "Selecciona un estado de salud." }),
+  healthStatus: z.enum(healthStatusOptions, {
+    message: "Selecciona un estado de salud.",
+  }),
   locationHome: z.string().trim().optional(),
   acquiredDate: z
     .string()
     .trim()
     .optional()
-    .refine((value) => !value || /^\d{4}-\d{2}-\d{2}$/.test(value), "Usa formato AAAA-MM-DD."),
+    .refine(
+      (value) => !value || /^\d{4}-\d{2}-\d{2}$/.test(value),
+      "Usa formato AAAA-MM-DD.",
+    ),
   notes: z.string().trim().optional(),
 });
 
 const createPlantSchema = z.object({
-  plantCatalogId: z.string().trim().min(1, "Selecciona una especie del catálogo."),
+  plantCatalogId: z
+    .string()
+    .trim()
+    .min(1, "Selecciona una especie del catálogo."),
   nickname: z.string().trim().min(1, "Define un nombre para tu planta."),
   customImageUrl: imagePathSchema,
-  healthStatus: z.enum(healthStatusOptions, { message: "Selecciona un estado de salud." }),
+  healthStatus: z.enum(healthStatusOptions, {
+    message: "Selecciona un estado de salud.",
+  }),
   locationHome: z.string().trim().optional(),
   acquiredDate: z
     .string()
     .trim()
     .optional()
-    .refine((value) => !value || /^\d{4}-\d{2}-\d{2}$/.test(value), "Usa formato AAAA-MM-DD."),
+    .refine(
+      (value) => !value || /^\d{4}-\d{2}-\d{2}$/.test(value),
+      "Usa formato AAAA-MM-DD.",
+    ),
   notes: z.string().trim().optional(),
   favorite: z.boolean(),
 });
@@ -75,18 +94,25 @@ const createPlantSchema = z.object({
 type EditPlantValues = z.infer<typeof editPlantSchema>;
 type CreatePlantValues = z.infer<typeof createPlantSchema>;
 
-export function getStringField(source: Record<string, unknown>, key: string): string {
+export function getStringField(
+  source: Record<string, unknown>,
+  key: string,
+): string {
   const value = source[key];
   return typeof value === "string" ? value : "";
 }
 
-export function getHealthStatus(source: Record<string, unknown>): EditPlantValues["healthStatus"] {
+export function getHealthStatus(
+  source: Record<string, unknown>,
+): EditPlantValues["healthStatus"] {
   const value = source.healthStatus;
   if (value === "good" || value === "regular" || value === "bad") return value;
   return "good";
 }
 
-export function getUserPlantPayload(item: UserPlantListItem): Record<string, unknown> {
+export function getUserPlantPayload(
+  item: UserPlantListItem,
+): Record<string, unknown> {
   if (item.userPlant && typeof item.userPlant === "object") {
     return item.userPlant as Record<string, unknown>;
   }
@@ -102,7 +128,9 @@ export function getCatalogPlantName(item: UserPlantListItem): string {
     return "Especie sin catálogo";
   }
   const name = (item.catalogPlant as Record<string, unknown>).name;
-  return typeof name === "string" && name.trim() ? name : "Especie sin catálogo";
+  return typeof name === "string" && name.trim()
+    ? name
+    : "Especie sin catálogo";
 }
 
 export function getCatalogPlantImage(item: UserPlantListItem): string {
@@ -168,8 +196,12 @@ export function useMisPlantasScreen() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showCreateDatePicker, setShowCreateDatePicker] = useState(false);
   const [showEditDatePicker, setShowEditDatePicker] = useState(false);
-  const [createDatePickerValue, setCreateDatePickerValue] = useState<Date>(new Date());
-  const [editDatePickerValue, setEditDatePickerValue] = useState<Date>(new Date());
+  const [createDatePickerValue, setCreateDatePickerValue] = useState<Date>(
+    new Date(),
+  );
+  const [editDatePickerValue, setEditDatePickerValue] = useState<Date>(
+    new Date(),
+  );
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const {
@@ -230,7 +262,9 @@ export function useMisPlantasScreen() {
   const editNotesRef = useRef<TextInput | null>(null);
 
   const editingPlant = useMemo(() => {
-    return plants.find((item) => getUserPlantId(item) === editingPlantId) ?? null;
+    return (
+      plants.find((item) => getUserPlantId(item) === editingPlantId) ?? null
+    );
   }, [editingPlantId, plants]);
 
   const createImagePreview = useMemo(() => {
@@ -319,10 +353,13 @@ export function useMisPlantasScreen() {
 
       if (!editingPlantId) return;
 
-      const edited = nextPlants.find((item) => getUserPlantId(item) === editingPlantId) ?? null;
+      const edited =
+        nextPlants.find((item) => getUserPlantId(item) === editingPlantId) ??
+        null;
       hydrateEditForm(edited);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "No se pudo cargar tu jardín.";
+      const message =
+        error instanceof Error ? error.message : "No se pudo cargar tu jardín.";
       setLoadError(message);
       showToast(message, "error");
       setPlants([]);
@@ -332,7 +369,13 @@ export function useMisPlantasScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [editingPlantId, hydrateEditForm, resolveBackendUserId, showToast, user?.uid]);
+  }, [
+    editingPlantId,
+    hydrateEditForm,
+    resolveBackendUserId,
+    showToast,
+    user?.uid,
+  ]);
 
   useEffect(() => {
     void loadAll();
@@ -385,7 +428,10 @@ export function useMisPlantasScreen() {
       closeEditModal();
       await loadAll();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "No se pudo actualizar la planta.";
+      const message =
+        error instanceof Error
+          ? error.message
+          : "No se pudo actualizar la planta.";
       showToast(message, "error");
     } finally {
       setIsSavingEdit(false);
@@ -394,7 +440,10 @@ export function useMisPlantasScreen() {
 
   const onCreatePlant = handleCreateSubmit(async (values) => {
     if (!backendUserId.trim()) {
-      showToast("No se encontró tu usuario de backend para crear la planta.", "error");
+      showToast(
+        "No se encontró tu usuario de backend para crear la planta.",
+        "error",
+      );
       return;
     }
 
@@ -426,14 +475,17 @@ export function useMisPlantasScreen() {
       setShowCreateForm(false);
       await loadAll();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "No se pudo crear la planta.";
+      const message =
+        error instanceof Error ? error.message : "No se pudo crear la planta.";
       showToast(message, "error");
     } finally {
       setIsSavingCreate(false);
     }
   });
 
-  const healthyCount = plants.filter((item) => getHealthStatus(getUserPlantPayload(item)) === "good").length;
+  const healthyCount = plants.filter(
+    (item) => getHealthStatus(getUserPlantPayload(item)) === "good",
+  ).length;
 
   return {
     plants,

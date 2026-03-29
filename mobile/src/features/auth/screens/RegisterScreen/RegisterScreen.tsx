@@ -146,18 +146,31 @@ export default function RegisterScreen({
           <View
             style={[
               styles.checkbox,
-              acceptedTerms && { backgroundColor: colors.primary, borderColor: colors.primary },
+              acceptedTerms && {
+                backgroundColor: colors.primary,
+                borderColor: colors.primary,
+              },
             ]}
           >
-            {acceptedTerms ? <AppText style={styles.checkIcon}>✓</AppText> : null}
+            {acceptedTerms ? (
+              <AppText style={styles.checkIcon}>✓</AppText>
+            ) : null}
           </View>
-          <AppText variant="body" color={colors.textSecondary} style={styles.termsText}>
+          <AppText
+            variant="body"
+            color={colors.textSecondary}
+            style={styles.termsText}
+          >
             Acepto los terminos de uso y la politica de privacidad.
           </AppText>
         </Pressable>
 
         {fieldErrors?.acceptedTerms ? (
-          <AppText variant="caption" color={colors.danger} style={styles.termsError}>
+          <AppText
+            variant="caption"
+            color={colors.danger}
+            style={styles.termsError}
+          >
             {fieldErrors.acceptedTerms}
           </AppText>
         ) : null}

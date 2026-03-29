@@ -10,7 +10,9 @@ import {
 
 const API_BASE_URL = getApiBaseUrl();
 
-export async function fetchUserProfile(userId: string): Promise<BackendUserProfile | null> {
+export async function fetchUserProfile(
+  userId: string,
+): Promise<BackendUserProfile | null> {
   if (!userId.trim()) return null;
 
   try {
@@ -23,7 +25,9 @@ export async function fetchUserProfile(userId: string): Promise<BackendUserProfi
   }
 }
 
-export async function fetchUserByEmail(email: string): Promise<BackendUser | null> {
+export async function fetchUserByEmail(
+  email: string,
+): Promise<BackendUser | null> {
   const normalizedEmail = email.trim().toLowerCase();
   if (!normalizedEmail) return null;
 
@@ -85,7 +89,9 @@ export async function fetchProfileForSession(
   };
 }
 
-export async function syncUserFromAuth(payload: SyncAuthUserPayload): Promise<BackendUser | null> {
+export async function syncUserFromAuth(
+  payload: SyncAuthUserPayload,
+): Promise<BackendUser | null> {
   const normalizedEmail = payload.email.trim().toLowerCase();
   if (!normalizedEmail) return null;
 

@@ -6,7 +6,10 @@ import { TextInput, TextInputProps, View } from "react-native";
 
 import { createStyles } from "./styles";
 
-interface InputTextProps extends Omit<TextInputProps, "onChangeText" | "value"> {
+interface InputTextProps extends Omit<
+  TextInputProps,
+  "onChangeText" | "value"
+> {
   label?: string;
   value: string;
   onChangeText: (value: string) => void;
@@ -16,15 +19,7 @@ interface InputTextProps extends Omit<TextInputProps, "onChangeText" | "value"> 
 }
 
 const InputText = forwardRef<TextInput, InputTextProps>(function InputText(
-  {
-    label,
-    value,
-    onChangeText,
-    error,
-    errorText,
-    helperText,
-    ...rest
-  },
+  { label, value, onChangeText, error, errorText, helperText, ...rest },
   ref,
 ) {
   const theme = useAppTheme();

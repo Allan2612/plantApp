@@ -10,7 +10,8 @@ export default function Settings() {
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
-  const { themeMode, setThemeMode, themeOptions, languageOptions } = useSettingsScreen();
+  const { themeMode, setThemeMode, themeOptions, languageOptions } =
+    useSettingsScreen();
 
   return (
     <ScreenWrapper>

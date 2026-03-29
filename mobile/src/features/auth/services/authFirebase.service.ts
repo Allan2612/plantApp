@@ -12,7 +12,11 @@ import {
 import { mapFirebaseAuthCode } from "@/src/services/errors/errorMessages";
 import { getFirebaseAuthOrThrow } from "./firebaseClient";
 
-function logHandledAuthError(scope: string, code?: string, message?: string): void {
+function logHandledAuthError(
+  scope: string,
+  code?: string,
+  message?: string,
+): void {
   if (!__DEV__) return;
   console.warn(`[Auth][${scope}]`, { code, message });
 }
@@ -27,7 +31,10 @@ export function subscribeAuthState(listener: (user: User | null) => void) {
   }
 }
 
-export async function loginWithEmail(email: string, password: string): Promise<User> {
+export async function loginWithEmail(
+  email: string,
+  password: string,
+): Promise<User> {
   try {
     const auth = getFirebaseAuthOrThrow();
     const credential = await signInWithEmailAndPassword(
@@ -38,7 +45,11 @@ export async function loginWithEmail(email: string, password: string): Promise<U
     return credential.user;
   } catch (error) {
     const firebaseError = error as { code?: string; message?: string };
-    logHandledAuthError("loginWithEmail", firebaseError.code, firebaseError.message);
+    logHandledAuthError(
+      "loginWithEmail",
+      firebaseError.code,
+      firebaseError.message,
+    );
     const message = mapFirebaseAuthCode(firebaseError.code);
     throw new Error(message);
   }
@@ -59,14 +70,20 @@ export async function registerWithEmail(
 
     const normalizedDisplayName = displayName?.trim();
     if (normalizedDisplayName) {
-      await updateProfile(credential.user, { displayName: normalizedDisplayName });
+      await updateProfile(credential.user, {
+        displayName: normalizedDisplayName,
+      });
     }
 
     await sendEmailVerification(credential.user);
     return credential.user;
   } catch (error) {
     const firebaseError = error as { code?: string; message?: string };
-    logHandledAuthError("registerWithEmail", firebaseError.code, firebaseError.message);
+    logHandledAuthError(
+      "registerWithEmail",
+      firebaseError.code,
+      firebaseError.message,
+    );
     const message = mapFirebaseAuthCode(firebaseError.code);
     throw new Error(message);
   }
@@ -78,7 +95,11 @@ export async function requestPasswordReset(email: string): Promise<void> {
     await sendPasswordResetEmail(auth, email.trim());
   } catch (error) {
     const firebaseError = error as { code?: string; message?: string };
-    logHandledAuthError("requestPasswordReset", firebaseError.code, firebaseError.message);
+    logHandledAuthError(
+      "requestPasswordReset",
+      firebaseError.code,
+      firebaseError.message,
+    );
     const message = mapFirebaseAuthCode(firebaseError.code);
     throw new Error(message);
   }

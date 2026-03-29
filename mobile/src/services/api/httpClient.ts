@@ -1,4 +1,7 @@
-import { mapHttpStatus, normalizeErrorMessage } from "@/src/services/errors/errorMessages";
+import {
+  mapHttpStatus,
+  normalizeErrorMessage,
+} from "@/src/services/errors/errorMessages";
 
 const HTTP_TIMEOUT_MS = 8000;
 

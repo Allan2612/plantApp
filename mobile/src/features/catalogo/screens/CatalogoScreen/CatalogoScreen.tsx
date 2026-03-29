@@ -7,7 +7,10 @@ import CatalogPlantCreateModal from "@/src/features/catalogo/components/CatalogP
 import CatalogPlantCard from "@/src/features/catalogo/components/CatalogPlantCard";
 import { useCatalogoScreen } from "@/src/features/catalogo/hooks/useCatalogoScreen";
 import { useAppTheme } from "@/src/theme/ThemeContext";
-import { CreateCatalogPlantPayload, PlantCatalogItem } from "@/src/types/plant.types";
+import {
+  CreateCatalogPlantPayload,
+  PlantCatalogItem,
+} from "@/src/types/plant.types";
 import { FlatList, View } from "react-native";
 import { createStyles } from "./styles";
 
@@ -35,8 +38,12 @@ export default function CatalogoScreen({
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
-  const { showCreateModal, openCreateModal, closeCreateModal, handleCreatePlant } =
-    useCatalogoScreen(onCreatePlant);
+  const {
+    showCreateModal,
+    openCreateModal,
+    closeCreateModal,
+    handleCreatePlant,
+  } = useCatalogoScreen(onCreatePlant);
 
   if (loading) {
     return (
@@ -53,7 +60,11 @@ export default function CatalogoScreen({
       <ScreenWrapper>
         <View style={styles.centerContent}>
           <AppText variant="heading">Catálogo</AppText>
-          <AppText variant="body" color={colors.textSecondary} style={styles.centerText}>
+          <AppText
+            variant="body"
+            color={colors.textSecondary}
+            style={styles.centerText}
+          >
             {error}
           </AppText>
           <AppButton title="Reintentar" onPress={onRetry} />

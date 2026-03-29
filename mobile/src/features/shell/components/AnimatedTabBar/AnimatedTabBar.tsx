@@ -14,11 +14,7 @@ export default function AnimatedTabBar({
   return (
     <Animated.View
       onLayout={(e) => scrollAnim?.setTabBarHeight(e.nativeEvent.layout.height)}
-      style={[
-        styles.container,
-        dynamicStyle,
-        translateStyle,
-      ]}
+      style={[styles.container, dynamicStyle, translateStyle]}
     >
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];

@@ -6,7 +6,10 @@ import { TextInput, TextInputProps, View } from "react-native";
 
 import { createStyles } from "./styles";
 
-interface AuthInputProps extends Omit<TextInputProps, "value" | "onChangeText"> {
+interface AuthInputProps extends Omit<
+  TextInputProps,
+  "value" | "onChangeText"
+> {
   label: string;
   value: string;
   onChangeText: (value: string) => void;
@@ -15,14 +18,7 @@ interface AuthInputProps extends Omit<TextInputProps, "value" | "onChangeText"> 
 }
 
 const AuthInput = forwardRef<TextInput, AuthInputProps>(function AuthInput(
-  {
-    label,
-    value,
-    onChangeText,
-    errorText,
-    helperText,
-    ...rest
-  },
+  { label, value, onChangeText, errorText, helperText, ...rest },
   ref,
 ) {
   const theme = useAppTheme();
@@ -32,7 +28,11 @@ const AuthInput = forwardRef<TextInput, AuthInputProps>(function AuthInput(
 
   return (
     <View style={styles.container}>
-      <AppText variant="label" color={colors.textSecondary} style={styles.label}>
+      <AppText
+        variant="label"
+        color={colors.textSecondary}
+        style={styles.label}
+      >
         {label}
       </AppText>
       <TextInput

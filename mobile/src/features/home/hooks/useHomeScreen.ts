@@ -1,7 +1,10 @@
 import { useAuthSession } from "@/src/features/auth/hooks/useAuthSession";
 import { useCatalogo } from "@/src/features/catalogo/hooks/useCatalogo";
 import { ACTIONS } from "@/src/features/home/services/home.localData";
-import { fetchUserPlants, UserPlantListItem } from "@/src/features/mis-plantas/services/misPlantasApi.service";
+import {
+  fetchUserPlants,
+  UserPlantListItem,
+} from "@/src/features/mis-plantas/services/misPlantasApi.service";
 import { fetchProfileForSession } from "@/src/features/profile/services/profileApi.service";
 import { useScrollAnim } from "@/src/features/shell/hooks/ScrollAnimContext";
 import { PlantCatalogItem } from "@/src/types/plant.types";

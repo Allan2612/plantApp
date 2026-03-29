@@ -1,7 +1,12 @@
 import { AppTheme } from "@/src/theme/designSystem";
 import { StyleSheet } from "react-native";
 
-export function createStyles({ colors, spacing, radius, typography }: AppTheme) {
+export function createStyles({
+  colors,
+  spacing,
+  radius,
+  typography,
+}: AppTheme) {
   return StyleSheet.create({
     container: {
       width: "100%",

@@ -31,7 +31,7 @@ export default function ForgotPasswordScreen({
     <AuthScreenLayout
       title="Recuperar acceso"
       subtitle="Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña."
-      helperNote="Si no lo ves, revisa spam o promociones." 
+      helperNote="Si no lo ves, revisa spam o promociones."
     >
       <View style={styles.form}>
         <AuthInput

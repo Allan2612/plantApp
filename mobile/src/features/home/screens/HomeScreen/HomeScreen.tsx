@@ -40,7 +40,9 @@ export default function HomeScreen() {
     >
       <FlatList
         data={gardenItems}
-        keyExtractor={(item, index) => getStringField(getUserPlantPayload(item), "id") || `garden-${index}`}
+        keyExtractor={(item, index) =>
+          getStringField(getUserPlantPayload(item), "id") || `garden-${index}`
+        }
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
         onScroll={scrollAnim?.onScroll}
@@ -110,11 +112,20 @@ export default function HomeScreen() {
                         style={styles.trendingImage}
                         contentFit="cover"
                         transition={120}
-                        onError={() => markImageAsFailed(`trending-${item.id}`, item.imageUrl)}
+                        onError={() =>
+                          markImageAsFailed(
+                            `trending-${item.id}`,
+                            item.imageUrl,
+                          )
+                        }
                       />
                     ) : (
                       <View style={styles.imageFallback}>
-                        <Ionicons name="leaf" size={theme.spacing.xl} color={colors.primary} />
+                        <Ionicons
+                          name="leaf"
+                          size={theme.spacing.xl}
+                          color={colors.primary}
+                        />
                       </View>
                     )}
                     <View style={styles.trendingOverlay}>
@@ -149,11 +160,17 @@ export default function HomeScreen() {
                       contentFit="cover"
                       transition={120}
                       accessibilityLabel={`Foto de ${item.name}`}
-                      onError={() => markImageAsFailed(`catalog-${item.id}`, item.imageUrl)}
+                      onError={() =>
+                        markImageAsFailed(`catalog-${item.id}`, item.imageUrl)
+                      }
                     />
                   ) : (
                     <View style={styles.catalogImageFallback}>
-                      <Ionicons name="leaf" size={theme.spacing.xl} color={colors.primary} />
+                      <Ionicons
+                        name="leaf"
+                        size={theme.spacing.xl}
+                        color={colors.primary}
+                      />
                     </View>
                   )}
                   <View style={styles.catalogContent}>
@@ -220,11 +237,17 @@ export default function HomeScreen() {
                       style={styles.plantRowImage}
                       contentFit="cover"
                       transition={120}
-                      onError={() => markImageAsFailed(`garden-${plantId}`, imageUri)}
+                      onError={() =>
+                        markImageAsFailed(`garden-${plantId}`, imageUri)
+                      }
                     />
                   ) : (
                     <View style={styles.plantRowImageFallback}>
-                      <Ionicons name="leaf" size={theme.spacing.xl} color={colors.primary} />
+                      <Ionicons
+                        name="leaf"
+                        size={theme.spacing.xl}
+                        color={colors.primary}
+                      />
                     </View>
                   )}
                   <View style={styles.plantRowContent}>

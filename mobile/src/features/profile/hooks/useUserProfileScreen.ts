@@ -35,7 +35,9 @@ const userFormSchema = z.object({
   username: z.string().trim().min(1, "El nombre de usuario es requerido."),
   avatarId: z.string().trim().min(1, "El avatar es requerido."),
   headline: z.string().trim().optional(),
-  visibility: z.enum(visibilityValues, { message: "Selecciona una visibilidad." }),
+  visibility: z.enum(visibilityValues, {
+    message: "Selecciona una visibilidad.",
+  }),
   birthDate: z
     .string()
     .trim()
@@ -49,12 +51,17 @@ const userFormSchema = z.object({
 
 export type UserFormValues = z.infer<typeof userFormSchema>;
 
-function getStringField(source: Record<string, unknown> | BackendUser, key: string): string {
+function getStringField(
+  source: Record<string, unknown> | BackendUser,
+  key: string,
+): string {
   const value = (source as Record<string, unknown>)[key];
   return typeof value === "string" ? value : "";
 }
 
-function getVisibilityField(source: Record<string, unknown> | BackendUser): UserFormValues["visibility"] {
+function getVisibilityField(
+  source: Record<string, unknown> | BackendUser,
+): UserFormValues["visibility"] {
   const value = (source as Record<string, unknown>).visibility;
   if (value === "public" || value === "private" || value === "friends") {
     return value;
@@ -62,12 +69,16 @@ function getVisibilityField(source: Record<string, unknown> | BackendUser): User
   return visibilityOptions[0].value;
 }
 
-export function formatBirthDateForInput(value: string | null | undefined): string {
+export function formatBirthDateForInput(
+  value: string | null | undefined,
+): string {
   if (!value) return "";
   return value.slice(0, 10);
 }
 
-export function formatBirthDateForDisplay(value: string | null | undefined): string {
+export function formatBirthDateForDisplay(
+  value: string | null | undefined,
+): string {
   const normalized = formatBirthDateForInput(value);
   if (!normalized) return "Seleccionar fecha";
   const [year, month, day] = normalized.split("-");
@@ -94,7 +105,10 @@ export function toIsoBirthDate(date: Date): string {
 }
 
 export function mapVisibilityLabel(value: UserVisibility | undefined): string {
-  return visibilityOptions.find((option) => option.value === value)?.label ?? "No definido";
+  return (
+    visibilityOptions.find((option) => option.value === value)?.label ??
+    "No definido"
+  );
 }
 
 export function getAvatarUri(avatarId?: string | null): string | null {
@@ -121,7 +135,9 @@ export function useUserProfileScreen() {
   const [backendUserId, setBackendUserId] = useState<string>("");
   const [profileUser, setProfileUser] = useState<BackendUser | null>(null);
   const [showBirthDatePicker, setShowBirthDatePicker] = useState(false);
-  const [birthDatePickerValue, setBirthDatePickerValue] = useState<Date>(new Date());
+  const [birthDatePickerValue, setBirthDatePickerValue] = useState<Date>(
+    new Date(),
+  );
 
   const resolveSessionProfile = useCallback(async () => {
     if (!user?.uid) return null;
@@ -177,7 +193,9 @@ export function useUserProfileScreen() {
 
       const userPayload: BackendUser = profile.user;
 
-      setBackendUserId(resolution?.backendUserId ?? getStringField(userPayload, "id"));
+      setBackendUserId(
+        resolution?.backendUserId ?? getStringField(userPayload, "id"),
+      );
       setProfileUser(profile.user);
       setGlobalProfile(profile);
 
@@ -189,7 +207,9 @@ export function useUserProfileScreen() {
         avatarId: getStringField(userPayload, "avatarId"),
         headline: getStringField(userPayload, "headline"),
         visibility: getVisibilityField(userPayload),
-        birthDate: formatBirthDateForInput(getStringField(userPayload, "birthDate")),
+        birthDate: formatBirthDateForInput(
+          getStringField(userPayload, "birthDate"),
+        ),
         city: getStringField(userPayload, "city"),
       });
 
@@ -213,7 +233,9 @@ export function useUserProfileScreen() {
       }
 
       if (!targetUserId) {
-        throw new Error("No se encontro el identificador del usuario en backend.");
+        throw new Error(
+          "No se encontro el identificador del usuario en backend.",
+        );
       }
 
       try {
@@ -242,7 +264,10 @@ export function useUserProfileScreen() {
       showToast("Perfil actualizado correctamente.", "success");
       setIsEditing(false);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "No se pudo actualizar el perfil.";
+      const message =
+        error instanceof Error
+          ? error.message
+          : "No se pudo actualizar el perfil.";
       showToast(message, "error");
     } finally {
       setIsSaving(false);

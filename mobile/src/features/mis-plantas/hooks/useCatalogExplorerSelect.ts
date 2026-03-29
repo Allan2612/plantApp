@@ -21,7 +21,10 @@ export function useCatalogExplorerSelect(
     return items.filter((item) => {
       const name = item.name.toLowerCase();
       const scientificName = item.scientificName.toLowerCase();
-      return name.includes(normalizedQuery) || scientificName.includes(normalizedQuery);
+      return (
+        name.includes(normalizedQuery) ||
+        scientificName.includes(normalizedQuery)
+      );
     });
   }, [items, query]);
 

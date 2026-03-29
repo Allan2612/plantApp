@@ -1,7 +1,12 @@
 import { AppTheme } from "@/src/theme/designSystem";
 import { StyleSheet } from "react-native";
 
-export function createStyles({ colors, spacing, radius, typography }: AppTheme) {
+export function createStyles({
+  colors,
+  spacing,
+  radius,
+  typography,
+}: AppTheme) {
   const panelMaxHeight = "86%" as const;
   const previewHeight = spacing.xxl + spacing.xl;
 

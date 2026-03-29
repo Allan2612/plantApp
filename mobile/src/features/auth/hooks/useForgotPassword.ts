@@ -18,7 +18,9 @@ export function useForgotPassword() {
         "Te enviamos un correo para restablecer la contraseña. Revisa también spam o promociones.",
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo enviar el correo.");
+      setError(
+        err instanceof Error ? err.message : "No se pudo enviar el correo.",
+      );
     } finally {
       setLoading(false);
     }
