@@ -7,6 +7,7 @@ export function useCatalogo() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [slowServer, setSlowServer] = useState(false);
 
   const loadCatalog = useCallback(async () => {
     setError(null);
@@ -18,7 +19,9 @@ export function useCatalogo() {
       if (__DEV__) {
         console.error("[Catalogo][loadCatalog]", details);
       }
-      setError("No se pudo cargar el catalogo. Intenta de nuevo.");
+      setError(
+        "No se pudo cargar el catalogo. El servidor puede tardar en despertar, intenta nuevamente.",
+      );
       setItems([]);
     }
   }, []);
@@ -39,10 +42,26 @@ export function useCatalogo() {
     void initialLoad();
   }, [initialLoad]);
 
+  useEffect(() => {
+    if (!loading && !refreshing) {
+      setSlowServer(false);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setSlowServer(true);
+    }, 8000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [loading, refreshing]);
+
   return {
     items,
     loading,
     refreshing,
+    slowServer,
     error,
     retry: initialLoad,
     refresh,

@@ -8,7 +8,10 @@ const API_BASE_URL = apiResolution.baseUrl;
 export async function fetchCatalogPlants(): Promise<PlantCatalogItem[]> {
   const endpoint = `${API_BASE_URL}/api/catalog/plants`;
   try {
-    return httpGet<PlantCatalogItem[]>(endpoint);
+    return await httpGet<PlantCatalogItem[]>(endpoint, undefined, {
+      timeoutMs: 15000,
+      maxRetries: 4,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Error desconocido";
     throw new Error(

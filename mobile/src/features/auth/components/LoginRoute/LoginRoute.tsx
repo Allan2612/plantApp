@@ -12,11 +12,11 @@ export default function LoginRoute() {
     submitGoogle,
     loading: googleLoading,
     error: googleError,
-    isConfigured: isGoogleConfigured,
   } = useGoogleLogin();
   const { showToast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [slowApi, setSlowApi] = useState(false);
 
   useEffect(() => {
     if (!error) return;
@@ -28,6 +28,27 @@ export default function LoginRoute() {
     showToast(googleError, "error");
   }, [googleError, showToast]);
 
+  useEffect(() => {
+    if (!loading && !googleLoading) {
+      setSlowApi(false);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setSlowApi(true);
+    }, 8000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [googleLoading, loading]);
+
+  const loadingHint = !loading && !googleLoading
+    ? null
+    : slowApi
+      ? "Estamos despertando el servidor. Esto puede tardar hasta 1 minuto."
+      : "Conectando con la API...";
+
   const handleSubmit = () => {
     submit(email, password);
   };
@@ -36,12 +57,14 @@ export default function LoginRoute() {
     <LoginScreen
       email={email}
       password={password}
-      loading={loading || googleLoading}
-      error={error ?? googleError}
+      loading={loading}
+      loadingHint={loadingHint}
+      error={error}
+      googleError={googleError}
       onEmailChange={setEmail}
       onPasswordChange={setPassword}
       onSubmit={handleSubmit}
-      onGoogleSubmit={isGoogleConfigured ? submitGoogle : undefined}
+      onGoogleSubmit={submitGoogle}
       googleLoading={googleLoading}
       onGoToRegister={() => router.push("/(auth)/register")}
       onGoToForgotPassword={() => router.push("/(auth)/forgot-password")}

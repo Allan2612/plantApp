@@ -1,9 +1,10 @@
 import AuthActions from "@/src/features/auth/components/AuthActions/AuthActions";
 import AuthInput from "@/src/features/auth/components/AuthInput/AuthInput";
 import AuthScreenLayout from "@/src/features/auth/components/AuthScreenLayout/AuthScreenLayout";
-import AppButton from "@/src/components/shared/AppButton/AppButton";
+import AppText from "@/src/components/shared/AppText/AppText";
 import { useAppTheme } from "@/src/theme/ThemeContext";
-import { View } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
+import { Pressable, View } from "react-native";
 
 import { createStyles } from "./styles";
 
@@ -11,11 +12,13 @@ interface LoginScreenProps {
   email: string;
   password: string;
   loading: boolean;
+  loadingHint?: string | null;
   error: string | null;
+  googleError?: string | null;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
   onSubmit: () => void;
-  onGoogleSubmit?: () => void;
+  onGoogleSubmit: () => void;
   googleLoading?: boolean;
   onGoToRegister: () => void;
   onGoToForgotPassword: () => void;
@@ -25,7 +28,9 @@ export default function LoginScreen({
   email,
   password,
   loading,
+  loadingHint = null,
   error,
+  googleError = null,
   onEmailChange,
   onPasswordChange,
   onSubmit,
@@ -41,8 +46,33 @@ export default function LoginScreen({
     <AuthScreenLayout
       title="Iniciar sesion"
       subtitle="Accede a tu cuenta para continuar con el cuidado de tus plantas."
-      helperNote="Tus datos se mantienen sincronizados en tu cuenta." 
     >
+      <Pressable
+        onPress={() => {
+          onGoogleSubmit();
+        }}
+        disabled={loading || googleLoading}
+        style={[
+          styles.googleButton,
+          (loading || googleLoading) && styles.googleButtonDisabled,
+        ]}
+        accessibilityRole="button"
+        accessibilityLabel="Continuar con Google"
+      >
+        <View style={styles.googleIconWrap}>
+          <AntDesign name="google" size={18} color="#DB4437" />
+        </View>
+        <AppText variant="label" color={theme.colors.textPrimary} style={styles.googleLabel}>
+          {googleLoading ? "Conectando con Google..." : "Continuar con Google"}
+        </AppText>
+      </Pressable>
+
+      {googleError ? (
+        <AppText variant="caption" color={theme.colors.danger} style={styles.googleErrorText}>
+          {googleError}
+        </AppText>
+      ) : null}
+
       <View style={styles.form}>
         <AuthInput
           label="Correo"
@@ -68,6 +98,7 @@ export default function LoginScreen({
       <AuthActions
         submitLabel="Iniciar sesion"
         loading={loading}
+        loadingText={loadingHint}
         errorText={error}
         onSubmit={onSubmit}
         secondaryActionLabel="Olvide mi contraseña"
@@ -76,16 +107,6 @@ export default function LoginScreen({
         footerActionLabel="Crear cuenta"
         onFooterAction={onGoToRegister}
       />
-
-      {onGoogleSubmit ? (
-        <AppButton
-          title={googleLoading ? "Conectando con Google..." : "Continuar con Google"}
-          onPress={onGoogleSubmit}
-          disabled={loading || googleLoading}
-          variant="secondary"
-          style={styles.googleButton}
-        />
-      ) : null}
     </AuthScreenLayout>
   );
 }

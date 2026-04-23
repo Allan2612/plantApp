@@ -1,8 +1,10 @@
 import AuthActions from "@/src/features/auth/components/AuthActions/AuthActions";
 import AuthInput from "@/src/features/auth/components/AuthInput/AuthInput";
 import AuthScreenLayout from "@/src/features/auth/components/AuthScreenLayout/AuthScreenLayout";
+import AppText from "@/src/components/shared/AppText/AppText";
 import { useAppTheme } from "@/src/theme/ThemeContext";
-import { View } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
+import { Pressable, View } from "react-native";
 
 import { createStyles } from "./styles";
 
@@ -11,11 +13,15 @@ interface RegisterScreenProps {
   password: string;
   confirmPassword: string;
   loading: boolean;
+  loadingHint?: string | null;
   error: string | null;
+  googleError?: string | null;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
   onConfirmPasswordChange: (value: string) => void;
   onSubmit: () => void;
+  onGoogleSubmit?: () => void;
+  googleLoading?: boolean;
   onGoToLogin: () => void;
 }
 
@@ -24,11 +30,15 @@ export default function RegisterScreen({
   password,
   confirmPassword,
   loading,
+  loadingHint = null,
   error,
+  googleError = null,
   onEmailChange,
   onPasswordChange,
   onConfirmPasswordChange,
   onSubmit,
+  onGoogleSubmit,
+  googleLoading = false,
   onGoToLogin,
 }: RegisterScreenProps) {
   const theme = useAppTheme();
@@ -40,6 +50,32 @@ export default function RegisterScreen({
       subtitle="Completa tus datos para empezar a organizar tu rutina verde."
       helperNote="Te enviaremos un correo para validar tu cuenta al finalizar." 
     >
+      <Pressable
+        onPress={() => {
+          onGoogleSubmit?.();
+        }}
+        disabled={loading || googleLoading || !onGoogleSubmit}
+        style={[
+          styles.googleButton,
+          (loading || googleLoading || !onGoogleSubmit) && styles.googleButtonDisabled,
+        ]}
+        accessibilityRole="button"
+        accessibilityLabel="Continuar con Google"
+      >
+        <View style={styles.googleIconWrap}>
+          <AntDesign name="google" size={18} color="#DB4437" />
+        </View>
+        <AppText variant="label" color={theme.colors.textPrimary} style={styles.googleLabel}>
+          {googleLoading ? "Conectando con Google..." : "Continuar con Google"}
+        </AppText>
+      </Pressable>
+
+      {googleError ? (
+        <AppText variant="caption" color={theme.colors.danger} style={styles.googleErrorText}>
+          {googleError}
+        </AppText>
+      ) : null}
+
       <View style={styles.form}>
         <AuthInput
           label="Correo"
@@ -74,6 +110,7 @@ export default function RegisterScreen({
       <AuthActions
         submitLabel="Crear mi cuenta"
         loading={loading}
+        loadingText={loadingHint}
         errorText={error}
         onSubmit={onSubmit}
         footerText="¿Ya tienes una cuenta?"

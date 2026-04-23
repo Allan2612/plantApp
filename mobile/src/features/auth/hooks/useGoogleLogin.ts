@@ -1,5 +1,7 @@
+import * as AuthSession from "expo-auth-session";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
+import Constants from "expo-constants";
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 
@@ -11,6 +13,13 @@ WebBrowser.maybeCompleteAuthSession();
 
 const ANDROID_CLIENT_ID =
   process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID?.trim() ?? "";
+const WEB_CLIENT_ID =
+  process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim() ?? "";
+
+const IS_EXPO_GO = Constants.executionEnvironment === "storeClient";
+const NATIVE_REDIRECT_URI = AuthSession.makeRedirectUri({
+  scheme: "plantapp",
+});
 
 export function useGoogleLogin() {
   const setFirebaseUser = useAuthStore((state) => state.setFirebaseUser);
@@ -25,6 +34,9 @@ export function useGoogleLogin() {
 
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     androidClientId: ANDROID_CLIENT_ID || undefined,
+    expoClientId: WEB_CLIENT_ID || undefined,
+    webClientId: WEB_CLIENT_ID || undefined,
+    redirectUri: IS_EXPO_GO ? undefined : NATIVE_REDIRECT_URI,
   });
 
   useEffect(() => {
@@ -91,6 +103,13 @@ export function useGoogleLogin() {
       return;
     }
 
+    if (IS_EXPO_GO && !WEB_CLIENT_ID) {
+      setError(
+        "En Expo Go debes definir EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID o probar con un dev build.",
+      );
+      return;
+    }
+
     if (!request) {
       setError("Google Auth aún no está listo. Intenta de nuevo en unos segundos.");
       return;
@@ -98,7 +117,13 @@ export function useGoogleLogin() {
 
     try {
       setLoading(true);
-      await promptAsync();
+      await promptAsync(
+        IS_EXPO_GO
+          ? {
+              useProxy: true,
+            }
+          : undefined,
+      );
     } catch (promptError) {
       console.error("[Auth][googleLogin] prompt failed", promptError);
       setError("No se pudo abrir el inicio de sesión con Google.");

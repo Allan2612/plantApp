@@ -11,6 +11,7 @@ interface CatalogoScreenProps {
   items: PlantCatalogItem[];
   loading: boolean;
   refreshing: boolean;
+  slowServer: boolean;
   error: string | null;
   onRetry: () => void;
   onRefresh: () => void;
@@ -20,6 +21,7 @@ export default function CatalogoScreen({
   items,
   loading,
   refreshing,
+  slowServer,
   error,
   onRetry,
   onRefresh,
@@ -36,6 +38,11 @@ export default function CatalogoScreen({
           <AppText variant="body" color={colors.textSecondary}>
             Cargando catalogo...
           </AppText>
+          {slowServer ? (
+            <AppText variant="caption" color={colors.textSecondary} style={styles.centerText}>
+              El servidor se esta despertando. Puede tardar hasta 1 minuto.
+            </AppText>
+          ) : null}
         </View>
       </ScreenWrapper>
     );

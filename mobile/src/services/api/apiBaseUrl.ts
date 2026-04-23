@@ -3,7 +3,7 @@ import * as Linking from "expo-linking";
 import { Platform } from "react-native";
 
 const DEFAULT_API_PORT = "8000";
-const DEFAULT_BASE_URL = `http://127.0.0.1:${DEFAULT_API_PORT}`;
+const DEFAULT_BASE_URL = "https://plantapp-jjh7.onrender.com";
 
 export interface ApiBaseUrlResolution {
   baseUrl: string;
@@ -47,7 +47,7 @@ export function getApiBaseUrlResolution(): ApiBaseUrlResolution {
   const configured = process.env.EXPO_PUBLIC_API_BASE_URL?.trim();
   const expoHost = getExpoHost();
 
-  if (configured && !isLoopbackUrl(configured)) {
+  if (configured) {
     return {
       baseUrl: stripTrailingSlash(configured),
       source: "env",
@@ -55,7 +55,7 @@ export function getApiBaseUrlResolution(): ApiBaseUrlResolution {
     };
   }
 
-  if (expoHost && !isLoopbackUrl(expoHost)) {
+  if (__DEV__ && expoHost && !isLoopbackUrl(expoHost)) {
     return {
       baseUrl: `http://${expoHost}:${DEFAULT_API_PORT}`,
       source: "expo-host",
@@ -63,7 +63,7 @@ export function getApiBaseUrlResolution(): ApiBaseUrlResolution {
     };
   }
 
-  if (Platform.OS === "android") {
+  if (__DEV__ && Platform.OS === "android") {
     return {
       baseUrl: `http://10.0.2.2:${DEFAULT_API_PORT}`,
       source: "android-emulator",

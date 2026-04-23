@@ -8,6 +8,7 @@ import { createStyles } from "./styles";
 interface AuthActionsProps {
   submitLabel: string;
   loading?: boolean;
+  loadingText?: string | null;
   errorText?: string | null;
   successText?: string | null;
   onSubmit: () => void;
@@ -21,6 +22,7 @@ interface AuthActionsProps {
 export default function AuthActions({
   submitLabel,
   loading = false,
+  loadingText = null,
   errorText,
   successText,
   onSubmit,
@@ -46,6 +48,12 @@ export default function AuthActions({
       {successText ? (
         <AppText variant="caption" color={colors.primary} style={styles.feedbackText}>
           {successText}
+        </AppText>
+      ) : null}
+
+      {loading && loadingText ? (
+        <AppText variant="caption" color={colors.textSecondary} style={styles.feedbackText}>
+          {loadingText}
         </AppText>
       ) : null}
 

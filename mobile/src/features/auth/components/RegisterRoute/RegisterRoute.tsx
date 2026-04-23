@@ -1,23 +1,56 @@
+import { useGoogleLogin } from "@/src/features/auth/hooks/useGoogleLogin";
 import { useRegister } from "@/src/features/auth/hooks/useRegister";
 import RegisterScreen from "@/src/features/auth/screens/RegisterScreen/RegisterScreen";
 import { useToast } from "@/src/providers/ToastProvider";
 import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function RegisterRoute() {
   const router = useRouter();
   const { submit, loading, error } = useRegister();
+  const {
+    submitGoogle,
+    loading: googleLoading,
+    error: googleError,
+  } = useGoogleLogin();
   const { showToast } = useToast();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [slowApi, setSlowApi] = useState(false);
 
   const localError = useMemo(() => {
     if (!confirmPassword) return null;
     if (password !== confirmPassword) return "Las contraseñas no coinciden.";
     return null;
   }, [confirmPassword, password]);
+
+  useEffect(() => {
+    if (!googleError) return;
+    showToast(googleError, "error");
+  }, [googleError, showToast]);
+
+  useEffect(() => {
+    if (!loading && !googleLoading) {
+      setSlowApi(false);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setSlowApi(true);
+    }, 8000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [googleLoading, loading]);
+
+  const loadingHint = !loading && !googleLoading
+    ? null
+    : slowApi
+      ? "Estamos despertando el servidor. Esto puede tardar hasta 1 minuto."
+      : "Conectando con la API...";
 
   const handleSubmit = async () => {
     if (localError) return;
@@ -39,11 +72,15 @@ export default function RegisterRoute() {
       password={password}
       confirmPassword={confirmPassword}
       loading={loading}
+      loadingHint={loadingHint}
       error={localError ?? error}
+      googleError={googleError}
       onEmailChange={setEmail}
       onPasswordChange={setPassword}
       onConfirmPasswordChange={setConfirmPassword}
       onSubmit={handleSubmit}
+      onGoogleSubmit={submitGoogle}
+      googleLoading={googleLoading}
       onGoToLogin={() => router.replace("/(auth)/login")}
     />
   );

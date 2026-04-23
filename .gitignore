@@ -10,3 +10,4 @@ mobile/.expo/
 mobile/dist/
 .env
 backend-api/.env
+node_modules
