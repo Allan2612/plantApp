@@ -5,6 +5,8 @@ import { useToast } from "@/src/providers/ToastProvider";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function LoginRoute() {
   const router = useRouter();
   const { submit, loading, error } = useLogin();
@@ -50,7 +52,25 @@ export default function LoginRoute() {
       : "Conectando con la API...";
 
   const handleSubmit = () => {
-    submit(email, password);
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPassword = password.trim();
+
+    if (!normalizedEmail) {
+      showToast("Debes ingresar un correo.", "error");
+      return;
+    }
+
+    if (!EMAIL_REGEX.test(normalizedEmail)) {
+      showToast("Correo inválido.", "error");
+      return;
+    }
+
+    if (!normalizedPassword) {
+      showToast("Debes ingresar una contraseña.", "error");
+      return;
+    }
+
+    submit(normalizedEmail, password);
   };
 
   return (

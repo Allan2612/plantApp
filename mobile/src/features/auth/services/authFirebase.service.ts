@@ -42,17 +42,26 @@ function assertIdTokenOrThrow(idToken: string): void {
 }
 
 function logAuthIssue(scope: string, code?: string, message?: string): void {
+  if (!code) {
+    return;
+  }
+
   const payload = { code, message };
   if (
     code === "auth/invalid-credential" ||
     code === "auth/user-not-found" ||
-    code === "auth/wrong-password"
+    code === "auth/wrong-password" ||
+    code === "auth/invalid-login-credentials"
   ) {
-    console.warn(scope, payload);
+    if (__DEV__) {
+      console.warn(scope, payload);
+    }
     return;
   }
 
-  console.error(scope, payload);
+  if (__DEV__) {
+    console.error(scope, payload);
+  }
 }
 
 function mapFirebaseError(code?: string): string {

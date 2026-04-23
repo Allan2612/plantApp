@@ -39,6 +39,27 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permite a $(PRODUCT_NAME) acceder a tu camara",
+          "microphonePermission": "Permite a $(PRODUCT_NAME) acceder a tu microfono",
+          "recordAudioAndroid": true,
+          "barcodeScannerEnabled": false
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Permite a $(PRODUCT_NAME) acceder a tus fotos",
+          "savePhotosPermission": "Permite a $(PRODUCT_NAME) guardar fotos y videos",
+          "isAccessMediaLocationEnabled": true,
+          "granularPermissions": [
+            "audio",
+            "photo"
+          ]
+        }
       ]
     ],
     "experiments": {

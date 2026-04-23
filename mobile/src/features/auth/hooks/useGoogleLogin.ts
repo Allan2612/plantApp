@@ -34,7 +34,7 @@ export function useGoogleLogin() {
 
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     androidClientId: ANDROID_CLIENT_ID || undefined,
-    expoClientId: WEB_CLIENT_ID || undefined,
+    clientId: WEB_CLIENT_ID || undefined,
     webClientId: WEB_CLIENT_ID || undefined,
     redirectUri: IS_EXPO_GO ? undefined : NATIVE_REDIRECT_URI,
   });
@@ -117,13 +117,7 @@ export function useGoogleLogin() {
 
     try {
       setLoading(true);
-      await promptAsync(
-        IS_EXPO_GO
-          ? {
-              useProxy: true,
-            }
-          : undefined,
-      );
+      await promptAsync();
     } catch (promptError) {
       console.error("[Auth][googleLogin] prompt failed", promptError);
       setError("No se pudo abrir el inicio de sesión con Google.");

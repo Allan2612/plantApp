@@ -22,6 +22,12 @@ npm install
 npx expo start
 ```
 
+Para abrir directo en Expo Go:
+
+```bash
+npm run android
+```
+
 Opciones disponibles al iniciar:
 
 - Android emulator
@@ -45,6 +51,7 @@ Variable de entorno necesaria en `.env`:
 
 ```bash
 EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=tu-client-id.apps.googleusercontent.com
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=tu-web-client-id.apps.googleusercontent.com
 ```
 
 Flujo recomendado para obtener SHA-1 con EAS:
@@ -56,10 +63,9 @@ eas build:configure
 eas credentials
 ```
 
-Con el SHA-1 configurado en Google Cloud + Firebase, prueba en Android (dispositivo real o emulador):
+Con el SHA-1 configurado en Google Cloud + Firebase, prueba en Android con Expo Go:
 
 ```bash
-npx expo prebuild --clean
 npm run android
 ```
 
