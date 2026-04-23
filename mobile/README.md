@@ -22,11 +22,52 @@ npm install
 npx expo start
 ```
 
+Para abrir directo en Expo Go:
+
+```bash
+npm run android
+```
+
 Opciones disponibles al iniciar:
 
 - Android emulator
 - iOS simulator
 - Expo Go
+
+---
+
+## Login con Google (Android)
+
+La app ya incluye integración de Google Sign-In con Firebase para Android.
+
+Requisitos:
+
+- Habilitar `Google` como proveedor en Firebase Authentication.
+- Crear credencial OAuth 2.0 de Android en Google Cloud.
+- Usar el package Android actual del proyecto: `com.alan2612.plantApp`.
+- Registrar el SHA-1 del keystore que uses para la build.
+
+Variable de entorno necesaria en `.env`:
+
+```bash
+EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=tu-client-id.apps.googleusercontent.com
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=tu-web-client-id.apps.googleusercontent.com
+```
+
+Flujo recomendado para obtener SHA-1 con EAS:
+
+```bash
+npm install -g eas-cli
+eas login
+eas build:configure
+eas credentials
+```
+
+Con el SHA-1 configurado en Google Cloud + Firebase, prueba en Android con Expo Go:
+
+```bash
+npm run android
+```
 
 ---
 

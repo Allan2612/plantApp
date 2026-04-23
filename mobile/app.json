@@ -44,7 +44,22 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "PlanTica necesita acceso a la camara para tomar fotos de plantas y completar el formulario de identificacion."
+          "cameraPermission": "Permite a $(PRODUCT_NAME) acceder a tu camara",
+          "microphonePermission": "Permite a $(PRODUCT_NAME) acceder a tu microfono",
+          "recordAudioAndroid": true,
+          "barcodeScannerEnabled": false
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Permite a $(PRODUCT_NAME) acceder a tus fotos",
+          "savePhotosPermission": "Permite a $(PRODUCT_NAME) guardar fotos y videos",
+          "isAccessMediaLocationEnabled": true,
+          "granularPermissions": [
+            "audio",
+            "photo"
+          ]
         }
       ],
       "@react-native-community/datetimepicker"
@@ -52,6 +67,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "5505cd37-3175-46f9-ae56-6ad6a1c1e4c1"
+      }
     }
   }
 }

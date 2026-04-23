@@ -1,225 +1,199 @@
 import AppButton from "@/src/components/shared/AppButton/AppButton";
 import AppText from "@/src/components/shared/AppText/AppText";
-import InputText from "@/src/components/shared/InputText/InputText";
-import { useIdentificarScreen } from "@/src/features/identificar/hooks/useIdentificarScreen";
 import ScreenWrapper from "@/src/components/shared/ScreenWrapper/ScreenWrapper";
+import { useCamera } from "@/src/features/identificar/hooks/useCamera";
+import LocalObjectDetectionService, {
+  DetectionResult,
+} from "@/src/features/identificar/services/localObjectDetection.service";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { CameraView } from "expo-camera";
-import { Controller } from "react-hook-form";
-import {
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  View,
-} from "react-native";
-
+import { useState } from "react";
+import { Image, View } from "react-native";
 import { createStyles } from "./styles";
 
 export default function IdentificarScreen() {
   const theme = useAppTheme();
+  const { colors } = theme;
   const styles = createStyles(theme);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [detections, setDetections] = useState<DetectionResult[]>([]);
+  const [isDetecting, setIsDetecting] = useState(false);
+
   const {
     cameraRef,
-    nicknameRef,
-    contextRef,
-    permission,
-    requestPermission,
-    cameraError,
-    setCameraError,
-    isCameraVisible,
-    setIsCameraVisible,
-    isSavingDraft,
-    draft,
-    control,
-    errors,
-    photoPreview,
-    onSaveDraft,
-    handleTakePhoto,
-    handleRetakePhoto,
-    handleRemovePhoto,
-  } = useIdentificarScreen();
+    isPermissionGranted,
+    isLoadingPermissions,
+    facing,
+    flashMode,
+    isRecording,
+    isBusy,
+    requestPermissions,
+    takePhoto,
+    startRecording,
+    stopRecording,
+    toggleFacing,
+    toggleFlash,
+    saveToGallery,
+    lastPhoto,
+    lastVideo,
+    error,
+  } = useCamera();
+
+  const handleTakePhoto = async () => {
+    const photo = await takePhoto({ quality: 0.8 });
+    if (!photo) return;
+
+    await saveToGallery(photo.uri);
+    setFeedback("Foto capturada y guardada en galeria");
+  };
+
+  const handleRecordVideo = async () => {
+    setFeedback("Grabando video...");
+
+    const video = await startRecording({
+      maxDuration: 10,
+    });
+
+    if (!video) return;
+
+    await saveToGallery(video.uri);
+    setFeedback("Video grabado y guardado en galeria");
+  };
+
+  const handleDetectObjects = async () => {
+    if (!lastPhoto?.uri) {
+      setFeedback("Primero toma una foto para analizarla");
+      return;
+    }
+
+    setIsDetecting(true);
+    setFeedback("Analizando imagen localmente...");
+
+    try {
+      const results = await LocalObjectDetectionService.detectFromImageUri(lastPhoto.uri);
+      setDetections(results);
+
+      if (!results.length) {
+        setFeedback("No se detectaron objetos en la imagen");
+        return;
+      }
+
+      setFeedback(`Se detectaron ${results.length} objeto(s)`);
+    } catch {
+      setDetections([]);
+      setFeedback("No se pudo ejecutar la deteccion local en este dispositivo");
+    } finally {
+      setIsDetecting(false);
+    }
+  };
+
+  const handleToggleRecording = async () => {
+    if (isRecording) {
+      stopRecording();
+      return;
+    }
+
+    await handleRecordVideo();
+  };
+
+  if (!isPermissionGranted) {
+    return (
+      <ScreenWrapper>
+        <View style={styles.permissionContainer}>
+          <AppText variant="heading">Identificar</AppText>
+          <AppText variant="body" color={colors.textSecondary} style={styles.centerText}>
+            Necesitamos permisos de camara y galeria para continuar.
+          </AppText>
+          <AppButton
+            title={isLoadingPermissions ? "Solicitando permisos..." : "Dar permisos"}
+            onPress={requestPermissions}
+            disabled={isLoadingPermissions}
+          />
+        </View>
+      </ScreenWrapper>
+    );
+  }
 
   return (
     <ScreenWrapper>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 16 : 0}
-      >
-        <ScrollView
-          contentContainerStyle={styles.container}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-          automaticallyAdjustKeyboardInsets
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.headerCard}>
-            <AppText variant="heading">Identificar planta</AppText>
-            <AppText variant="body" style={styles.headerSubtitle}>
-              Toma una foto y completa un formulario temporal. La consulta a IA
-              se habilitara en una proxima etapa.
-            </AppText>
-          </View>
+      <View style={styles.container}>
+        <View style={styles.cameraCard}>
+          <CameraView
+            ref={cameraRef}
+            style={styles.camera}
+            facing={facing}
+            flash={flashMode}
+          />
+        </View>
 
-          <View style={styles.cameraCard}>
-            <AppText variant="subheading">Foto de la planta</AppText>
-            {!permission ? (
-              <AppText variant="body" style={styles.infoText}>
-                Verificando permisos de camara...
-              </AppText>
-            ) : null}
+        <View style={styles.controlsRow}>
+          <AppButton title="Rotar" onPress={toggleFacing} style={styles.controlButton} />
+          <AppButton
+            title={`Flash: ${flashMode}`}
+            onPress={toggleFlash}
+            style={styles.controlButton}
+          />
+        </View>
 
-            {permission && !permission.granted ? (
-              <View style={styles.permissionBlock}>
-                <AppText variant="body" style={styles.infoText}>
-                  Necesitamos permiso de camara para capturar la planta.
-                </AppText>
-                <AppButton
-                  title="Permitir camara"
-                  onPress={() => {
-                    void requestPermission();
-                  }}
-                />
-              </View>
-            ) : null}
+        <View style={styles.controlsRow}>
+          <AppButton
+            title={isBusy ? "Procesando..." : "Tomar foto"}
+            onPress={handleTakePhoto}
+            disabled={isBusy}
+            style={styles.controlButton}
+          />
+          <AppButton
+            title={isRecording ? "Detener video" : "Grabar video"}
+            onPress={handleToggleRecording}
+            style={styles.controlButton}
+          />
+        </View>
 
-            {permission?.granted ? (
-              <View style={styles.captureArea}>
-                {isCameraVisible ? (
-                  <CameraView
-                    ref={cameraRef}
-                    style={styles.cameraView}
-                    facing="back"
-                  />
-                ) : photoPreview ? (
-                  <Image
-                    source={{ uri: photoPreview }}
-                    style={styles.previewImage}
-                  />
-                ) : null}
+        {feedback ? (
+          <AppText variant="caption" color={colors.textSecondary} style={styles.centerText}>
+            {feedback}
+          </AppText>
+        ) : null}
 
-                <View style={styles.captureActions}>
-                  {isCameraVisible ? (
-                    <>
-                      <AppButton title="Capturar" onPress={handleTakePhoto} />
-                      <AppButton
-                        title="Cancelar"
-                        variant="secondary"
-                        onPress={() => {
-                          setIsCameraVisible(false);
-                        }}
-                      />
-                    </>
-                  ) : photoPreview ? (
-                    <>
-                      <AppButton
-                        title="Tomar otra foto"
-                        variant="secondary"
-                        onPress={handleRetakePhoto}
-                      />
-                      <AppButton
-                        title="Quitar foto"
-                        variant="secondary"
-                        onPress={handleRemovePhoto}
-                      />
-                    </>
-                  ) : (
-                    <AppButton
-                      title="Añadir foto"
-                      onPress={() => {
-                        setIsCameraVisible(true);
-                        setCameraError(null);
-                      }}
-                    />
-                  )}
-                </View>
-              </View>
-            ) : null}
+        {error ? (
+          <AppText variant="caption" color={colors.danger} style={styles.centerText}>
+            {error}
+          </AppText>
+        ) : null}
 
-            {cameraError ? (
-              <AppText variant="caption" style={styles.errorText}>
-                {cameraError}
-              </AppText>
-            ) : null}
-
-            {errors.photoUri?.message ? (
-              <AppText variant="caption" style={styles.errorText}>
-                {errors.photoUri.message}
-              </AppText>
-            ) : null}
-          </View>
-
-          <View style={styles.formCard}>
-            <AppText variant="subheading">Formulario temporal</AppText>
-
-            <Controller
-              control={control}
-              name="nickname"
-              render={({ field: { value, onChange } }) => (
-                <InputText
-                  ref={nicknameRef}
-                  label="Nombre tentativo (opcional)"
-                  value={value ?? ""}
-                  onChangeText={onChange}
-                  error={errors.nickname?.message}
-                  placeholder="Ejemplo: Monstera"
-                  autoCapitalize="words"
-                  returnKeyType="next"
-                  onSubmitEditing={() => contextRef.current?.focus()}
-                  blurOnSubmit={false}
-                />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="context"
-              render={({ field: { value, onChange } }) => (
-                <InputText
-                  ref={contextRef}
-                  label="Contexto para la IA (opcional)"
-                  value={value ?? ""}
-                  onChangeText={onChange}
-                  error={errors.context?.message}
-                  placeholder="Ejemplo: hoja con manchas marrones, interior sin sol directo"
-                  multiline
-                  numberOfLines={4}
-                  textAlignVertical="top"
-                  returnKeyType="done"
-                  onSubmitEditing={onSaveDraft}
-                />
-              )}
-            />
-
+        {lastPhoto ? (
+          <View style={styles.previewContainer}>
+            <AppText variant="label">Ultima foto</AppText>
+            <Image source={{ uri: lastPhoto.uri }} style={styles.previewImage} />
             <AppButton
-              title={
-                isSavingDraft ? "Guardando..." : "Guardar formulario temporal"
-              }
-              onPress={onSaveDraft}
-              disabled={isSavingDraft}
+              title={isDetecting ? "Detectando..." : "Detectar objetos"}
+              onPress={handleDetectObjects}
+              disabled={isDetecting}
             />
-          </View>
 
-          {draft ? (
-            <View style={styles.summaryCard}>
-              <AppText variant="subheading">Borrador listo</AppText>
-              <AppText variant="body" style={styles.summaryText}>
-                Foto: capturada
-              </AppText>
-              <AppText variant="body" style={styles.summaryText}>
-                Nombre tentativo: {draft.nickname ?? "No definido"}
-              </AppText>
-              <AppText variant="body" style={styles.summaryText}>
-                Contexto: {draft.context ?? "No definido"}
-              </AppText>
-              <AppText variant="caption" style={styles.summaryDate}>
-                Guardado temporal: {new Date(draft.createdAt).toLocaleString()}
-              </AppText>
-            </View>
-          ) : null}
-        </ScrollView>
-      </KeyboardAvoidingView>
+            {detections.length ? (
+              <View style={styles.detectionsContainer}>
+                <AppText variant="label">Objetos detectados</AppText>
+                {detections.map((item, index) => (
+                  <AppText
+                    key={`${item.label}-${index}`}
+                    variant="caption"
+                    color={colors.textSecondary}
+                  >
+                    {`${index + 1}. ${item.label} (${Math.round(item.score * 100)}%)`}
+                  </AppText>
+                ))}
+              </View>
+            ) : null}
+          </View>
+        ) : null}
+
+        {lastVideo ? (
+          <AppText variant="caption" color={colors.textSecondary}>
+            Ultimo video: {lastVideo.uri}
+          </AppText>
+        ) : null}
+      </View>
     </ScreenWrapper>
   );
 }

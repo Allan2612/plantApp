@@ -15,7 +15,7 @@ const LOGO_IMAGE = require("@/assets/images/Logo.png");
 interface AuthScreenLayoutProps {
   title?: string;
   subtitle: string;
-  helperNote?: string;
+  helperNote?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -75,9 +75,13 @@ export default function AuthScreenLayout({
             {children}
             {helperNote ? (
               <View style={styles.helperBox}>
-                <AppText variant="caption" color={colors.textSecondary}>
-                  {helperNote}
-                </AppText>
+                {typeof helperNote === "string" ? (
+                  <AppText variant="caption" color={colors.textSecondary}>
+                    {helperNote}
+                  </AppText>
+                ) : (
+                  helperNote
+                )}
               </View>
             ) : null}
           </View>

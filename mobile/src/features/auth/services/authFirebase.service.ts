@@ -1,10 +1,12 @@
 import {
+  GoogleAuthProvider,
   User,
   createUserWithEmailAndPassword,
   deleteUser,
   onAuthStateChanged,
   sendEmailVerification,
   sendPasswordResetEmail,
+  signInWithCredential,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
@@ -19,6 +21,37 @@ function logHandledAuthError(
 ): void {
   if (!__DEV__) return;
   console.warn(`[Auth][${scope}]`, { code, message });
+}
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function normalizeEmailOrThrow(email: string): string {
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!normalizedEmail) {
+    throw new Error("Debes ingresar un correo.");
+  }
+  if (!EMAIL_REGEX.test(normalizedEmail)) {
+    throw new Error("Correo inválido.");
+  }
+  return normalizedEmail;
+}
+
+function assertPasswordOrThrow(password: string): void {
+  if (!password.trim()) {
+    throw new Error("Debes ingresar una contraseña.");
+  }
+}
+
+function assertIdTokenOrThrow(idToken: string): void {
+  if (!idToken.trim()) {
+    throw new Error("No se recibió un token de Google válido.");
+  }
+}
+
+function mapAndThrow(scope: string, error: unknown): never {
+  const firebaseError = error as { code?: string; message?: string };
+  logHandledAuthError(scope, firebaseError.code, firebaseError.message);
+  throw new Error(mapFirebaseAuthCode(firebaseError.code));
 }
 
 export function subscribeAuthState(listener: (user: User | null) => void) {
@@ -36,22 +69,27 @@ export async function loginWithEmail(
   password: string,
 ): Promise<User> {
   try {
+    const normalizedEmail = normalizeEmailOrThrow(email);
+    assertPasswordOrThrow(password);
+
     const auth = getFirebaseAuthOrThrow();
-    const credential = await signInWithEmailAndPassword(
-      auth,
-      email.trim(),
-      password,
-    );
+    const credential = await signInWithEmailAndPassword(auth, normalizedEmail, password);
     return credential.user;
   } catch (error) {
-    const firebaseError = error as { code?: string; message?: string };
-    logHandledAuthError(
-      "loginWithEmail",
-      firebaseError.code,
-      firebaseError.message,
-    );
-    const message = mapFirebaseAuthCode(firebaseError.code);
-    throw new Error(message);
+    mapAndThrow("loginWithEmail", error);
+  }
+}
+
+export async function loginWithGoogleIdToken(idToken: string): Promise<User> {
+  try {
+    assertIdTokenOrThrow(idToken);
+
+    const auth = getFirebaseAuthOrThrow();
+    const credential = GoogleAuthProvider.credential(idToken);
+    const userCredential = await signInWithCredential(auth, credential);
+    return userCredential.user;
+  } catch (error) {
+    mapAndThrow("loginWithGoogleIdToken", error);
   }
 }
 
@@ -61,10 +99,13 @@ export async function registerWithEmail(
   displayName?: string,
 ): Promise<User> {
   try {
+    const normalizedEmail = normalizeEmailOrThrow(email);
+    assertPasswordOrThrow(password);
+
     const auth = getFirebaseAuthOrThrow();
     const credential = await createUserWithEmailAndPassword(
       auth,
-      email.trim(),
+      normalizedEmail,
       password,
     );
 
@@ -78,53 +119,53 @@ export async function registerWithEmail(
     await sendEmailVerification(credential.user);
     return credential.user;
   } catch (error) {
-    const firebaseError = error as { code?: string; message?: string };
-    logHandledAuthError(
-      "registerWithEmail",
-      firebaseError.code,
-      firebaseError.message,
-    );
-    const message = mapFirebaseAuthCode(firebaseError.code);
-    throw new Error(message);
+    mapAndThrow("registerWithEmail", error);
   }
 }
 
 export async function requestPasswordReset(email: string): Promise<void> {
   try {
+    const normalizedEmail = normalizeEmailOrThrow(email);
+
     const auth = getFirebaseAuthOrThrow();
-    await sendPasswordResetEmail(auth, email.trim());
+    await sendPasswordResetEmail(auth, normalizedEmail);
   } catch (error) {
-    const firebaseError = error as { code?: string; message?: string };
-    logHandledAuthError(
-      "requestPasswordReset",
-      firebaseError.code,
-      firebaseError.message,
-    );
-    const message = mapFirebaseAuthCode(firebaseError.code);
-    throw new Error(message);
+    mapAndThrow("requestPasswordReset", error);
   }
 }
 
 export async function resendAccountVerification(): Promise<void> {
-  const auth = getFirebaseAuthOrThrow();
-  const user = auth.currentUser;
-  if (!user) {
-    throw new Error("No hay sesión activa.");
+  try {
+    const auth = getFirebaseAuthOrThrow();
+    const user = auth.currentUser;
+    if (!user) {
+      throw { code: "auth/no-current-user" };
+    }
+    await sendEmailVerification(user);
+  } catch (error) {
+    mapAndThrow("resendAccountVerification", error);
   }
-  await sendEmailVerification(user);
 }
 
 export async function refreshCurrentUser(): Promise<User | null> {
-  const auth = getFirebaseAuthOrThrow();
-  const user = auth.currentUser;
-  if (!user) return null;
-  await user.reload();
-  return auth.currentUser;
+  try {
+    const auth = getFirebaseAuthOrThrow();
+    const user = auth.currentUser;
+    if (!user) return null;
+    await user.reload();
+    return auth.currentUser;
+  } catch (error) {
+    mapAndThrow("refreshCurrentUser", error);
+  }
 }
 
 export async function logoutUser(): Promise<void> {
-  const auth = getFirebaseAuthOrThrow();
-  await signOut(auth);
+  try {
+    const auth = getFirebaseAuthOrThrow();
+    await signOut(auth);
+  } catch (error) {
+    mapAndThrow("logoutUser", error);
+  }
 }
 
 export async function deleteCurrentUser(): Promise<void> {
