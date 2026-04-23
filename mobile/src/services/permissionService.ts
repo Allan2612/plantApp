@@ -1,6 +1,10 @@
 import { Camera } from "expo-camera";
+import Constants from "expo-constants";
 import * as MediaLibrary from "expo-media-library";
 import { Linking } from "react-native";
+
+// expo-media-library no tiene acceso completo en Expo Go en Android
+const IS_EXPO_GO = Constants.executionEnvironment === "storeClient";
 
 export type PermissionStatus = "granted" | "denied" | "undetermined";
 
@@ -20,6 +24,8 @@ export interface AppPermissionDetails {
   mediaLibrary: PermissionDetails;
 }
 
+const MEDIA_LIBRARY_PERMISSIONS: MediaLibrary.GranularPermission[] = ["photo"];
+
 const normalizeStatus = (granted: boolean, status: string): PermissionStatus => {
   if (granted) return "granted";
   if (status === "undetermined") return "undetermined";
@@ -33,14 +39,20 @@ const PermissionService = {
   },
 
   async requestMediaLibraryPermission(): Promise<PermissionStatus> {
-    const { granted, status } = await MediaLibrary.requestPermissionsAsync();
+    if (IS_EXPO_GO) return "granted";
+    const { granted, status } = await MediaLibrary.requestPermissionsAsync(
+      false,
+      MEDIA_LIBRARY_PERMISSIONS
+    );
     return normalizeStatus(granted, status);
   },
 
   async checkAllPermissions(): Promise<AppPermissions> {
     const [camera, mediaLibrary] = await Promise.all([
       Camera.getCameraPermissionsAsync(),
-      MediaLibrary.getPermissionsAsync(),
+      IS_EXPO_GO
+        ? Promise.resolve({ granted: true, status: "granted" as const })
+        : MediaLibrary.getPermissionsAsync(false, MEDIA_LIBRARY_PERMISSIONS),
     ]);
 
     return {
@@ -52,7 +64,9 @@ const PermissionService = {
   async checkAllPermissionDetails(): Promise<AppPermissionDetails> {
     const [camera, mediaLibrary] = await Promise.all([
       Camera.getCameraPermissionsAsync(),
-      MediaLibrary.getPermissionsAsync(),
+      IS_EXPO_GO
+        ? Promise.resolve({ granted: true, status: "granted" as const, canAskAgain: false })
+        : MediaLibrary.getPermissionsAsync(false, MEDIA_LIBRARY_PERMISSIONS),
     ]);
 
     return {

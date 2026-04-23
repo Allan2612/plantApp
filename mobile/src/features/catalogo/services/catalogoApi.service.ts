@@ -76,13 +76,19 @@ function normalizeWikimediaUrl(rawUrl: string): string {
       return rawUrl;
     }
 
+    // Transform Special:FilePath/<filename> → thumb.php?f=<filename>&width=800
+    // Special:FilePath returns a 302 redirect that expo-image/Glide can't follow reliably on Android.
+    // thumb.php serves the image directly (or a thumbnail) without a redirect.
+    const filePathPrefix = "/wiki/Special:FilePath/";
+    if (parsed.pathname.startsWith(filePathPrefix)) {
+      const fileName = parsed.pathname.slice(filePathPrefix.length);
+      return `https://commons.wikimedia.org/w/thumb.php?f=${fileName}&width=800`;
+    }
+
     const fileWikiPrefix = "/wiki/File:";
     if (parsed.pathname.startsWith(fileWikiPrefix)) {
       const fileName = parsed.pathname.slice(fileWikiPrefix.length);
-      parsed.pathname = `/wiki/Special:FilePath/${fileName}`;
-      parsed.search = "";
-      parsed.hash = "";
-      return parsed.toString();
+      return `https://commons.wikimedia.org/w/thumb.php?f=${fileName}&width=800`;
     }
 
     return rawUrl;

@@ -1,5 +1,5 @@
 import AppText from "@/src/components/shared/AppText/AppText";
-import { useCatalogPlantCard } from "@/src/features/catalogo/hooks/useCatalogPlantCard";
+import { buildImageSource, useCatalogPlantCard } from "@/src/features/catalogo/hooks/useCatalogPlantCard";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { PlantCatalogItem } from "@/src/types/plant.types";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,7 +22,7 @@ export default function CatalogPlantCard({ plant }: CatalogPlantCardProps) {
     <View style={styles.card}>
       {shouldRenderImage ? (
         <Image
-          source={{ uri: plant.imageUrl ?? "" }}
+          source={buildImageSource(plant.imageUrl)}
           style={styles.image}
           contentFit="cover"
           transition={120}

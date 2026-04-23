@@ -36,12 +36,35 @@ function getStringField(source: Record<string, unknown>, key: string): string {
   return typeof value === "string" ? value : "";
 }
 
+function normalizeImageUrl(url: string): string {
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+
+  if (trimmed.startsWith("//")) {
+    return `https:${trimmed}`;
+  }
+
+  if (/^(file|content|data):/i.test(trimmed)) {
+    return trimmed;
+  }
+
+  if (!/^https?:\/\//i.test(trimmed)) {
+    return "";
+  }
+
+  try {
+    return encodeURI(decodeURI(trimmed));
+  } catch {
+    return trimmed;
+  }
+}
+
 function resolveGardenImage(item: UserPlantListItem): string {
   const userPlant = getUserPlantPayload(item);
   const catalog = getCatalogPayload(item);
   const customImage = getStringField(userPlant, "customImageUrl").trim();
-  if (customImage) return customImage;
-  return getStringField(catalog, "imageUrl");
+  if (customImage) return normalizeImageUrl(customImage);
+  return normalizeImageUrl(getStringField(catalog, "imageUrl"));
 }
 
 function mapHealthLabel(value: string): string {
@@ -114,10 +137,6 @@ export function useHomeScreen() {
   }, [providerId, user?.displayName, user?.email, user?.uid]);
 
   const markImageAsFailed = (imageId: string, imageUrl: string | null) => {
-    if (__DEV__) {
-      console.warn("[Home][ImageError]", { imageId, imageUrl });
-    }
-
     setFailedImages((current) => {
       if (current[imageId]) {
         return current;

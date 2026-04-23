@@ -15,19 +15,24 @@ interface UseCameraOptions {
 interface UseCameraReturn {
   cameraRef: React.RefObject<CameraView | null>;
   permissions: AppPermissions | null;
-  isPermissionGranted: boolean;
+  isCameraPermissionGranted: boolean;
+  isMediaLibraryPermissionGranted: boolean;
   isLoadingPermissions: boolean;
   facing: CameraType;
   flashMode: FlashMode;
   isRecording: boolean;
   isBusy: boolean;
   requestPermissions: () => Promise<void>;
+  requestMediaLibraryPermission: () => Promise<void>;
   takePhoto: (options?: CaptureOptions) => Promise<PhotoResult | null>;
   startRecording: (options?: VideoCaptureOptions) => Promise<VideoResult | null>;
   stopRecording: () => void;
   toggleFacing: () => void;
   toggleFlash: () => void;
   saveToGallery: (uri: string) => Promise<void>;
+  clearError: () => void;
+  clearLastPhoto: () => void;
+  clearLastVideo: () => void;
   lastPhoto: PhotoResult | null;
   lastVideo: VideoResult | null;
   error: string | null;
@@ -36,7 +41,7 @@ interface UseCameraReturn {
 export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
   const { requestOnMount = true } = options;
 
-  const cameraRef = useRef<CameraView>(null);
+  const cameraRef = useRef<CameraView | null>(null);
 
   const [permissions, setPermissions] = useState<AppPermissions | null>(null);
   const [isLoadingPermissions, setIsLoadingPermissions] = useState(false);
@@ -48,20 +53,55 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
   const [lastVideo, setLastVideo] = useState<VideoResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const isPermissionGranted =
-    !!permissions &&
-    PermissionService.isGranted(permissions.camera) &&
-    PermissionService.isGranted(permissions.mediaLibrary);
+  const isCameraPermissionGranted =
+    !!permissions && PermissionService.isGranted(permissions.camera);
+
+  const isMediaLibraryPermissionGranted =
+    !!permissions && PermissionService.isGranted(permissions.mediaLibrary);
+
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  const clearLastPhoto = useCallback(() => {
+    setLastPhoto(null);
+  }, []);
+
+  const clearLastVideo = useCallback(() => {
+    setLastVideo(null);
+  }, []);
 
   const requestPermissions = useCallback(async () => {
     setIsLoadingPermissions(true);
     setError(null);
 
     try {
-      const result = await PermissionService.requestAllPermissions();
-      setPermissions(result);
+      const cameraStatus = await PermissionService.requestCameraPermission();
+
+      setPermissions((current) => ({
+        camera: cameraStatus,
+        mediaLibrary: current?.mediaLibrary ?? "undetermined",
+      }));
     } catch {
-      setError("Error al solicitar permisos");
+      setError("Error al solicitar permiso de camara");
+    } finally {
+      setIsLoadingPermissions(false);
+    }
+  }, []);
+
+  const requestMediaLibraryPermission = useCallback(async () => {
+    setIsLoadingPermissions(true);
+    setError(null);
+
+    try {
+      const mediaLibraryStatus = await PermissionService.requestMediaLibraryPermission();
+
+      setPermissions((current) => ({
+        camera: current?.camera ?? "undetermined",
+        mediaLibrary: mediaLibraryStatus,
+      }));
+    } catch {
+      setError("Error al solicitar permiso de galeria");
     } finally {
       setIsLoadingPermissions(false);
     }
@@ -69,31 +109,104 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
 
   useEffect(() => {
     if (!requestOnMount) return;
-    requestPermissions();
-  }, [requestOnMount, requestPermissions]);
 
-  const takePhoto = useCallback(async (options: CaptureOptions = {}): Promise<PhotoResult | null> => {
-    setIsBusy(true);
+    let isMounted = true;
+
+    const bootstrapPermissions = async () => {
+      try {
+        const result = await PermissionService.checkAllPermissions();
+
+        if (!isMounted) return;
+        setPermissions(result);
+      } catch {
+        if (!isMounted) return;
+        setError("Error al consultar permisos");
+      }
+    };
+
+    void bootstrapPermissions();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [requestOnMount]);
+
+  const ensureCameraPermission = useCallback(async () => {
+    if (permissions && PermissionService.isGranted(permissions.camera)) {
+      return true;
+    }
+
+    setIsLoadingPermissions(true);
     setError(null);
 
     try {
-      const photo = await CameraService.takePhoto(cameraRef, options);
-      setLastPhoto(photo);
-      return photo;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Error al capturar foto";
-      setError(message);
-      return null;
+      const cameraStatus = await PermissionService.requestCameraPermission();
+
+      setPermissions((current) => ({
+        camera: cameraStatus,
+        mediaLibrary: current?.mediaLibrary ?? "undetermined",
+      }));
+
+      return PermissionService.isGranted(cameraStatus);
+    } catch {
+      setError("Error al solicitar permiso de camara");
+      return false;
     } finally {
-      setIsBusy(false);
+      setIsLoadingPermissions(false);
     }
-  }, []);
+  }, [permissions]);
+
+  const takePhoto = useCallback(
+    async (options: CaptureOptions = {}): Promise<PhotoResult | null> => {
+      if (isBusy || isRecording) return null;
+
+      const hasPermission = await ensureCameraPermission();
+      if (!hasPermission) {
+        setError("Debes permitir la camara para tomar fotos");
+        return null;
+      }
+
+      if (!cameraRef.current) {
+        setError("La camara no esta disponible");
+        return null;
+      }
+
+      setIsBusy(true);
+      setError(null);
+
+      try {
+        const photo = await CameraService.takePhoto(cameraRef, options);
+        setLastPhoto(photo);
+        return photo;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Error al capturar foto";
+        setError(message);
+        return null;
+      } finally {
+        setIsBusy(false);
+      }
+    },
+    [ensureCameraPermission, isBusy, isRecording]
+  );
 
   const startRecording = useCallback(
     async (options: VideoCaptureOptions = {}): Promise<VideoResult | null> => {
+      if (isBusy || isRecording) return null;
+
+      const hasPermission = await ensureCameraPermission();
+      if (!hasPermission) {
+        setError("Debes permitir la camara para grabar video");
+        return null;
+      }
+
+      if (!cameraRef.current) {
+        setError("La camara no esta disponible");
+        return null;
+      }
+
       setIsBusy(true);
-      setError(null);
       setIsRecording(true);
+      setError(null);
 
       try {
         const video = await CameraService.startRecording(cameraRef, options);
@@ -108,46 +221,87 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
         setIsBusy(false);
       }
     },
-    []
+    [ensureCameraPermission, isBusy, isRecording]
   );
 
   const stopRecording = useCallback(() => {
-    CameraService.stopRecording(cameraRef);
-  }, []);
+    if (!isRecording) return;
+
+    try {
+      CameraService.stopRecording(cameraRef);
+    } catch {
+      setError("No se pudo detener la grabacion");
+    }
+  }, [isRecording]);
 
   const toggleFacing = useCallback(() => {
+    if (isBusy || isRecording) return;
     setFacing((prev) => CameraService.toggleFacing(prev));
-  }, []);
+  }, [isBusy, isRecording]);
 
   const toggleFlash = useCallback(() => {
+    if (isBusy) return;
     setFlashMode((prev) => CameraService.cycleFlashMode(prev));
-  }, []);
+  }, [isBusy]);
 
-  const saveToGallery = useCallback(async (uri: string) => {
-    setError(null);
-    try {
-      await CameraService.saveToGallery(uri);
-    } catch {
-      setError("Error al guardar en galeria");
-    }
-  }, []);
+  const saveToGallery = useCallback(
+    async (uri: string) => {
+      if (!uri?.trim()) {
+        setError("No hay un archivo valido para guardar");
+        return;
+      }
+
+      setError(null);
+
+      try {
+        let mediaPermissionGranted =
+          permissions && PermissionService.isGranted(permissions.mediaLibrary);
+
+        if (!mediaPermissionGranted) {
+          const mediaStatus = await PermissionService.requestMediaLibraryPermission();
+
+          setPermissions((current) => ({
+            camera: current?.camera ?? "undetermined",
+            mediaLibrary: mediaStatus,
+          }));
+
+          mediaPermissionGranted = PermissionService.isGranted(mediaStatus);
+        }
+
+        if (!mediaPermissionGranted) {
+          throw new Error("Debes permitir galeria para guardar la captura");
+        }
+
+        await CameraService.saveToGallery(uri);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Error al guardar en galeria";
+        setError(message);
+      }
+    },
+    [permissions]
+  );
 
   return {
     cameraRef,
     permissions,
-    isPermissionGranted,
+    isCameraPermissionGranted,
+    isMediaLibraryPermissionGranted,
     isLoadingPermissions,
     facing,
     flashMode,
     isRecording,
     isBusy,
     requestPermissions,
+    requestMediaLibraryPermission,
     takePhoto,
     startRecording,
     stopRecording,
     toggleFacing,
     toggleFlash,
     saveToGallery,
+    clearError,
+    clearLastPhoto,
+    clearLastVideo,
     lastPhoto,
     lastVideo,
     error,

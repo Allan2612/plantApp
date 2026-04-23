@@ -21,7 +21,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.alan2612.plantApp"
+      "package": "com.alan2612.plantApp",
+      "blockedPermissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
       "output": "static",
@@ -45,8 +46,7 @@
         "expo-camera",
         {
           "cameraPermission": "Permite a $(PRODUCT_NAME) acceder a tu camara",
-          "microphonePermission": "Permite a $(PRODUCT_NAME) acceder a tu microfono",
-          "recordAudioAndroid": true,
+          "recordAudioAndroid": false,
           "barcodeScannerEnabled": false
         }
       ],
@@ -57,7 +57,6 @@
           "savePhotosPermission": "Permite a $(PRODUCT_NAME) guardar fotos y videos",
           "isAccessMediaLocationEnabled": true,
           "granularPermissions": [
-            "audio",
             "photo"
           ]
         }

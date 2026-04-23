@@ -3,6 +3,7 @@ import LoadingState from "@/src/components/shared/LoadingState";
 import AppText from "@/src/components/shared/AppText/AppText";
 import PressableCard from "@/src/components/shared/PressableCard/PressableCard";
 import ScreenWrapper from "@/src/components/shared/ScreenWrapper/ScreenWrapper";
+import { buildImageSource } from "@/src/features/catalogo/hooks/useCatalogPlantCard";
 import { useHomeScreen } from "@/src/features/home/hooks/useHomeScreen";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -108,7 +109,7 @@ export default function HomeScreen() {
                   <View style={styles.trendingCard}>
                     {item.imageUrl && !failedImages[`trending-${item.id}`] ? (
                       <Image
-                        source={{ uri: item.imageUrl }}
+                        source={buildImageSource(item.imageUrl)}
                         style={styles.trendingImage}
                         contentFit="cover"
                         transition={120}
@@ -155,7 +156,7 @@ export default function HomeScreen() {
                 >
                   {item.imageUrl && !failedImages[`catalog-${item.id}`] ? (
                     <Image
-                      source={{ uri: item.imageUrl }}
+                      source={buildImageSource(item.imageUrl)}
                       style={styles.catalogImage}
                       contentFit="cover"
                       transition={120}
@@ -233,7 +234,7 @@ export default function HomeScreen() {
                 <View style={styles.plantRow}>
                   {imageUri && !failedImages[`garden-${plantId}`] ? (
                     <Image
-                      source={{ uri: imageUri }}
+                      source={buildImageSource(imageUri)}
                       style={styles.plantRowImage}
                       contentFit="cover"
                       transition={120}

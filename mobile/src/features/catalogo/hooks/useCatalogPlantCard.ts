@@ -1,6 +1,16 @@
 import { PlantCatalogItem } from "@/src/types/plant.types";
 import { useEffect, useState } from "react";
 
+const WIKIMEDIA_UA = "PlantApp/1.0 (plant identification app; educational)";
+
+export function buildImageSource(uri: string | null | undefined) {
+  if (!uri) return null;
+  if (/wikimedia\.org|wikipedia\.org/i.test(uri)) {
+    return { uri, headers: { "User-Agent": WIKIMEDIA_UA } };
+  }
+  return { uri };
+}
+
 function mapDifficultyLabel(value: PlantCatalogItem["difficulty"]) {
   if (value === "easy") return "Facil";
   if (value === "medium") return "Intermedia";
@@ -17,12 +27,6 @@ export function useCatalogPlantCard(plant: PlantCatalogItem) {
   const shouldRenderImage = Boolean(plant.imageUrl) && !imageFailed;
 
   const onImageError = () => {
-    if (__DEV__) {
-      console.warn("[Catalogo][ImageError]", {
-        plantId: plant.id,
-        imageUrl: plant.imageUrl,
-      });
-    }
     setImageFailed(true);
   };
 
