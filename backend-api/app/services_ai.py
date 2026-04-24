@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 _GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
-    "gemini-2.0-flash:generateContent"
+    "gemini-2.0-flash-lite:generateContent"
 )
 
 _IDENTIFICATION_PROMPT = """
@@ -44,7 +44,7 @@ Reglas:
 def identify_plant_from_base64(image_base64: str, user_context: str = "") -> dict:
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        raise ValueError("GEMINI_API_KEY no está configurada en las variables de entorno")
+        raise ValueError("La IA no está configurada. Contacta al administrador.")
 
     prompt = _IDENTIFICATION_PROMPT
     if user_context and user_context.strip():
@@ -77,22 +77,33 @@ def identify_plant_from_base64(image_base64: str, user_context: str = "") -> dic
             json=body,
             timeout=25,
         )
-        response.raise_for_status()
     except requests.exceptions.Timeout:
         raise RuntimeError("La IA tardó demasiado en responder. Intenta de nuevo.")
-    except requests.exceptions.HTTPError as exc:
-        error_body = exc.response.text[:300] if exc.response is not None else ""
-        logger.error("Gemini HTTP error %s: %s", exc.response.status_code, error_body)
-        raise RuntimeError(f"Error al contactar la IA ({exc.response.status_code})") from exc
     except requests.exceptions.RequestException as exc:
         logger.exception("Error de red al llamar a Gemini")
-        raise RuntimeError("No se pudo conectar con la IA") from exc
+        raise RuntimeError("Sin conexión con la IA. Verifica tu internet e intenta de nuevo.") from exc
+
+    if response.status_code == 429:
+        logger.warning("Gemini rate limit reached")
+        raise RuntimeError("Demasiadas solicitudes en poco tiempo. Espera 30 segundos e intenta de nuevo.")
+
+    if response.status_code == 400:
+        logger.error("Gemini 400: %s", response.text[:300])
+        raise RuntimeError("La imagen no pudo ser procesada. Intenta con otra foto.")
+
+    if response.status_code == 403:
+        logger.error("Gemini 403: %s", response.text[:200])
+        raise RuntimeError("Sin acceso a la IA. Verifica la configuración del servicio.")
+
+    if not response.ok:
+        logger.error("Gemini HTTP %s: %s", response.status_code, response.text[:300])
+        raise RuntimeError(f"Error del servicio de IA ({response.status_code}). Intenta más tarde.")
 
     data = response.json()
     candidates = data.get("candidates", [])
     if not candidates:
         logger.error("Gemini returned no candidates: %s", data)
-        raise RuntimeError("La IA no devolvió resultados. Intenta con otra foto.")
+        raise RuntimeError("La IA no pudo analizar la imagen. Intenta con una foto más clara.")
 
     raw_text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "").strip()
     logger.info("Gemini raw response (first 300 chars): %s", raw_text[:300])
@@ -100,13 +111,13 @@ def identify_plant_from_base64(image_base64: str, user_context: str = "") -> dic
     json_match = re.search(r"\{.*\}", raw_text, re.DOTALL)
     if not json_match:
         logger.error("No JSON in Gemini response: %s", raw_text[:500])
-        raise ValueError("La IA devolvió una respuesta inesperada")
+        raise ValueError("La IA devolvió una respuesta inesperada. Intenta de nuevo.")
 
     try:
         result = json.loads(json_match.group())
     except json.JSONDecodeError as exc:
         logger.exception("JSON parse error from Gemini: %s", json_match.group()[:300])
-        raise ValueError("Respuesta de IA con formato inválido") from exc
+        raise ValueError("Error al procesar la respuesta de la IA. Intenta de nuevo.") from exc
 
     valid_difficulties = {"easy", "medium", "hard"}
     if result.get("difficulty") not in valid_difficulties:
