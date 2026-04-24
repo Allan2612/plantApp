@@ -1,5 +1,5 @@
 import { getApiBaseUrl } from "@/src/services/api/apiBaseUrl";
-import { readAsStringAsync } from "expo-file-system";
+import { readAsStringAsync } from "expo-file-system/legacy";
 
 const AI_TIMEOUT_MS = 30_000;
 
