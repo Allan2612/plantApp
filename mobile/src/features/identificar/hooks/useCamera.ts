@@ -17,6 +17,8 @@ interface UseCameraReturn {
   permissions: AppPermissions | null;
   isCameraPermissionGranted: boolean;
   isMediaLibraryPermissionGranted: boolean;
+  canAskAgainCamera: boolean;
+  canAskAgainMediaLibrary: boolean;
   isLoadingPermissions: boolean;
   facing: CameraType;
   flashMode: FlashMode;
@@ -24,6 +26,7 @@ interface UseCameraReturn {
   isBusy: boolean;
   requestPermissions: () => Promise<void>;
   requestMediaLibraryPermission: () => Promise<void>;
+  openSettings: () => Promise<void>;
   takePhoto: (options?: CaptureOptions) => Promise<PhotoResult | null>;
   startRecording: (options?: VideoCaptureOptions) => Promise<VideoResult | null>;
   stopRecording: () => void;
@@ -44,6 +47,8 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
   const cameraRef = useRef<CameraView | null>(null);
 
   const [permissions, setPermissions] = useState<AppPermissions | null>(null);
+  const [canAskAgainCamera, setCanAskAgainCamera] = useState(true);
+  const [canAskAgainMediaLibrary, setCanAskAgainMediaLibrary] = useState(true);
   const [isLoadingPermissions, setIsLoadingPermissions] = useState(false);
   const [facing, setFacing] = useState<CameraType>("back");
   const [flashMode, setFlashMode] = useState<FlashMode>("off");
@@ -71,6 +76,16 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
     setLastVideo(null);
   }, []);
 
+  const refreshCanAskAgain = useCallback(async () => {
+    try {
+      const details = await PermissionService.checkAllPermissionDetails();
+      setCanAskAgainCamera(details.camera.canAskAgain);
+      setCanAskAgainMediaLibrary(details.mediaLibrary.canAskAgain);
+    } catch {
+      // no-op: non-critical
+    }
+  }, []);
+
   const requestPermissions = useCallback(async () => {
     setIsLoadingPermissions(true);
     setError(null);
@@ -82,12 +97,13 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
         camera: cameraStatus,
         mediaLibrary: current?.mediaLibrary ?? "undetermined",
       }));
+      await refreshCanAskAgain();
     } catch {
       setError("Error al solicitar permiso de camara");
     } finally {
       setIsLoadingPermissions(false);
     }
-  }, []);
+  }, [refreshCanAskAgain]);
 
   const requestMediaLibraryPermission = useCallback(async () => {
     setIsLoadingPermissions(true);
@@ -100,11 +116,16 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
         camera: current?.camera ?? "undetermined",
         mediaLibrary: mediaLibraryStatus,
       }));
+      await refreshCanAskAgain();
     } catch {
       setError("Error al solicitar permiso de galeria");
     } finally {
       setIsLoadingPermissions(false);
     }
+  }, [refreshCanAskAgain]);
+
+  const openSettings = useCallback(async () => {
+    await PermissionService.openAppSettings();
   }, []);
 
   useEffect(() => {
@@ -114,10 +135,15 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
 
     const bootstrapPermissions = async () => {
       try {
-        const result = await PermissionService.checkAllPermissions();
+        const details = await PermissionService.checkAllPermissionDetails();
 
         if (!isMounted) return;
-        setPermissions(result);
+        setPermissions({
+          camera: details.camera.status,
+          mediaLibrary: details.mediaLibrary.status,
+        });
+        setCanAskAgainCamera(details.camera.canAskAgain);
+        setCanAskAgainMediaLibrary(details.mediaLibrary.canAskAgain);
       } catch {
         if (!isMounted) return;
         setError("Error al consultar permisos");
@@ -286,6 +312,8 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
     permissions,
     isCameraPermissionGranted,
     isMediaLibraryPermissionGranted,
+    canAskAgainCamera,
+    canAskAgainMediaLibrary,
     isLoadingPermissions,
     facing,
     flashMode,
@@ -293,6 +321,7 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
     isBusy,
     requestPermissions,
     requestMediaLibraryPermission,
+    openSettings,
     takePhoto,
     startRecording,
     stopRecording,

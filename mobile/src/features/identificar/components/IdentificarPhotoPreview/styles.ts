@@ -142,5 +142,92 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       flex: 1,
       textTransform: "capitalize",
     },
+
+    // AI result card
+    aiResultCard: {
+      gap: spacing.sm,
+      padding: spacing.md,
+      borderRadius: radius.lg,
+      backgroundColor: colors.surfaceAlt,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.primary,
+    },
+
+    aiResultHeader: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: spacing.sm,
+    },
+
+    aiResultTitleBlock: {
+      flex: 1,
+      gap: 2,
+    },
+
+    aiResultName: {
+      color: colors.textPrimary,
+    },
+
+    aiResultScientific: {
+      fontStyle: "italic",
+    },
+
+    confidenceRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.sm,
+    },
+
+    confidenceBarBg: {
+      flex: 1,
+      height: 6,
+      borderRadius: radius.full,
+      backgroundColor: colors.surfaceDivider,
+      overflow: "hidden",
+    },
+
+    confidenceBarFill: {
+      height: "100%",
+      borderRadius: radius.full,
+      backgroundColor: colors.primary,
+    },
+
+    confidencePct: {
+      minWidth: 32,
+      textAlign: "right",
+      fontWeight: "600",
+    },
+
+    aiDivider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: colors.surfaceDivider,
+    },
+
+    aiInfoRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: spacing.sm,
+    },
+
+    aiInfoText: {
+      flex: 1,
+      lineHeight: 18,
+    },
+
+    // No plant state
+    noPlantCard: {
+      gap: spacing.sm,
+      padding: spacing.md,
+      borderRadius: radius.lg,
+      backgroundColor: colors.surfaceAlt,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.danger,
+      alignItems: "center",
+    },
+
+    noPlantText: {
+      textAlign: "center",
+      lineHeight: 18,
+    },
   });
 }

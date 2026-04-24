@@ -214,3 +214,23 @@ class UserPlantsResponse(BaseModel):
     userId: str
     count: int
     items: list[UserPlantSummaryResponse]
+
+
+class PlantIdentificationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    image_base64: str
+    user_context: str | None = None
+
+
+class PlantIdentificationResponse(BaseModel):
+    is_plant: bool
+    confidence: float
+    common_name: str | None = None
+    scientific_name: str | None = None
+    description: str | None = None
+    care_summary: str | None = None
+    watering_notes: str | None = None
+    light_notes: str | None = None
+    difficulty: Literal["easy", "medium", "hard"] | None = None
+    is_toxic: bool | None = None

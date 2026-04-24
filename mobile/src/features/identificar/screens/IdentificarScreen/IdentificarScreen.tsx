@@ -22,8 +22,11 @@ export default function IdentificarScreen() {
     permissionStep,
     isCameraPermissionGranted,
     isMediaLibraryPermissionGranted,
+    canAskAgainCamera,
+    canAskAgainMediaLibrary,
     requestCameraPermission,
     requestMediaLibraryPermission,
+    openSettings,
     toggleFacing,
     toggleFlash,
     isCameraOpen,
@@ -34,8 +37,12 @@ export default function IdentificarScreen() {
     handleRetakePhoto,
     handleClearPhoto,
     handleIdentify,
+    handleSavePlant,
     detections,
     isDetecting,
+    aiResult,
+    isIdentifying,
+    isSaving,
     description,
     setDescription,
   } = useIdentificarScreen();
@@ -45,10 +52,13 @@ export default function IdentificarScreen() {
       <IdentificarPermissions
         isCameraPermissionGranted={isCameraPermissionGranted}
         isMediaLibraryPermissionGranted={isMediaLibraryPermissionGranted}
+        canAskAgainCamera={canAskAgainCamera}
+        canAskAgainMediaLibrary={canAskAgainMediaLibrary}
         isLoadingPermissions={isLoadingPermissions}
         error={cameraError}
         onRequestCamera={requestCameraPermission}
         onRequestMediaLibrary={requestMediaLibraryPermission}
+        onOpenSettings={openSettings}
       />
     );
   }
@@ -66,11 +76,15 @@ export default function IdentificarScreen() {
               photo={capturedPhoto}
               detections={detections}
               isDetecting={isDetecting}
+              isIdentifying={isIdentifying}
+              isSaving={isSaving}
+              aiResult={aiResult}
               description={description}
               onChangeDescription={setDescription}
               onRetake={handleRetakePhoto}
               onClear={handleClearPhoto}
               onIdentify={handleIdentify}
+              onSavePlant={handleSavePlant}
             />
           ) : (
             <IdentificarEmptyState onOpenCamera={openCamera} />

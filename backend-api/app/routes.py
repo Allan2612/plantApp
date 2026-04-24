@@ -10,6 +10,8 @@ from .models import (
     CreateCatalogPlantRequest,
     CreateUserPlantRequest,
     PlantCatalogModel,
+    PlantIdentificationRequest,
+    PlantIdentificationResponse,
     PlantTagModel,
     ProfileResponse,
     SyncAuthUserRequest,
@@ -35,6 +37,7 @@ from .services import (
     update_user_fields,
     update_user_plant_fields,
 )
+from .services_ai import identify_plant_from_base64
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -49,6 +52,25 @@ def _validate_required_id(value: str, field_name: str) -> str:
 @router.get("/health")
 def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@router.post("/api/identify-plant", response_model=PlantIdentificationResponse)
+def post_identify_plant(payload: PlantIdentificationRequest) -> dict:
+    if not payload.image_base64.strip():
+        raise HTTPException(status_code=400, detail="image_base64 es requerido")
+    try:
+        result = identify_plant_from_base64(
+            payload.image_base64,
+            payload.user_context or "",
+        )
+        return result
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception:
+        logger.exception("Error inesperado en post_identify_plant")
+        raise HTTPException(status_code=500, detail="Error interno al identificar la planta")
 
 
 @router.get("/api/users/by-email", response_model=UserModel)

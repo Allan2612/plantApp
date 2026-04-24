@@ -1,3 +1,10 @@
+import { useAuthStore } from "@/src/store/auth.store";
+import { createCatalogPlant } from "@/src/features/catalogo/services/catalogoApi.service";
+import { createUserPlant } from "@/src/features/mis-plantas/services/misPlantasApi.service";
+import {
+  identifyPlantFromUri,
+  PlantIdentificationResult,
+} from "@/src/features/identificar/services/aiIdentification.service";
 import { useCamera } from "@/src/features/identificar/hooks/useCamera";
 import LocalObjectDetectionService, {
   DetectionResult,
@@ -7,16 +14,18 @@ import { useCallback, useState } from "react";
 
 export type PermissionStep = "camera" | "mediaLibrary" | "granted";
 
-const PLANT_LABELS = ["potted plant", "plant", "flower", "tree", "broccoli", "vase"];
-
 export function useIdentificarScreen() {
   const camera = useCamera({ requestOnMount: true });
   const { showToast } = useToast();
+  const firebaseUser = useAuthStore((state) => state.firebaseUser);
 
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [description, setDescription] = useState("");
   const [detections, setDetections] = useState<DetectionResult[]>([]);
   const [isDetecting, setIsDetecting] = useState(false);
+  const [aiResult, setAiResult] = useState<PlantIdentificationResult | null>(null);
+  const [isIdentifying, setIsIdentifying] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const permissionStep: PermissionStep = !camera.isCameraPermissionGranted
     ? "camera"
@@ -33,7 +42,7 @@ export function useIdentificarScreen() {
     setIsCameraOpen(false);
   }, []);
 
-  const runDetection = useCallback(async (photoUri: string) => {
+  const runLocalDetection = useCallback(async (photoUri: string) => {
     setIsDetecting(true);
     setDetections([]);
     try {
@@ -50,13 +59,15 @@ export function useIdentificarScreen() {
     const photo = await camera.takePhoto({ quality: 0.85 });
     if (!photo) return;
     setIsCameraOpen(false);
-    await runDetection(photo.uri);
-  }, [camera, runDetection]);
+    setAiResult(null);
+    await runLocalDetection(photo.uri);
+  }, [camera, runLocalDetection]);
 
   const handleRetakePhoto = useCallback(() => {
     camera.clearLastPhoto();
     setDetections([]);
     setDescription("");
+    setAiResult(null);
     setIsCameraOpen(true);
   }, [camera]);
 
@@ -64,32 +75,66 @@ export function useIdentificarScreen() {
     camera.clearLastPhoto();
     setDetections([]);
     setDescription("");
+    setAiResult(null);
   }, [camera]);
 
-  const handleIdentify = useCallback(() => {
-    if (isDetecting) return;
+  const handleIdentify = useCallback(async () => {
+    if (!camera.lastPhoto || isIdentifying || isDetecting) return;
 
-    const plantDetection = detections.find((d) =>
-      PLANT_LABELS.some((label) => d.label.toLowerCase().includes(label))
-    );
+    setIsIdentifying(true);
+    setAiResult(null);
 
-    if (plantDetection) {
-      showToast(
-        `Planta detectada localmente: ${plantDetection.label} (${Math.round(plantDetection.score * 100)}%). Enviando a IA...`,
-        "success"
-      );
-    } else if (detections.length > 0) {
-      showToast(
-        "No se identifico una planta en la imagen. Intenta con una foto mas clara.",
-        "error"
-      );
-    } else {
-      showToast(
-        "No se detecto ningun objeto. Asegurate de que la planta este bien iluminada.",
-        "error"
-      );
+    try {
+      const result = await identifyPlantFromUri(camera.lastPhoto.uri, description);
+      setAiResult(result);
+
+      if (!result.isPlant) {
+        showToast("No se detectó una planta en la imagen. Intenta con una foto más clara.", "error");
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Error al analizar la imagen";
+      showToast(message, "error");
+    } finally {
+      setIsIdentifying(false);
     }
-  }, [detections, isDetecting, showToast]);
+  }, [camera.lastPhoto, description, isDetecting, isIdentifying, showToast]);
+
+  const handleSavePlant = useCallback(async () => {
+    if (!aiResult?.isPlant || !aiResult.commonName || isSaving) return;
+    if (!firebaseUser?.uid) {
+      showToast("Debes iniciar sesión para guardar plantas.", "error");
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const catalogPlant = await createCatalogPlant({
+        name: aiResult.commonName,
+        scientificName: aiResult.scientificName ?? aiResult.commonName,
+        description: aiResult.description ?? "",
+        difficulty: aiResult.difficulty ?? "medium",
+        isToxic: aiResult.isToxic ?? false,
+        lightNotes: aiResult.lightNotes ?? undefined,
+        generalCareNotes: aiResult.careSummary ?? undefined,
+      });
+
+      await createUserPlant({
+        userId: firebaseUser.uid,
+        plantCatalogId: catalogPlant.id,
+        nickname: aiResult.commonName,
+        notes: aiResult.careSummary ?? undefined,
+      });
+
+      showToast(`${aiResult.commonName} guardada en Mis Plantas`, "success");
+      handleClearPhoto();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Error al guardar la planta";
+      showToast(message, "error");
+    } finally {
+      setIsSaving(false);
+    }
+  }, [aiResult, firebaseUser?.uid, handleClearPhoto, isSaving, showToast]);
 
   return {
     cameraRef: camera.cameraRef,
@@ -102,8 +147,11 @@ export function useIdentificarScreen() {
     permissionStep,
     isCameraPermissionGranted: camera.isCameraPermissionGranted,
     isMediaLibraryPermissionGranted: camera.isMediaLibraryPermissionGranted,
+    canAskAgainCamera: camera.canAskAgainCamera,
+    canAskAgainMediaLibrary: camera.canAskAgainMediaLibrary,
     requestCameraPermission: camera.requestPermissions,
     requestMediaLibraryPermission: camera.requestMediaLibraryPermission,
+    openSettings: camera.openSettings,
 
     toggleFacing: camera.toggleFacing,
     toggleFlash: camera.toggleFlash,
@@ -117,9 +165,13 @@ export function useIdentificarScreen() {
     handleRetakePhoto,
     handleClearPhoto,
     handleIdentify,
+    handleSavePlant,
 
     detections,
     isDetecting,
+    aiResult,
+    isIdentifying,
+    isSaving,
 
     description,
     setDescription,
