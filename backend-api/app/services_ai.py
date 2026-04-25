@@ -7,10 +7,8 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-_GEMINI_URL = (
-    "https://generativelanguage.googleapis.com/v1beta/models/"
-    "gemini-2.0-flash-lite:generateContent"
-)
+_GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+_GROQ_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 
 _IDENTIFICATION_PROMPT = """
 Eres un experto en botánica e identificación de plantas. Analiza la imagen proporcionada.
@@ -42,7 +40,7 @@ Reglas:
 
 
 def identify_plant_from_base64(image_base64: str, user_context: str = "") -> dict:
-    api_key = os.environ.get("GEMINI_API_KEY")
+    api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
         raise ValueError("La IA no está configurada. Contacta al administrador.")
 
@@ -51,72 +49,77 @@ def identify_plant_from_base64(image_base64: str, user_context: str = "") -> dic
         prompt += f"\n\nContexto adicional del usuario: {user_context.strip()}"
 
     body = {
-        "contents": [
+        "model": _GROQ_MODEL,
+        "messages": [
             {
-                "parts": [
-                    {"text": prompt},
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
                     {
-                        "inline_data": {
-                            "mime_type": "image/jpeg",
-                            "data": image_base64,
-                        }
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{image_base64}",
+                        },
                     },
-                ]
+                ],
             }
         ],
-        "generationConfig": {
-            "temperature": 0.1,
-            "maxOutputTokens": 1024,
-        },
+        "temperature": 0.1,
+        "max_tokens": 1024,
+    }
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
     }
 
     try:
         response = requests.post(
-            _GEMINI_URL,
-            params={"key": api_key},
+            _GROQ_URL,
+            headers=headers,
             json=body,
             timeout=25,
         )
     except requests.exceptions.Timeout:
         raise RuntimeError("La IA tardó demasiado en responder. Intenta de nuevo.")
     except requests.exceptions.RequestException as exc:
-        logger.exception("Error de red al llamar a Gemini")
+        logger.exception("Error de red al llamar a Groq")
         raise RuntimeError("Sin conexión con la IA. Verifica tu internet e intenta de nuevo.") from exc
 
     if response.status_code == 429:
-        logger.warning("Gemini rate limit reached")
+        logger.error("Groq 429 body: %s", response.text[:500])
         raise RuntimeError("Demasiadas solicitudes en poco tiempo. Espera 30 segundos e intenta de nuevo.")
 
     if response.status_code == 400:
-        logger.error("Gemini 400: %s", response.text[:300])
+        logger.error("Groq 400: %s", response.text[:300])
         raise RuntimeError("La imagen no pudo ser procesada. Intenta con otra foto.")
 
-    if response.status_code == 403:
-        logger.error("Gemini 403: %s", response.text[:200])
+    if response.status_code == 401:
+        logger.error("Groq 401: %s", response.text[:200])
         raise RuntimeError("Sin acceso a la IA. Verifica la configuración del servicio.")
 
     if not response.ok:
-        logger.error("Gemini HTTP %s: %s", response.status_code, response.text[:300])
+        logger.error("Groq HTTP %s: %s", response.status_code, response.text[:300])
         raise RuntimeError(f"Error del servicio de IA ({response.status_code}). Intenta más tarde.")
 
     data = response.json()
-    candidates = data.get("candidates", [])
-    if not candidates:
-        logger.error("Gemini returned no candidates: %s", data)
+    choices = data.get("choices", [])
+    if not choices:
+        logger.error("Groq returned no choices: %s", data)
         raise RuntimeError("La IA no pudo analizar la imagen. Intenta con una foto más clara.")
 
-    raw_text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "").strip()
-    logger.info("Gemini raw response (first 300 chars): %s", raw_text[:300])
+    raw_text = choices[0].get("message", {}).get("content", "").strip()
+    logger.info("Groq raw response (first 300 chars): %s", raw_text[:300])
 
     json_match = re.search(r"\{.*\}", raw_text, re.DOTALL)
     if not json_match:
-        logger.error("No JSON in Gemini response: %s", raw_text[:500])
+        logger.error("No JSON in Groq response: %s", raw_text[:500])
         raise ValueError("La IA devolvió una respuesta inesperada. Intenta de nuevo.")
 
     try:
         result = json.loads(json_match.group())
     except json.JSONDecodeError as exc:
-        logger.exception("JSON parse error from Gemini: %s", json_match.group()[:300])
+        logger.exception("JSON parse error from Groq: %s", json_match.group()[:300])
         raise ValueError("Error al procesar la respuesta de la IA. Intenta de nuevo.") from exc
 
     valid_difficulties = {"easy", "medium", "hard"}
