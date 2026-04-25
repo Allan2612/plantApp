@@ -6,6 +6,7 @@ import AppText from "@/src/components/shared/AppText/AppText";
 import PressableCard from "@/src/components/shared/PressableCard/PressableCard";
 import ScreenWrapper from "@/src/components/shared/ScreenWrapper/ScreenWrapper";
 import SingleSelect from "@/src/components/shared/SingleSelect";
+import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import CatalogExplorerSelect from "@/src/features/mis-plantas/components/CatalogExplorerSelect";
 import {
   formatDateDisplay,
@@ -35,6 +36,8 @@ import { createStyles } from "./styles";
 export default function MisPlantasScreen() {
   const theme = useAppTheme();
   const styles = createStyles(theme);
+  const { isConnected } = useNetworkStatus();
+  const isOffline = isConnected === false;
   const {
     plants,
     catalog,
@@ -100,7 +103,7 @@ export default function MisPlantasScreen() {
           </View>
 
           <AppButton
-            title={showCreateForm ? "Cerrar" : "Añadir a mi jardín"}
+            title={showCreateForm ? "Cerrar" : isOffline ? "Sin conexión" : "Añadir a mi jardín"}
             onPress={() => {
               if (showCreateForm) {
                 closeCreateModal();
@@ -112,6 +115,7 @@ export default function MisPlantasScreen() {
                 hydrateEditForm(null);
               }
             }}
+            disabled={!showCreateForm && isOffline}
             variant={showCreateForm ? "secondary" : "primary"}
           />
         </View>
@@ -469,9 +473,9 @@ export default function MisPlantasScreen() {
               </Pressable>
 
               <AppButton
-                title={isSavingCreate ? "Guardando..." : "Añadir a mi jardín"}
+                title={isOffline ? "Sin conexión" : isSavingCreate ? "Guardando..." : "Añadir a mi jardín"}
                 onPress={onCreatePlant}
-                disabled={isSavingCreate}
+                disabled={isSavingCreate || isOffline}
               />
             </ScrollView>
           </View>
@@ -687,9 +691,9 @@ export default function MisPlantasScreen() {
               />
 
               <AppButton
-                title={isSavingEdit ? "Guardando..." : "Guardar cambios"}
+                title={isOffline ? "Sin conexión" : isSavingEdit ? "Guardando..." : "Guardar cambios"}
                 onPress={onSaveEdit}
-                disabled={isSavingEdit}
+                disabled={isSavingEdit || isOffline}
               />
             </ScrollView>
           </View>

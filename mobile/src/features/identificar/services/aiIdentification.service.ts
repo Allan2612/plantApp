@@ -44,22 +44,69 @@ function mapResponse(raw: RawIdentificationResponse): PlantIdentificationResult 
   };
 }
 
-export async function fetchPlantImageUrl(scientificName: string): Promise<string | null> {
+async function _wikiImageFor(name: string): Promise<string | null> {
   try {
-    const encoded = encodeURIComponent(scientificName.replace(/ /g, "_"));
+    const encoded = encodeURIComponent(name.trim().replace(/ /g, "_"));
     const response = await fetch(
       `https://en.wikipedia.org/api/rest_v1/page/summary/${encoded}`,
       { headers: { Accept: "application/json" } }
     );
     if (!response.ok) return null;
     const data = await response.json() as {
+      type?: string;
       originalimage?: { source?: string };
       thumbnail?: { source?: string };
     };
+    if (data.type === "disambiguation") return null;
     return data?.originalimage?.source ?? data?.thumbnail?.source ?? null;
   } catch {
     return null;
   }
+}
+
+async function _iNaturalistImageFor(name: string): Promise<string | null> {
+  try {
+    const response = await fetch(
+      `https://api.inaturalist.org/v1/taxa?q=${encodeURIComponent(name)}&rank=species&is_active=true&per_page=1`,
+      { headers: { Accept: "application/json" } }
+    );
+    if (!response.ok) return null;
+    const data = await response.json() as {
+      results?: Array<{
+        default_photo?: { medium_url?: string; square_url?: string };
+      }>;
+    };
+    const photo = data?.results?.[0]?.default_photo;
+    return photo?.medium_url ?? photo?.square_url ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchPlantImageUrl(
+  scientificName: string | null,
+  commonName: string | null
+): Promise<string | null> {
+  // 1. Wikipedia por nombre científico
+  if (scientificName) {
+    const url = await _wikiImageFor(scientificName);
+    if (url) return url;
+  }
+  // 2. Wikipedia por nombre común
+  if (commonName) {
+    const url = await _wikiImageFor(commonName);
+    if (url) return url;
+  }
+  // 3. iNaturalist por nombre científico
+  if (scientificName) {
+    const url = await _iNaturalistImageFor(scientificName);
+    if (url) return url;
+  }
+  // 4. iNaturalist por nombre común
+  if (commonName) {
+    return _iNaturalistImageFor(commonName);
+  }
+  return null;
 }
 
 export async function identifyPlantFromUri(

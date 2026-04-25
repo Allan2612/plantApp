@@ -10,15 +10,20 @@ import { useCamera } from "@/src/features/identificar/hooks/useCamera";
 import LocalObjectDetectionService, {
   DetectionResult,
 } from "@/src/features/identificar/services/localObjectDetection.service";
+import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { useToast } from "@/src/providers/ToastProvider";
-import { useCallback, useState } from "react";
+import * as ImagePicker from "expo-image-picker";
+import * as MediaLibrary from "expo-media-library";
+import { useCallback, useEffect, useState } from "react";
 
 export type PermissionStep = "camera" | "mediaLibrary" | "granted";
 
 export function useIdentificarScreen() {
   const camera = useCamera({ requestOnMount: true });
   const { showToast } = useToast();
-  const firebaseUser = useAuthStore((state) => state.firebaseUser);
+  const { isConnected } = useNetworkStatus();
+  const profile = useAuthStore((state) => state.profile);
+  const isOffline = isConnected === false;
 
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [description, setDescription] = useState("");
@@ -28,6 +33,20 @@ export function useIdentificarScreen() {
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
   const [isIdentifying, setIsIdentifying] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [pickedPhoto, setPickedPhoto] = useState<{ uri: string; width: number; height: number } | null>(null);
+  const [galleryThumbnailUri, setGalleryThumbnailUri] = useState<string | null>(null);
+
+  // Single source of truth: camera photo takes priority over gallery pick
+  const capturedPhoto = camera.lastPhoto ?? pickedPhoto;
+
+  useEffect(() => {
+    MediaLibrary.getAssetsAsync({ first: 1, mediaType: "photo", sortBy: [["creationTime", false]] })
+      .then((result) => {
+        const uri = result.assets[0]?.uri ?? null;
+        setGalleryThumbnailUri(uri);
+      })
+      .catch(() => setGalleryThumbnailUri(null));
+  }, []);
 
   const permissionStep: PermissionStep = !camera.isCameraPermissionGranted
     ? "camera"
@@ -65,8 +84,29 @@ export function useIdentificarScreen() {
     await runLocalDetection(photo.uri);
   }, [camera, runLocalDetection]);
 
+  const handlePickFromGallery = useCallback(async () => {
+    // Close the camera modal first and wait for it to fully dismiss
+    setIsCameraOpen(false);
+    await new Promise<void>((resolve) => setTimeout(resolve, 350));
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      quality: 0.85,
+      allowsEditing: false,
+    });
+    if (result.canceled || !result.assets[0]) return;
+    const asset = result.assets[0];
+    camera.clearLastPhoto();
+    setPickedPhoto({ uri: asset.uri, width: asset.width, height: asset.height });
+    setAiResult(null);
+    setAiImageUrl(null);
+    setDetections([]);
+    await runLocalDetection(asset.uri);
+  }, [camera, runLocalDetection]);
+
   const handleRetakePhoto = useCallback(() => {
     camera.clearLastPhoto();
+    setPickedPhoto(null);
     setDetections([]);
     setDescription("");
     setAiResult(null);
@@ -76,6 +116,7 @@ export function useIdentificarScreen() {
 
   const handleClearPhoto = useCallback(() => {
     camera.clearLastPhoto();
+    setPickedPhoto(null);
     setDetections([]);
     setDescription("");
     setAiResult(null);
@@ -83,18 +124,18 @@ export function useIdentificarScreen() {
   }, [camera]);
 
   const handleIdentify = useCallback(async () => {
-    if (!camera.lastPhoto || isIdentifying || isDetecting) return;
+    if (!capturedPhoto || isIdentifying || isDetecting) return;
 
     setIsIdentifying(true);
     setAiResult(null);
     setAiImageUrl(null);
 
     try {
-      const result = await identifyPlantFromUri(camera.lastPhoto.uri, description);
+      const result = await identifyPlantFromUri(capturedPhoto.uri, description);
       setAiResult(result);
 
       if (result.isPlant) {
-        fetchPlantImageUrl(result.scientificName ?? result.commonName ?? "").then(setAiImageUrl);
+        fetchPlantImageUrl(result.scientificName, result.commonName).then(setAiImageUrl);
       } else {
         showToast("No se detectó una planta en la imagen. Intenta con una foto más clara.", "error");
       }
@@ -104,11 +145,12 @@ export function useIdentificarScreen() {
     } finally {
       setIsIdentifying(false);
     }
-  }, [camera.lastPhoto, description, isDetecting, isIdentifying, showToast]);
+  }, [capturedPhoto, description, isDetecting, isIdentifying, showToast]);
 
   const handleSavePlant = useCallback(async () => {
     if (!aiResult?.isPlant || !aiResult.commonName || isSaving) return;
-    if (!firebaseUser?.uid) {
+    const backendUserId = profile?.user.id;
+    if (!backendUserId) {
       showToast("Debes iniciar sesión para guardar plantas.", "error");
       return;
     }
@@ -128,7 +170,7 @@ export function useIdentificarScreen() {
       });
 
       await createUserPlant({
-        userId: firebaseUser.uid,
+        userId: backendUserId,
         plantCatalogId: catalogPlant.id,
         nickname: aiResult.commonName,
         notes: aiResult.careSummary ?? undefined,
@@ -142,7 +184,7 @@ export function useIdentificarScreen() {
     } finally {
       setIsSaving(false);
     }
-  }, [aiImageUrl, aiResult, firebaseUser?.uid, handleClearPhoto, isSaving, showToast]);
+  }, [aiImageUrl, aiResult, profile?.user.id, handleClearPhoto, isSaving, showToast]);
 
   return {
     cameraRef: camera.cameraRef,
@@ -168,8 +210,10 @@ export function useIdentificarScreen() {
     openCamera,
     closeCamera,
 
-    capturedPhoto: camera.lastPhoto,
+    capturedPhoto,
+    galleryThumbnailUri,
     handleTakePhoto,
+    handlePickFromGallery,
     handleRetakePhoto,
     handleClearPhoto,
     handleIdentify,
@@ -184,5 +228,6 @@ export function useIdentificarScreen() {
 
     description,
     setDescription,
+    isOffline,
   };
 }

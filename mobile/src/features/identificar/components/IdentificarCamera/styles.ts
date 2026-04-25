@@ -190,5 +190,11 @@ export function createStyles({ spacing }: AppTheme) {
       borderRadius: 999,
       backgroundColor: "#FFFFFF",
     },
+
+    galleryThumb: {
+      width: 46,
+      height: 46,
+      borderRadius: 8,
+    },
   });
 }

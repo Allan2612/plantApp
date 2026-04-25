@@ -127,13 +127,16 @@ function isNotFoundError(error: unknown): boolean {
 
 export function useUserProfileScreen() {
   const { user } = useAuthSession();
+  const cachedProfile = useAuthStore((state) => state.profile);
   const setGlobalProfile = useAuthStore((state) => state.setProfile);
   const { showToast } = useToast();
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [backendUserId, setBackendUserId] = useState<string>("");
-  const [profileUser, setProfileUser] = useState<BackendUser | null>(null);
+  const [profileUser, setProfileUser] = useState<BackendUser | null>(
+    cachedProfile?.user ?? null,
+  );
   const [showBirthDatePicker, setShowBirthDatePicker] = useState(false);
   const [birthDatePickerValue, setBirthDatePickerValue] = useState<Date>(
     new Date(),
@@ -178,27 +181,7 @@ export function useUserProfileScreen() {
 
     let isMounted = true;
 
-    const loadProfile = async () => {
-      setIsLoadingProfile(true);
-      const resolution = await resolveSessionProfile();
-      const profile = resolution?.profile ?? null;
-
-      if (!isMounted) return;
-
-      if (!profile?.user) {
-        setIsLoadingProfile(false);
-        showToast("No se pudo cargar el perfil del usuario.", "error");
-        return;
-      }
-
-      const userPayload: BackendUser = profile.user;
-
-      setBackendUserId(
-        resolution?.backendUserId ?? getStringField(userPayload, "id"),
-      );
-      setProfileUser(profile.user);
-      setGlobalProfile(profile);
-
+    const hydrateForm = (userPayload: BackendUser) => {
       reset({
         displayName: getStringField(userPayload, "displayName"),
         firstName: getStringField(userPayload, "firstName"),
@@ -207,12 +190,41 @@ export function useUserProfileScreen() {
         avatarId: getStringField(userPayload, "avatarId"),
         headline: getStringField(userPayload, "headline"),
         visibility: getVisibilityField(userPayload),
-        birthDate: formatBirthDateForInput(
-          getStringField(userPayload, "birthDate"),
-        ),
+        birthDate: formatBirthDateForInput(getStringField(userPayload, "birthDate")),
         city: getStringField(userPayload, "city"),
       });
+    };
 
+    const loadProfile = async () => {
+      setIsLoadingProfile(true);
+
+      // Show cached data immediately so the profile is visible offline
+      if (cachedProfile?.user) {
+        setProfileUser(cachedProfile.user);
+        setBackendUserId(cachedProfile.user.id);
+        hydrateForm(cachedProfile.user);
+        setIsLoadingProfile(false);
+      }
+
+      const resolution = await resolveSessionProfile();
+      const profile = resolution?.profile ?? null;
+
+      if (!isMounted) return;
+
+      if (!profile?.user) {
+        // Already showing cached data above — only show error if we had nothing
+        if (!cachedProfile?.user) {
+          showToast("No se pudo cargar el perfil del usuario.", "error");
+        }
+        setIsLoadingProfile(false);
+        return;
+      }
+
+      const userPayload: BackendUser = profile.user;
+      setBackendUserId(resolution?.backendUserId ?? getStringField(userPayload, "id"));
+      setProfileUser(profile.user);
+      setGlobalProfile(profile);
+      hydrateForm(userPayload);
       setIsLoadingProfile(false);
     };
 
@@ -221,7 +233,7 @@ export function useUserProfileScreen() {
     return () => {
       isMounted = false;
     };
-  }, [reset, resolveSessionProfile, setGlobalProfile, showToast, user?.uid]);
+  }, [cachedProfile, reset, resolveSessionProfile, setGlobalProfile, showToast, user?.uid]);
 
   const onSubmit = handleSubmit(async (values) => {
     setIsSaving(true);

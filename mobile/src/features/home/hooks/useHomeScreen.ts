@@ -7,6 +7,7 @@ import {
 } from "@/src/features/mis-plantas/services/misPlantasApi.service";
 import { fetchProfileForSession } from "@/src/features/profile/services/profileApi.service";
 import { useScrollAnim } from "@/src/features/shell/hooks/ScrollAnimContext";
+import { useAuthStore } from "@/src/store/auth.store";
 import { PlantCatalogItem } from "@/src/types/plant.types";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -78,6 +79,7 @@ export function useHomeScreen() {
   const scrollAnim = useScrollAnim();
   const router = useRouter();
   const { user } = useAuthSession();
+  const cachedProfile = useAuthStore((state) => state.profile);
   const { items } = useCatalogo();
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [gardenItems, setGardenItems] = useState<UserPlantListItem[]>([]);
@@ -102,14 +104,17 @@ export function useHomeScreen() {
 
       setIsGardenLoading(true);
       try {
-        const resolution = await fetchProfileForSession({
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          providerId,
-        });
+        let backendUserId = cachedProfile?.user?.id ?? "";
 
-        const backendUserId = resolution?.backendUserId ?? "";
+        if (!backendUserId) {
+          const resolution = await fetchProfileForSession({
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            providerId,
+          });
+          backendUserId = resolution?.backendUserId ?? "";
+        }
         if (!backendUserId.trim()) {
           if (!isMounted) return;
           setGardenItems([]);
@@ -134,7 +139,7 @@ export function useHomeScreen() {
     return () => {
       isMounted = false;
     };
-  }, [providerId, user?.displayName, user?.email, user?.uid]);
+  }, [cachedProfile?.user?.id, providerId, user?.displayName, user?.email, user?.uid]);
 
   const markImageAsFailed = (imageId: string, imageUrl: string | null) => {
     setFailedImages((current) => {

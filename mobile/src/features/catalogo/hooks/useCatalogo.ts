@@ -2,11 +2,14 @@ import {
   createCatalogPlant,
   fetchCatalogPlants,
 } from "@/src/features/catalogo/services/catalogoApi.service";
+import { cacheGet, cacheSet } from "@/src/services/offlineCache";
 import {
   CreateCatalogPlantPayload,
   PlantCatalogItem,
 } from "@/src/types/plant.types";
 import { useCallback, useEffect, useState } from "react";
+
+const CATALOG_CACHE_KEY = "plantica:catalog";
 
 export function useCatalogo() {
   const [items, setItems] = useState<PlantCatalogItem[]>([]);
@@ -20,21 +23,27 @@ export function useCatalogo() {
     try {
       const data = await fetchCatalogPlants();
       setItems(data);
-    } catch (error) {
-      const details =
-        error instanceof Error ? error.message : "Error desconocido";
+      void cacheSet(CATALOG_CACHE_KEY, data);
+    } catch (err) {
+      const details = err instanceof Error ? err.message : "Error desconocido";
       if (__DEV__) {
         console.error("[Catalogo][loadCatalog]", details);
       }
-      setError("No se pudo cargar el catalogo. Intenta de nuevo.");
-      setItems([]);
+      setError("Sin conexión — mostrando datos guardados.");
     }
   }, []);
 
   const initialLoad = useCallback(async () => {
     setLoading(true);
-    await loadCatalog();
-    setLoading(false);
+    const cached = await cacheGet<PlantCatalogItem[]>(CATALOG_CACHE_KEY);
+    if (cached?.length) {
+      setItems(cached);
+      setLoading(false);
+      void loadCatalog();
+    } else {
+      await loadCatalog();
+      setLoading(false);
+    }
   }, [loadCatalog]);
 
   const refresh = useCallback(async () => {

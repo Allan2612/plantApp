@@ -1,4 +1,5 @@
 import { useAuthSession } from "@/src/features/auth/hooks/useAuthSession";
+import { useAuthStore } from "@/src/store/auth.store";
 import { fetchCatalogPlants } from "@/src/features/catalogo/services/catalogoApi.service";
 import {
   createUserPlant,
@@ -7,6 +8,7 @@ import {
   UserPlantListItem,
 } from "@/src/features/mis-plantas/services/misPlantasApi.service";
 import { fetchProfileForSession } from "@/src/features/profile/services/profileApi.service";
+import { cacheGet, cacheSet } from "@/src/services/offlineCache";
 import { useToast } from "@/src/providers/ToastProvider";
 import { PlantCatalogItem } from "@/src/types/plant.types";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -183,6 +185,7 @@ export function toIsoDate(date: Date): string {
 
 export function useMisPlantasScreen() {
   const { user } = useAuthSession();
+  const cachedProfile = useAuthStore((state) => state.profile);
   const { showToast } = useToast();
 
   const [backendUserId, setBackendUserId] = useState("");
@@ -309,6 +312,9 @@ export function useMisPlantasScreen() {
   const resolveBackendUserId = useCallback(async () => {
     if (!user?.uid) return "";
 
+    // Use cached profile first (works offline)
+    if (cachedProfile?.user?.id) return cachedProfile.user.id;
+
     const resolution = await fetchProfileForSession({
       uid: user.uid,
       email: user.email,
@@ -317,7 +323,7 @@ export function useMisPlantasScreen() {
     });
 
     return resolution?.backendUserId ?? "";
-  }, [user?.displayName, user?.email, user?.providerData, user?.uid]);
+  }, [cachedProfile?.user?.id, user?.displayName, user?.email, user?.providerData, user?.uid]);
 
   const loadAll = useCallback(async () => {
     if (!user?.uid) {
@@ -342,6 +348,18 @@ export function useMisPlantasScreen() {
 
       setBackendUserId(resolvedUserId);
 
+      const plantsKey = `plantica:plants:${resolvedUserId}`;
+      const catalogKey = "plantica:catalog";
+
+      const [cachedPlants, cachedCatalog] = await Promise.all([
+        cacheGet<UserPlantListItem[]>(plantsKey),
+        cacheGet<PlantCatalogItem[]>(catalogKey),
+      ]);
+
+      if (cachedPlants?.length) setPlants(cachedPlants);
+      if (cachedCatalog?.length) setCatalog(cachedCatalog);
+      if (cachedPlants?.length || cachedCatalog?.length) setIsLoading(false);
+
       const [plantsResponse, catalogItems] = await Promise.all([
         fetchUserPlants(resolvedUserId),
         fetchCatalogPlants(),
@@ -350,6 +368,8 @@ export function useMisPlantasScreen() {
       const nextPlants = plantsResponse.items ?? [];
       setPlants(nextPlants);
       setCatalog(catalogItems);
+      void cacheSet(plantsKey, nextPlants);
+      void cacheSet(catalogKey, catalogItems);
 
       if (!editingPlantId) return;
 
@@ -360,12 +380,8 @@ export function useMisPlantasScreen() {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No se pudo cargar tu jardín.";
-      setLoadError(message);
-      showToast(message, "error");
-      setPlants([]);
-      setCatalog([]);
-      setEditingPlantId("");
-      hydrateEditForm(null);
+      setLoadError("Sin conexión — mostrando datos guardados.");
+      if (__DEV__) console.error("[MisPlantas][loadAll]", message);
     } finally {
       setIsLoading(false);
     }
@@ -373,7 +389,6 @@ export function useMisPlantasScreen() {
     editingPlantId,
     hydrateEditForm,
     resolveBackendUserId,
-    showToast,
     user?.uid,
   ]);
 

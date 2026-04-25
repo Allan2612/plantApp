@@ -2,7 +2,7 @@ import AppText from "@/src/components/shared/AppText/AppText";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { CameraType, CameraView, FlashMode } from "expo-camera";
-import { Modal, StatusBar, TouchableOpacity, View } from "react-native";
+import { Image, Modal, StatusBar, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { createStyles } from "./styles";
 
@@ -13,8 +13,10 @@ interface IdentificarCameraProps {
   isBusy: boolean;
   isVisible: boolean;
   error: string | null;
+  galleryThumbnailUri: string | null;
   onClose: () => void;
   onTakePhoto: () => Promise<void>;
+  onPickFromGallery: () => void;
   onToggleFacing: () => void;
   onToggleFlash: () => void;
 }
@@ -26,8 +28,10 @@ export default function IdentificarCamera({
   isBusy,
   isVisible,
   error,
+  galleryThumbnailUri,
   onClose,
   onTakePhoto,
+  onPickFromGallery,
   onToggleFacing,
   onToggleFlash,
 }: IdentificarCameraProps) {
@@ -119,7 +123,20 @@ export default function IdentificarCamera({
               </View>
             </TouchableOpacity>
 
-            <View style={styles.iconButton} />
+            <TouchableOpacity
+              onPress={onPickFromGallery}
+              style={styles.iconButton}
+              activeOpacity={0.85}
+            >
+              {galleryThumbnailUri ? (
+                <Image
+                  source={{ uri: galleryThumbnailUri }}
+                  style={styles.galleryThumb}
+                />
+              ) : (
+                <Ionicons name="images-outline" size={22} color="#FFFFFF" />
+              )}
+            </TouchableOpacity>
           </View>
         </View>
       </View>

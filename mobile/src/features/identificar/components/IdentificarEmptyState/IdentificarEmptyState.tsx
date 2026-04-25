@@ -7,9 +7,10 @@ import { createStyles } from "./styles";
 
 interface IdentificarEmptyStateProps {
   onOpenCamera: () => void;
+  onPickFromGallery: () => void;
 }
 
-export default function IdentificarEmptyState({ onOpenCamera }: IdentificarEmptyStateProps) {
+export default function IdentificarEmptyState({ onOpenCamera, onPickFromGallery }: IdentificarEmptyStateProps) {
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);

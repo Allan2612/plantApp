@@ -20,6 +20,7 @@ interface CatalogoScreenProps {
   refreshing: boolean;
   creating: boolean;
   error: string | null;
+  isOffline: boolean;
   onRetry: () => void;
   onRefresh: () => void;
   onCreatePlant: (payload: CreateCatalogPlantPayload) => Promise<void>;
@@ -31,6 +32,7 @@ export default function CatalogoScreen({
   refreshing,
   creating,
   error,
+  isOffline,
   onRetry,
   onRefresh,
   onCreatePlant,
@@ -96,9 +98,9 @@ export default function CatalogoScreen({
               Explora especies y conoce sus cuidados principales.
             </AppText>
             <AppButton
-              title="Añadir al catálogo"
+              title={isOffline ? "Sin conexión" : "Añadir al catálogo"}
               onPress={openCreateModal}
-              disabled={creating}
+              disabled={creating || isOffline}
               style={styles.addButton}
             />
           </View>

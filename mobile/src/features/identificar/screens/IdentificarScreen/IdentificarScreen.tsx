@@ -33,7 +33,9 @@ export default function IdentificarScreen() {
     openCamera,
     closeCamera,
     capturedPhoto,
+    galleryThumbnailUri,
     handleTakePhoto,
+    handlePickFromGallery,
     handleRetakePhoto,
     handleClearPhoto,
     handleIdentify,
@@ -46,6 +48,7 @@ export default function IdentificarScreen() {
     isSaving,
     description,
     setDescription,
+    isOffline,
   } = useIdentificarScreen();
 
   if (permissionStep !== "granted") {
@@ -79,6 +82,7 @@ export default function IdentificarScreen() {
               isDetecting={isDetecting}
               isIdentifying={isIdentifying}
               isSaving={isSaving}
+              isOffline={isOffline}
               aiResult={aiResult}
               aiImageUrl={aiImageUrl}
               description={description}
@@ -89,7 +93,7 @@ export default function IdentificarScreen() {
               onSavePlant={handleSavePlant}
             />
           ) : (
-            <IdentificarEmptyState onOpenCamera={openCamera} />
+            <IdentificarEmptyState onOpenCamera={openCamera} onPickFromGallery={handlePickFromGallery} />
           )}
         </ScrollView>
       </ScreenWrapper>
@@ -101,8 +105,10 @@ export default function IdentificarScreen() {
         isBusy={isBusy}
         isVisible={isCameraOpen}
         error={cameraError}
+        galleryThumbnailUri={galleryThumbnailUri}
         onClose={closeCamera}
         onTakePhoto={handleTakePhoto}
+        onPickFromGallery={handlePickFromGallery}
         onToggleFacing={toggleFacing}
         onToggleFlash={toggleFlash}
       />

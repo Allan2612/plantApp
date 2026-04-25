@@ -5,6 +5,7 @@ import LoadingState from "@/src/components/shared/LoadingState";
 import AppText from "@/src/components/shared/AppText/AppText";
 import ScreenWrapper from "@/src/components/shared/ScreenWrapper/ScreenWrapper";
 import SingleSelect from "@/src/components/shared/SingleSelect";
+import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import {
   formatBirthDateForDisplay,
   getAvatarUri,
@@ -33,6 +34,8 @@ import { createStyles } from "./styles";
 export default function UserProfileScreen() {
   const theme = useAppTheme();
   const styles = createStyles(theme);
+  const { isConnected } = useNetworkStatus();
+  const isOffline = isConnected === false;
   const {
     isLoadingProfile,
     isSaving,
@@ -86,9 +89,10 @@ export default function UserProfileScreen() {
             </View>
             {isLoadingProfile ? null : (
               <AppButton
-                title={isEditing ? "Cancelar" : "Editar perfil"}
+                title={isEditing ? "Cancelar" : isOffline ? "Sin conexión" : "Editar perfil"}
                 onPress={() => setIsEditing((current) => !current)}
                 variant="secondary"
+                disabled={!isEditing && isOffline}
               />
             )}
           </View>
@@ -398,9 +402,9 @@ export default function UserProfileScreen() {
               />
 
               <AppButton
-                title={isSaving ? "Guardando..." : "Guardar perfil"}
+                title={isOffline ? "Sin conexión" : isSaving ? "Guardando..." : "Guardar perfil"}
                 onPress={onSubmit}
-                disabled={isSaving}
+                disabled={isSaving || isOffline}
               />
             </View>
           )}

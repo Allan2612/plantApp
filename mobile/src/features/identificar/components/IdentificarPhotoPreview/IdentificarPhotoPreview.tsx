@@ -15,6 +15,7 @@ interface IdentificarPhotoPreviewProps {
   isDetecting: boolean;
   isIdentifying: boolean;
   isSaving: boolean;
+  isOffline: boolean;
   aiResult: PlantIdentificationResult | null;
   aiImageUrl: string | null;
   description: string;
@@ -37,6 +38,7 @@ export default function IdentificarPhotoPreview({
   isDetecting,
   isIdentifying,
   isSaving,
+  isOffline,
   aiResult,
   aiImageUrl,
   description,
@@ -197,9 +199,9 @@ export default function IdentificarPhotoPreview({
             <View style={styles.aiDivider} />
 
             <AppButton
-              title={isSaving ? "Guardando..." : "Guardar en Mis Plantas"}
+              title={isOffline ? "Sin conexión" : isSaving ? "Guardando..." : "Guardar en Mis Plantas"}
               onPress={onSavePlant}
-              disabled={isSaving}
+              disabled={isSaving || isOffline}
             />
           </View>
         ) : (
@@ -233,12 +235,12 @@ export default function IdentificarPhotoPreview({
 
           <View style={styles.identifyBlock}>
             <AppButton
-              title={isBusy ? "Procesando imagen..." : "Analizar con IA"}
+              title={isOffline ? "Sin conexión" : isBusy ? "Procesando imagen..." : "Analizar con IA"}
               onPress={onIdentify}
-              disabled={isBusy}
+              disabled={isBusy || isOffline}
             />
             <AppText variant="caption" color={colors.textSecondary} style={styles.identifyCaption}>
-              El análisis puede tardar unos segundos
+              {isOffline ? "Conéctate a internet para identificar la planta" : "El análisis puede tardar unos segundos"}
             </AppText>
           </View>
 
