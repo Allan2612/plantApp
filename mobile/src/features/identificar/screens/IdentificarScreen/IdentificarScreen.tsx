@@ -41,6 +41,7 @@ export default function IdentificarScreen() {
     detections,
     isDetecting,
     aiResult,
+    aiImageUrl,
     isIdentifying,
     isSaving,
     description,
@@ -79,6 +80,7 @@ export default function IdentificarScreen() {
               isIdentifying={isIdentifying}
               isSaving={isSaving}
               aiResult={aiResult}
+              aiImageUrl={aiImageUrl}
               description={description}
               onChangeDescription={setDescription}
               onRetake={handleRetakePhoto}

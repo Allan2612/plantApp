@@ -44,6 +44,24 @@ function mapResponse(raw: RawIdentificationResponse): PlantIdentificationResult 
   };
 }
 
+export async function fetchPlantImageUrl(scientificName: string): Promise<string | null> {
+  try {
+    const encoded = encodeURIComponent(scientificName.replace(/ /g, "_"));
+    const response = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encoded}`,
+      { headers: { Accept: "application/json" } }
+    );
+    if (!response.ok) return null;
+    const data = await response.json() as {
+      originalimage?: { source?: string };
+      thumbnail?: { source?: string };
+    };
+    return data?.originalimage?.source ?? data?.thumbnail?.source ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function identifyPlantFromUri(
   imageUri: string,
   userContext?: string

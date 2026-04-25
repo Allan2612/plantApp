@@ -5,6 +5,7 @@ import { DetectionResult } from "@/src/features/identificar/services/localObject
 import { PhotoResult } from "@/src/services/cameraService";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 import { Image, TextInput, TouchableOpacity, View } from "react-native";
 import { createStyles } from "./styles";
 
@@ -15,6 +16,7 @@ interface IdentificarPhotoPreviewProps {
   isIdentifying: boolean;
   isSaving: boolean;
   aiResult: PlantIdentificationResult | null;
+  aiImageUrl: string | null;
   description: string;
   onChangeDescription: (value: string) => void;
   onRetake: () => void;
@@ -36,6 +38,7 @@ export default function IdentificarPhotoPreview({
   isIdentifying,
   isSaving,
   aiResult,
+  aiImageUrl,
   description,
   onChangeDescription,
   onRetake,
@@ -46,9 +49,11 @@ export default function IdentificarPhotoPreview({
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
+  const [refImageError, setRefImageError] = useState(false);
 
   const isBusy = isDetecting || isIdentifying;
   const confidencePct = aiResult ? Math.round(aiResult.confidence * 100) : 0;
+  const showRefImage = Boolean(aiImageUrl && !refImageError);
 
   return (
     <View style={styles.container}>
@@ -118,6 +123,16 @@ export default function IdentificarPhotoPreview({
                 ) : null}
               </View>
             </View>
+
+            {/* Reference image from Wikipedia */}
+            {showRefImage ? (
+              <Image
+                source={{ uri: aiImageUrl! }}
+                style={{ width: "100%", height: 180, borderRadius: 10, marginVertical: 10 }}
+                resizeMode="cover"
+                onError={() => setRefImageError(true)}
+              />
+            ) : null}
 
             {/* Confidence bar */}
             <View style={styles.confidenceRow}>

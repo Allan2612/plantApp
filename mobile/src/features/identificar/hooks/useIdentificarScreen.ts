@@ -2,6 +2,7 @@ import { useAuthStore } from "@/src/store/auth.store";
 import { createCatalogPlant } from "@/src/features/catalogo/services/catalogoApi.service";
 import { createUserPlant } from "@/src/features/mis-plantas/services/misPlantasApi.service";
 import {
+  fetchPlantImageUrl,
   identifyPlantFromUri,
   PlantIdentificationResult,
 } from "@/src/features/identificar/services/aiIdentification.service";
@@ -24,6 +25,7 @@ export function useIdentificarScreen() {
   const [detections, setDetections] = useState<DetectionResult[]>([]);
   const [isDetecting, setIsDetecting] = useState(false);
   const [aiResult, setAiResult] = useState<PlantIdentificationResult | null>(null);
+  const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
   const [isIdentifying, setIsIdentifying] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -68,6 +70,7 @@ export function useIdentificarScreen() {
     setDetections([]);
     setDescription("");
     setAiResult(null);
+    setAiImageUrl(null);
     setIsCameraOpen(true);
   }, [camera]);
 
@@ -76,6 +79,7 @@ export function useIdentificarScreen() {
     setDetections([]);
     setDescription("");
     setAiResult(null);
+    setAiImageUrl(null);
   }, [camera]);
 
   const handleIdentify = useCallback(async () => {
@@ -83,12 +87,15 @@ export function useIdentificarScreen() {
 
     setIsIdentifying(true);
     setAiResult(null);
+    setAiImageUrl(null);
 
     try {
       const result = await identifyPlantFromUri(camera.lastPhoto.uri, description);
       setAiResult(result);
 
-      if (!result.isPlant) {
+      if (result.isPlant) {
+        fetchPlantImageUrl(result.scientificName ?? result.commonName ?? "").then(setAiImageUrl);
+      } else {
         showToast("No se detectó una planta en la imagen. Intenta con una foto más clara.", "error");
       }
     } catch (err) {
@@ -117,6 +124,7 @@ export function useIdentificarScreen() {
         isToxic: aiResult.isToxic ?? false,
         lightNotes: aiResult.lightNotes ?? undefined,
         generalCareNotes: aiResult.careSummary ?? undefined,
+        imageUrl: aiImageUrl ?? undefined,
       });
 
       await createUserPlant({
@@ -134,7 +142,7 @@ export function useIdentificarScreen() {
     } finally {
       setIsSaving(false);
     }
-  }, [aiResult, firebaseUser?.uid, handleClearPhoto, isSaving, showToast]);
+  }, [aiImageUrl, aiResult, firebaseUser?.uid, handleClearPhoto, isSaving, showToast]);
 
   return {
     cameraRef: camera.cameraRef,
@@ -170,6 +178,7 @@ export function useIdentificarScreen() {
     detections,
     isDetecting,
     aiResult,
+    aiImageUrl,
     isIdentifying,
     isSaving,
 
