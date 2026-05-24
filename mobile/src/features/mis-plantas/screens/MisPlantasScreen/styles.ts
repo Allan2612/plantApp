@@ -9,11 +9,31 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
     },
     header: {
       paddingBottom: spacing.md,
-      paddingTop: spacing.xl,
+      paddingTop: spacing.sm,
       gap: spacing.xs,
     },
     cardWrapper: {
       flex: 1,
+    },
+    // Dashboard
+    dashboardRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: spacing.xs,
+      gap: spacing.md,
+    },
+    dashboardStat: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.xs,
+    },
+    dashboardValue: {
+      fontSize: 15,
+      fontWeight: "700",
+    },
+    dashboardLabel: {
+      fontSize: 13,
+      color: colors.textSecondary,
     },
     errorCard: {
       borderRadius: radius.lg,

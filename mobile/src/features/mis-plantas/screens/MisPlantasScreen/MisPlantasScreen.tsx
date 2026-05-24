@@ -105,12 +105,42 @@ export default function MisPlantasScreen() {
     }
   }, [edit, plants, hydrateEditForm, setEditingPlantId]);
 
+  const goodCount = plants.filter(
+    (p) => getHealthStatus(getUserPlantPayload(p)) === "good"
+  ).length;
+  const attentionCount = plants.length - goodCount;
+  const totalColor = theme.colors.primary;
+  const goodColor = "#22c55e";
+  const attentionColor = attentionCount > 0 ? "#f59e0b" : "#22c55e";
+
   const ListHeader = (
     <View style={styles.header}>
       <AppText variant="heading">Mi jardín</AppText>
-      <AppText variant="caption" color={theme.colors.textSecondary}>
-        {plants.length} {plants.length === 1 ? "planta" : "plantas"}
-      </AppText>
+      {plants.length > 0 ? (
+        <View style={styles.dashboardRow}>
+          <View style={styles.dashboardStat}>
+            <Ionicons name="leaf-outline" size={13} color={totalColor} />
+            <AppText style={[styles.dashboardValue, { color: totalColor }]}>{plants.length}</AppText>
+            <AppText style={styles.dashboardLabel}>{plants.length === 1 ? "planta" : "plantas"}</AppText>
+          </View>
+          <View style={styles.dashboardStat}>
+            <Ionicons name="checkmark-circle-outline" size={13} color={goodColor} />
+            <AppText style={[styles.dashboardValue, { color: goodColor }]}>{goodCount}</AppText>
+            <AppText style={styles.dashboardLabel}>sanas</AppText>
+          </View>
+          {attentionCount > 0 ? (
+            <View style={styles.dashboardStat}>
+              <Ionicons name="warning-outline" size={13} color={attentionColor} />
+              <AppText style={[styles.dashboardValue, { color: attentionColor }]}>{attentionCount}</AppText>
+              <AppText style={styles.dashboardLabel}>atención</AppText>
+            </View>
+          ) : null}
+        </View>
+      ) : (
+        <AppText variant="caption" color={theme.colors.textSecondary}>
+          Agrega tu primera planta con el botón verde
+        </AppText>
+      )}
       {loadError ? (
         <View style={styles.errorCard}>
           <AppText variant="body" style={styles.errorCardText}>{loadError}</AppText>
