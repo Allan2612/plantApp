@@ -3,7 +3,7 @@ import {
   CreateCatalogPlantPayload,
 } from "@/src/types/plant.types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { TextInput } from "react-native";
 import { z } from "zod";
@@ -26,14 +26,6 @@ const createCatalogPlantSchema = z.object({
   }),
   climate: z.string().trim().optional(),
   origin: z.string().trim().optional(),
-  imageUrl: z
-    .string()
-    .trim()
-    .optional()
-    .refine(
-      (value) => !value || /^https?:\/\//i.test(value),
-      "Usa una URL valida (https://...).",
-    ),
   lightNotes: z.string().trim().optional(),
   generalCareNotes: z.string().trim().optional(),
 });
@@ -60,15 +52,15 @@ export function useCatalogPlantCreateModal(
   const descriptionRef = useRef<TextInput | null>(null);
   const climateRef = useRef<TextInput | null>(null);
   const originRef = useRef<TextInput | null>(null);
-  const imageUrlRef = useRef<TextInput | null>(null);
   const lightNotesRef = useRef<TextInput | null>(null);
   const careNotesRef = useRef<TextInput | null>(null);
+
+  const [imageLocalUri, setImageLocalUri] = useState<string | null>(null);
 
   const {
     control,
     handleSubmit,
     reset,
-    watch,
     formState: { errors },
   } = useForm<CreateCatalogPlantFormValues>({
     resolver: zodResolver(createCatalogPlantSchema),
@@ -80,7 +72,6 @@ export function useCatalogPlantCreateModal(
       toxicity: "no",
       climate: "",
       origin: "",
-      imageUrl: "",
       lightNotes: "",
       generalCareNotes: "",
     },
@@ -89,14 +80,8 @@ export function useCatalogPlantCreateModal(
   useEffect(() => {
     if (!visible) return;
     reset();
+    setImageLocalUri(null);
   }, [reset, visible]);
-
-  const watchedImageUrl = watch("imageUrl") ?? "";
-
-  const imagePreview = useMemo(() => {
-    const candidate = watchedImageUrl.trim();
-    return /^https?:\/\//i.test(candidate) ? candidate : "";
-  }, [watchedImageUrl]);
 
   const onFormSubmit = handleSubmit(async (values) => {
     const payload: CreateCatalogPlantPayload = {
@@ -107,26 +92,27 @@ export function useCatalogPlantCreateModal(
       isToxic: values.toxicity === "yes",
       climate: values.climate?.trim() || undefined,
       origin: values.origin?.trim() || undefined,
-      imageUrl: values.imageUrl?.trim() || undefined,
       lightNotes: values.lightNotes?.trim() || undefined,
       generalCareNotes: values.generalCareNotes?.trim() || undefined,
+      imageLocalUri: imageLocalUri ?? undefined,
     };
 
     await onSubmit(payload);
     reset();
+    setImageLocalUri(null);
   });
 
   return {
     control,
     errors,
-    imagePreview,
+    imageLocalUri,
+    setImageLocalUri,
     onFormSubmit,
     refs: {
       scientificNameRef,
       descriptionRef,
       climateRef,
       originRef,
-      imageUrlRef,
       lightNotesRef,
       careNotesRef,
     },

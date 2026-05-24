@@ -1,13 +1,12 @@
 from functools import lru_cache
 
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, storage as fb_storage
 
 from .config import get_settings
 
 
-@lru_cache(maxsize=1)
-def get_firestore_client() -> firestore.Client:
+def _ensure_app_initialized() -> None:
     settings = get_settings()
 
     if not settings.firebase_service_account_path.exists():
@@ -22,6 +21,19 @@ def get_firestore_client() -> firestore.Client:
         credential = credentials.Certificate(
             str(settings.firebase_service_account_path)
         )
-        firebase_admin.initialize_app(credential)
+        options: dict = {}
+        bucket = settings.firebase_storage_bucket.strip()
+        if bucket:
+            options["storageBucket"] = bucket
+        firebase_admin.initialize_app(credential, options)
 
+
+@lru_cache(maxsize=1)
+def get_firestore_client() -> firestore.Client:
+    _ensure_app_initialized()
     return firestore.client()
+
+
+def get_storage_bucket():
+    _ensure_app_initialized()
+    return fb_storage.bucket()

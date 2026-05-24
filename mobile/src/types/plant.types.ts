@@ -67,4 +67,5 @@ export interface CreateCatalogPlantPayload {
   generalCareNotes?: string;
   imageUrl?: string;
   categoryIds?: string[];
+  imageLocalUri?: string;
 }

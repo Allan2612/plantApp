@@ -4,6 +4,7 @@ import {
   fetchUserProfile,
   updateUserProfile,
 } from "@/src/features/profile/services/profileApi.service";
+import { uploadUserAvatar } from "@/src/services/imageUpload.service";
 import { useToast } from "@/src/providers/ToastProvider";
 import { useAuthStore } from "@/src/store/auth.store";
 import { BackendUser, UserVisibility } from "@/src/types/auth.types";
@@ -141,6 +142,7 @@ export function useUserProfileScreen() {
   const [birthDatePickerValue, setBirthDatePickerValue] = useState<Date>(
     new Date(),
   );
+  const [avatarLocalUri, setAvatarLocalUri] = useState<string | null>(null);
 
   const resolveSessionProfile = useCallback(async () => {
     if (!user?.uid) return null;
@@ -250,8 +252,14 @@ export function useUserProfileScreen() {
         );
       }
 
+      let finalValues = { ...values };
+      if (avatarLocalUri) {
+        const uploadedUrl = await uploadUserAvatar(targetUserId, avatarLocalUri);
+        finalValues = { ...finalValues, avatarId: uploadedUrl };
+      }
+
       try {
-        await updateUserProfile(targetUserId, values);
+        await updateUserProfile(targetUserId, finalValues);
       } catch (firstError) {
         if (!isNotFoundError(firstError)) throw firstError;
 
@@ -261,7 +269,7 @@ export function useUserProfileScreen() {
           throw firstError;
         }
 
-        await updateUserProfile(recoveredUserId, values);
+        await updateUserProfile(recoveredUserId, finalValues);
         targetUserId = recoveredUserId;
       }
 
@@ -274,6 +282,7 @@ export function useUserProfileScreen() {
       }
 
       showToast("Perfil actualizado correctamente.", "success");
+      setAvatarLocalUri(null);
       setIsEditing(false);
     } catch (error) {
       const message =
@@ -296,6 +305,8 @@ export function useUserProfileScreen() {
     setShowBirthDatePicker,
     birthDatePickerValue,
     setBirthDatePickerValue,
+    avatarLocalUri,
+    setAvatarLocalUri,
     control,
     errors,
     onSubmit,

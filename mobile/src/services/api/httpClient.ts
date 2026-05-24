@@ -4,6 +4,7 @@ import {
 } from "@/src/services/errors/errorMessages";
 
 const HTTP_TIMEOUT_MS = 8000;
+const HTTP_UPLOAD_TIMEOUT_MS = 30000;
 
 function parseBackendMessage(payload: unknown): string | null {
   if (!payload || typeof payload !== "object") return null;
@@ -71,6 +72,32 @@ export async function httpPatch<TResponse, TPayload extends object>(
       },
       signal: controller.signal,
       body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw await buildHttpError(response);
+    }
+
+    return (await response.json()) as TResponse;
+  } catch (error) {
+    throw new Error(normalizeErrorMessage(error));
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+export async function httpPostMultipart<TResponse>(
+  url: string,
+  formData: FormData,
+): Promise<TResponse> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), HTTP_UPLOAD_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+      signal: controller.signal,
     });
 
     if (!response.ok) {

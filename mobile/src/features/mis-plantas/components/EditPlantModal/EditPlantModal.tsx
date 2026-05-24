@@ -19,6 +19,7 @@ import {
   toIsoDate,
 } from "@/src/features/mis-plantas/hooks/useMisPlantasScreen";
 import { updateUserPlant, UserPlantListItem } from "@/src/features/mis-plantas/services/misPlantasApi.service";
+import { uploadUserPlantImage } from "@/src/services/imageUpload.service";
 import { useToast } from "@/src/providers/ToastProvider";
 import { cacheGet } from "@/src/services/offlineCache";
 import { useAppTheme } from "@/src/theme/ThemeContext";
@@ -127,10 +128,14 @@ export default function EditPlantModal({
     }
     setIsSaving(true);
     try {
+      let imageUrl = values.customImageUrl || undefined;
+      if (imageUrl) {
+        imageUrl = await uploadUserPlantImage(plantId, imageUrl);
+      }
       await updateUserPlant(plantId, {
         plantCatalogId: values.plantCatalogId,
         nickname: values.nickname,
-        customImageUrl: values.customImageUrl || undefined,
+        customImageUrl: imageUrl,
         healthStatus: values.healthStatus,
         locationHome: values.locationHome || undefined,
         acquiredDate: values.acquiredDate || undefined,

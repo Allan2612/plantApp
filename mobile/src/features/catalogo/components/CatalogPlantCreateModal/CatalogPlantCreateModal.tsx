@@ -1,6 +1,7 @@
 import AppButton from "@/src/components/shared/AppButton/AppButton";
 import AppText from "@/src/components/shared/AppText/AppText";
 import InputText from "@/src/components/shared/InputText";
+import PlantImagePicker from "@/src/components/shared/PlantImagePicker";
 import SingleSelect from "@/src/components/shared/SingleSelect";
 import {
   difficultyOptions,
@@ -9,7 +10,6 @@ import {
 } from "@/src/features/catalogo/hooks/useCatalogPlantCreateModal";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { CreateCatalogPlantPayload } from "@/src/types/plant.types";
-import { Image } from "expo-image";
 import { Controller } from "react-hook-form";
 import { Modal, Pressable, ScrollView, View } from "react-native";
 
@@ -30,7 +30,7 @@ export default function CatalogPlantCreateModal({
 }: CatalogPlantCreateModalProps) {
   const theme = useAppTheme();
   const styles = createStyles(theme);
-  const { control, errors, imagePreview, onFormSubmit, refs } =
+  const { control, errors, imageLocalUri, setImageLocalUri, onFormSubmit, refs } =
     useCatalogPlantCreateModal(visible, onSubmit);
 
   return (
@@ -182,42 +182,17 @@ export default function CatalogPlantCreateModal({
                   error={errors.origin?.message}
                   placeholder="Region o pais"
                   returnKeyType="next"
-                  onSubmitEditing={() => refs.imageUrlRef.current?.focus()}
-                />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="imageUrl"
-              render={({ field: { value, onChange } }) => (
-                <InputText
-                  ref={refs.imageUrlRef}
-                  label="URL de imagen"
-                  value={value ?? ""}
-                  onChangeText={onChange}
-                  error={errors.imageUrl?.message}
-                  placeholder="https://..."
-                  autoCapitalize="none"
-                  returnKeyType="next"
                   onSubmitEditing={() => refs.lightNotesRef.current?.focus()}
                 />
               )}
             />
 
             <View style={styles.previewFrame}>
-              {imagePreview ? (
-                <Image
-                  source={{ uri: imagePreview }}
-                  style={styles.previewImage}
-                  contentFit="cover"
-                  transition={120}
-                />
-              ) : (
-                <AppText variant="caption" style={styles.fallbackText}>
-                  Previsualizacion de imagen
-                </AppText>
-              )}
+              <AppText variant="label" style={styles.fieldLabel}>Imagen de la especie (opcional)</AppText>
+              <PlantImagePicker
+                value={imageLocalUri}
+                onChange={(uri) => setImageLocalUri(uri)}
+              />
             </View>
 
             <Controller

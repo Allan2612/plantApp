@@ -234,3 +234,7 @@ class PlantIdentificationResponse(BaseModel):
     light_notes: str | None = None
     difficulty: Literal["easy", "medium", "hard"] | None = None
     is_toxic: bool | None = None
+
+
+class ImageUploadResponse(BaseModel):
+    url: str

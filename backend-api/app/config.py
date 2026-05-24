@@ -28,6 +28,11 @@ class Settings:
             service_account_path = (BASE_DIR / service_account_path).resolve()
         self.firebase_service_account_path = service_account_path
 
+        self.firebase_storage_bucket = os.getenv(
+            "FIREBASE_STORAGE_BUCKET",
+            "",
+        )
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

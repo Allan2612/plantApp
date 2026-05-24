@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter
+from fastapi import APIRouter, File, UploadFile
 from fastapi import HTTPException
 
 from .models import (
@@ -9,6 +9,7 @@ from .models import (
     CategoryModel,
     CreateCatalogPlantRequest,
     CreateUserPlantRequest,
+    ImageUploadResponse,
     PlantCatalogModel,
     PlantIdentificationRequest,
     PlantIdentificationResponse,
@@ -36,7 +37,9 @@ from .services import (
     sync_user_from_auth,
     update_user_fields,
     update_user_plant_fields,
+    upload_image_to_storage,
 )
+from .firebase import get_firestore_client
 from .services_ai import identify_plant_from_base64
 
 router = APIRouter()
@@ -324,4 +327,64 @@ def read_user_info_tiles(user_id: str) -> list[dict]:
             "Error inesperado en read_user_info_tiles. user_id=%s",
             validated_user_id,
         )
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.post("/api/users/{user_id}/avatar", response_model=ImageUploadResponse)
+async def upload_user_avatar(user_id: str, file: UploadFile = File(...)) -> dict:
+    validated_user_id = _validate_required_id(user_id, "user_id")
+    try:
+        file_bytes = await file.read()
+        url = upload_image_to_storage(
+            file_bytes,
+            file.content_type,
+            f"user-avatars/{validated_user_id}/avatar",
+        )
+        db = get_firestore_client()
+        db.collection("users").document(validated_user_id).update({"avatarId": url})
+        return {"url": url}
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error inesperado en upload_user_avatar. user_id=%s", validated_user_id)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.post("/api/user-plants/{user_plant_id}/image", response_model=ImageUploadResponse)
+async def upload_user_plant_image(user_plant_id: str, file: UploadFile = File(...)) -> dict:
+    validated_id = _validate_required_id(user_plant_id, "user_plant_id")
+    try:
+        file_bytes = await file.read()
+        url = upload_image_to_storage(
+            file_bytes,
+            file.content_type,
+            f"user-plants/{validated_id}/image",
+        )
+        db = get_firestore_client()
+        db.collection("userPlants").document(validated_id).update({"customImageUrl": url})
+        return {"url": url}
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error inesperado en upload_user_plant_image. user_plant_id=%s", validated_id)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.post("/api/catalog/plants/{plant_catalog_id}/image", response_model=ImageUploadResponse)
+async def upload_catalog_plant_image(plant_catalog_id: str, file: UploadFile = File(...)) -> dict:
+    validated_id = _validate_required_id(plant_catalog_id, "plant_catalog_id")
+    try:
+        file_bytes = await file.read()
+        url = upload_image_to_storage(
+            file_bytes,
+            file.content_type,
+            f"catalog-plants/{validated_id}/image",
+        )
+        db = get_firestore_client()
+        db.collection("plantsCatalog").document(validated_id).update({"imageUrl": url})
+        return {"url": url}
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error inesperado en upload_catalog_plant_image. plant_catalog_id=%s", validated_id)
         raise HTTPException(status_code=500, detail="Error interno del servidor")

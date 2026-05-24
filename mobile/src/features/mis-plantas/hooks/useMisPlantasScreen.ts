@@ -10,6 +10,7 @@ import {
 } from "@/src/features/mis-plantas/services/misPlantasApi.service";
 import { fetchProfileForSession } from "@/src/features/profile/services/profileApi.service";
 import { cacheGet, cacheSet } from "@/src/services/offlineCache";
+import { uploadUserPlantImage } from "@/src/services/imageUpload.service";
 import { useToast } from "@/src/providers/ToastProvider";
 import { PlantCatalogItem } from "@/src/types/plant.types";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -402,10 +403,14 @@ export function useMisPlantasScreen() {
 
     setIsSavingEdit(true);
     try {
+      let imageUrl = values.customImageUrl || undefined;
+      if (imageUrl) {
+        imageUrl = await uploadUserPlantImage(userPlantId, imageUrl);
+      }
       await updateUserPlant(userPlantId, {
         plantCatalogId: values.plantCatalogId,
         nickname: values.nickname,
-        customImageUrl: values.customImageUrl || undefined,
+        customImageUrl: imageUrl,
         healthStatus: values.healthStatus,
         locationHome: values.locationHome || undefined,
         acquiredDate: values.acquiredDate || undefined,
@@ -436,17 +441,24 @@ export function useMisPlantasScreen() {
 
     setIsSavingCreate(true);
     try {
-      await createUserPlant({
+      const created = await createUserPlant({
         userId: backendUserId,
         plantCatalogId: values.plantCatalogId,
         nickname: values.nickname,
-        customImageUrl: values.customImageUrl,
+        customImageUrl: undefined,
         healthStatus: values.healthStatus,
         locationHome: values.locationHome || undefined,
         acquiredDate: values.acquiredDate || undefined,
         notes: values.notes || undefined,
         favorite: values.favorite,
       });
+
+      const newPlantId = typeof (created as Record<string, unknown>).id === "string"
+        ? (created as Record<string, unknown>).id as string
+        : "";
+      if (newPlantId && values.customImageUrl) {
+        await uploadUserPlantImage(newPlantId, values.customImageUrl).catch(() => {});
+      }
 
       showToast("Planta agregada a tu jardín.", "success");
       resetCreate({

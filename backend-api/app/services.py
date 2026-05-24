@@ -1,11 +1,13 @@
 import logging
 import re
+import uuid
 from datetime import datetime
 from typing import Any
+from urllib.parse import quote
 
 from fastapi import HTTPException
 
-from .firebase import get_firestore_client
+from .firebase import get_firestore_client, get_storage_bucket
 
 logger = logging.getLogger(__name__)
 
@@ -562,6 +564,49 @@ def create_catalog_plant(payload: dict[str, Any]) -> dict[str, Any]:
     reference = db.collection("plantsCatalog").document()
     reference.set(document)
     return get_document("plantsCatalog", reference.id)
+
+
+_ALLOWED_IMAGE_MIMETYPES: dict[str, str] = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+}
+_IMAGE_MAX_BYTES = 5 * 1024 * 1024  # 5 MB
+
+
+def upload_image_to_storage(
+    file_bytes: bytes,
+    content_type: str | None,
+    storage_path: str,
+) -> str:
+    normalized_mime = (content_type or "").lower().split(";")[0].strip()
+    extension = _ALLOWED_IMAGE_MIMETYPES.get(normalized_mime)
+    if extension is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Formato no soportado. Usa JPEG, PNG o WebP.",
+        )
+    if not file_bytes:
+        raise HTTPException(status_code=400, detail="El archivo llegó vacío.")
+    if len(file_bytes) > _IMAGE_MAX_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail="La imagen supera el tamaño máximo permitido (5 MB).",
+        )
+
+    object_path = f"{storage_path}.{extension}"
+    bucket = get_storage_bucket()
+    blob = bucket.blob(object_path)
+
+    download_token = str(uuid.uuid4())
+    blob.metadata = {"firebaseStorageDownloadTokens": download_token}
+    blob.upload_from_string(file_bytes, content_type=normalized_mime)
+
+    encoded_path = quote(object_path, safe="")
+    return (
+        f"https://firebasestorage.googleapis.com/v0/b/{bucket.name}/o/"
+        f"{encoded_path}?alt=media&token={download_token}"
+    )
 
 
 def get_user_profile_payload(user_id: str) -> dict[str, Any]:

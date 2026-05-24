@@ -3,6 +3,7 @@ import EmptyState from "@/src/components/shared/EmptyState";
 import InputText from "@/src/components/shared/InputText";
 import LoadingState from "@/src/components/shared/LoadingState";
 import AppText from "@/src/components/shared/AppText/AppText";
+import PlantImagePicker from "@/src/components/shared/PlantImagePicker";
 import ScreenWrapper from "@/src/components/shared/ScreenWrapper/ScreenWrapper";
 import SingleSelect from "@/src/components/shared/SingleSelect";
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
@@ -46,6 +47,8 @@ export default function UserProfileScreen() {
     setShowBirthDatePicker,
     birthDatePickerValue,
     setBirthDatePickerValue,
+    avatarLocalUri,
+    setAvatarLocalUri,
     control,
     errors,
     onSubmit,
@@ -239,35 +242,24 @@ export default function UserProfileScreen() {
                 )}
               />
 
-              <Controller
-                control={control}
-                name="avatarId"
-                render={({ field: { value, onChange } }) => (
-                  <View style={styles.fieldBlock}>
-                    <InputText
-                      label="Foto de perfil"
-                      value={value}
-                      onChangeText={onChange}
-                      error={errors.avatarId?.message}
-                      placeholder="Pega una URL de imagen o un id de avatar"
-                      autoCapitalize="none"
-                      helperText="Puedes usar una URL (https://...) o un avatar id interno."
+              <View style={styles.fieldBlock}>
+                <AppText variant="label" style={styles.fieldLabel}>Foto de perfil</AppText>
+                <Controller
+                  control={control}
+                  name="avatarId"
+                  render={({ field: { value } }) => (
+                    <PlantImagePicker
+                      value={avatarLocalUri ?? getAvatarUri(value) ?? null}
+                      onChange={(uri) => setAvatarLocalUri(uri)}
                     />
-
-                    {getAvatarUri(value) ? (
-                      <View style={styles.previewRow}>
-                        <Image
-                          source={{ uri: getAvatarUri(value) ?? "" }}
-                          style={styles.previewAvatar}
-                        />
-                        <AppText variant="caption" style={styles.previewText}>
-                          Vista previa de tu foto.
-                        </AppText>
-                      </View>
-                    ) : null}
-                  </View>
-                )}
-              />
+                  )}
+                />
+                {errors.avatarId?.message ? (
+                  <AppText variant="caption" style={styles.errorText}>
+                    {errors.avatarId.message}
+                  </AppText>
+                ) : null}
+              </View>
 
               <Controller
                 control={control}
