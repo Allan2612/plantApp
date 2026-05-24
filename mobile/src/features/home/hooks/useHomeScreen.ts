@@ -6,7 +6,6 @@ import {
   UserPlantListItem,
 } from "@/src/features/mis-plantas/services/misPlantasApi.service";
 import { fetchProfileForSession } from "@/src/features/profile/services/profileApi.service";
-import { useScrollAnim } from "@/src/features/shell/hooks/ScrollAnimContext";
 import { useAuthStore } from "@/src/store/auth.store";
 import { PlantCatalogItem } from "@/src/types/plant.types";
 import { useRouter } from "expo-router";
@@ -76,7 +75,6 @@ function mapHealthLabel(value: string): string {
 }
 
 export function useHomeScreen() {
-  const scrollAnim = useScrollAnim();
   const router = useRouter();
   const { user } = useAuthSession();
   const cachedProfile = useAuthStore((state) => state.profile);
@@ -159,7 +157,6 @@ export function useHomeScreen() {
   };
 
   return {
-    scrollAnim,
     failedImages,
     gardenItems,
     isGardenLoading,

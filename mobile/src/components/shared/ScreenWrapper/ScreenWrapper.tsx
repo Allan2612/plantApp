@@ -1,6 +1,6 @@
 import { useScrollAnim } from "@/src/features/shell/hooks/ScrollAnimContext";
 import { useAppTheme } from "@/src/theme/ThemeContext";
-import { Animated, StyleProp, ViewStyle } from "react-native";
+import { StyleProp, View, ViewStyle } from "react-native";
 import { Edge, SafeAreaView } from "react-native-safe-area-context";
 import { createStyles } from "./styles";
 
@@ -25,18 +25,15 @@ export default function ScreenWrapper({
       edges={edges}
       accessibilityRole="summary"
     >
-      <Animated.View
+      <View
         style={[
           styles.container,
-          {
-            paddingTop:
-              scrollAnim?.headerPaddingAnim ?? scrollAnim?.headerHeight ?? 0,
-          },
+          { paddingTop: scrollAnim?.headerHeight ?? 90 },
           contentContainerStyle,
         ]}
       >
         {children}
-      </Animated.View>
+      </View>
     </SafeAreaView>
   );
 }

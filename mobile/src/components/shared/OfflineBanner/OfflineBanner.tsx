@@ -1,24 +1,25 @@
+import { useScrollAnim } from "@/src/features/shell/hooks/ScrollAnimContext";
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef } from "react";
 import { Animated, Easing, Text } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./styles";
 
 export default function OfflineBanner() {
   const { isConnected } = useNetworkStatus();
-  const { top } = useSafeAreaInsets();
+  const scrollAnim = useScrollAnim();
+  const headerHeight = scrollAnim?.headerHeight ?? 90;
   const translateY = useRef(new Animated.Value(-60)).current;
   const isOffline = isConnected === false;
 
   useEffect(() => {
     Animated.timing(translateY, {
-      toValue: isOffline ? top : -60,
+      toValue: isOffline ? headerHeight : -60,
       duration: 300,
       easing: Easing.inOut(Easing.ease),
       useNativeDriver: true,
     }).start();
-  }, [isOffline, top, translateY]);
+  }, [isOffline, headerHeight, translateY]);
 
   if (isConnected === null) return null;
 

@@ -7,11 +7,12 @@ import CatalogPlantCreateModal from "@/src/features/catalogo/components/CatalogP
 import CatalogPlantCard from "@/src/features/catalogo/components/CatalogPlantCard";
 import { useCatalogoScreen } from "@/src/features/catalogo/hooks/useCatalogoScreen";
 import { useAppTheme } from "@/src/theme/ThemeContext";
+import { Ionicons } from "@expo/vector-icons";
 import {
   CreateCatalogPlantPayload,
   PlantCatalogItem,
 } from "@/src/types/plant.types";
-import { FlatList, View } from "react-native";
+import { FlatList, TouchableOpacity, View } from "react-native";
 import { createStyles } from "./styles";
 
 interface CatalogoScreenProps {
@@ -62,11 +63,7 @@ export default function CatalogoScreen({
       <ScreenWrapper>
         <View style={styles.centerContent}>
           <AppText variant="heading">Catálogo</AppText>
-          <AppText
-            variant="body"
-            color={colors.textSecondary}
-            style={styles.centerText}
-          >
+          <AppText variant="body" color={colors.textSecondary} style={styles.centerText}>
             {error}
           </AppText>
           <AppButton title="Reintentar" onPress={onRetry} />
@@ -93,16 +90,24 @@ export default function CatalogoScreen({
         onRefresh={onRefresh}
         ListHeaderComponent={
           <View style={styles.header}>
-            <AppText variant="heading">Catálogo</AppText>
-            <AppText variant="body" color={colors.textSecondary}>
-              Explora especies y conoce sus cuidados principales.
-            </AppText>
-            <AppButton
-              title={isOffline ? "Sin conexión" : "Añadir al catálogo"}
-              onPress={openCreateModal}
-              disabled={creating || isOffline}
-              style={styles.addButton}
-            />
+            <View style={styles.headerTitleRow}>
+              <View>
+                <AppText variant="heading">Catálogo</AppText>
+                <AppText variant="caption" color={colors.textSecondary}>
+                  {items.length} {items.length === 1 ? "especie" : "especies"}
+                </AppText>
+              </View>
+              {!isOffline ? (
+                <TouchableOpacity
+                  style={styles.addIconButton}
+                  onPress={openCreateModal}
+                  disabled={creating}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="add" size={22} color="#FFFFFF" />
+                </TouchableOpacity>
+              ) : null}
+            </View>
           </View>
         }
         ListEmptyComponent={

@@ -8,15 +8,16 @@ import { useHomeScreen } from "@/src/features/home/hooks/useHomeScreen";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { FlatList, ScrollView, View } from "react-native";
-import { createScreenWrapperContentStyle, createStyles } from "./styles";
+import { useRouter } from "expo-router";
+import { FlatList, ScrollView, TouchableOpacity, View } from "react-native";
+import { createStyles } from "./styles";
 
 export default function HomeScreen() {
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
+  const router = useRouter();
   const {
-    scrollAnim,
     failedImages,
     gardenItems,
     isGardenLoading,
@@ -34,20 +35,14 @@ export default function HomeScreen() {
   } = useHomeScreen();
 
   return (
-    <ScreenWrapper
-      contentContainerStyle={createScreenWrapperContentStyle(
-        scrollAnim?.headerPaddingAnim ?? scrollAnim?.headerHeight ?? 0,
-      )}
-    >
+    <ScreenWrapper>
       <FlatList
-        data={gardenItems}
+        data={gardenItems.slice(0, 3)}
         keyExtractor={(item, index) =>
           getStringField(getUserPlantPayload(item), "id") || `garden-${index}`
         }
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
-        onScroll={scrollAnim?.onScroll}
-        scrollEventThrottle={16}
         ListHeaderComponent={
           <>
             {/* Search bar */}
@@ -142,13 +137,16 @@ export default function HomeScreen() {
             {/* Catalog section */}
             <View style={[styles.sectionHeader, styles.plantsSectionHeader]}>
               <AppText variant="subheading">Catálogo</AppText>
+              <TouchableOpacity onPress={() => router.push("/(tabs)/catalogo" as never)} activeOpacity={0.7}>
+                <AppText variant="caption" color={colors.primary}>Ver todo</AppText>
+              </TouchableOpacity>
             </View>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.catalogRow}
             >
-              {catalogItemsInverted.map((item) => (
+              {catalogItemsInverted.slice(0, 3).map((item) => (
                 <PressableCard
                   key={item.id}
                   style={styles.catalogCard}
@@ -203,6 +201,20 @@ export default function HomeScreen() {
               <AppText variant="subheading">Mis Plantas</AppText>
             </View>
           </>
+        }
+        ListFooterComponent={
+          gardenItems.length > 3 ? (
+            <TouchableOpacity
+              style={styles.seeAllButton}
+              onPress={() => router.push("/(tabs)/misplantas" as never)}
+              activeOpacity={0.7}
+            >
+              <AppText variant="caption" color={colors.primary}>
+                Ver las {gardenItems.length - 3} plantas más
+              </AppText>
+              <Ionicons name="chevron-forward" size={13} color={colors.primary} />
+            </TouchableOpacity>
+          ) : null
         }
         ListEmptyComponent={
           <View style={styles.plantsList}>

@@ -1,6 +1,6 @@
 import { useAnimatedTabBarLogic } from "@/src/features/shell/hooks/useAnimatedTabBarLogic";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { Animated, Pressable } from "react-native";
+import { Pressable, View } from "react-native";
 import { styles } from "./styles";
 
 export default function AnimatedTabBar({
@@ -8,18 +8,13 @@ export default function AnimatedTabBar({
   descriptors,
   navigation,
 }: BottomTabBarProps) {
-  const { colors, scrollAnim, dynamicStyle, translateStyle } =
-    useAnimatedTabBarLogic(state.index);
+  const { colors, dynamicStyle } = useAnimatedTabBarLogic(state.index);
 
   return (
-    <Animated.View
-      onLayout={(e) => scrollAnim?.setTabBarHeight(e.nativeEvent.layout.height)}
-      style={[styles.container, dynamicStyle, translateStyle]}
-    >
+    <View style={[styles.container, dynamicStyle]}>
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
 
-        // Skip tabs flagged as hidden (href: null in expo-router)
         if (!options.tabBarIcon) return null;
 
         const isFocused = state.index === index;
@@ -48,6 +43,6 @@ export default function AnimatedTabBar({
           </Pressable>
         );
       })}
-    </Animated.View>
+    </View>
   );
 }

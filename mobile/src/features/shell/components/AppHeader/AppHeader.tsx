@@ -1,7 +1,7 @@
 import { useScrollAnim } from "@/src/features/shell/hooks/ScrollAnimContext";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { Animated, View } from "react-native";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AppText from "@/src/components/shared/AppText/AppText";
 import ProfileMenu from "../ProfileMenu/ProfileMenu";
@@ -15,15 +15,9 @@ export default function AppHeader() {
   const scrollAnim = useScrollAnim();
 
   return (
-    <Animated.View
+    <View
       onLayout={(e) => scrollAnim?.setHeaderHeight(e.nativeEvent.layout.height)}
-      style={[
-        styles.container,
-        containerInset(top, theme.spacing.sm),
-        scrollAnim
-          ? { transform: [{ translateY: scrollAnim.headerTranslateY }] }
-          : undefined,
-      ]}
+      style={[styles.container, containerInset(top, theme.spacing.sm)]}
       accessibilityRole="header"
     >
       <View style={styles.left}>
@@ -39,6 +33,6 @@ export default function AppHeader() {
       </View>
 
       <ProfileMenu />
-    </Animated.View>
+    </View>
   );
 }

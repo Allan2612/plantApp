@@ -1,5 +1,5 @@
 import { AppTheme } from "@/src/theme/designSystem";
-import { Animated, Dimensions, StyleSheet, ViewStyle } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 export function createStyles({ colors, spacing, radius }: AppTheme) {
@@ -135,6 +135,15 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
     chevronIcon: {
       marginRight: spacing.sm + spacing.xs,
     },
+    seeAllButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: spacing.xs,
+      paddingVertical: spacing.sm,
+      marginHorizontal: spacing.md,
+      marginTop: spacing.xs,
+    },
     catalogRow: {
       paddingLeft: spacing.md,
       paddingRight: spacing.sm,
@@ -171,10 +180,3 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
   });
 }
 
-export function createScreenWrapperContentStyle(
-  paddingTop: number | Animated.Value,
-): ViewStyle {
-  return {
-    paddingTop,
-  };
-}

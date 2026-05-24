@@ -2,47 +2,88 @@ import { AppTheme } from "@/src/theme/designSystem";
 import { StyleSheet } from "react-native";
 
 export function createStyles({ colors, spacing, radius }: AppTheme) {
-  const imageHeight = spacing.xxl * 3;
-
   return StyleSheet.create({
     card: {
+      flexDirection: "row",
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.surfaceDivider,
       borderRadius: radius.lg,
       backgroundColor: colors.surface,
       overflow: "hidden",
     },
-    image: {
-      width: "100%",
-      height: imageHeight,
+    imageWrap: {
+      width: 100,
+      minHeight: 100,
+      alignSelf: "stretch",
       backgroundColor: colors.surfaceAlt,
+    },
+    image: {
+      width: 100,
+      flex: 1,
     },
     imageFallback: {
-      width: "100%",
-      height: imageHeight,
+      width: 100,
+      flex: 1,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: colors.surfaceAlt,
     },
-    content: {
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm + spacing.xs,
-      gap: spacing.xs,
-    },
-    scientificName: {
-      textTransform: "capitalize",
-    },
-    row: {
+    toxicBadge: {
+      position: "absolute",
+      top: spacing.xs,
+      left: spacing.xs,
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "space-between",
-      marginTop: spacing.xs,
-    },
-    badge: {
+      gap: 2,
+      backgroundColor: "#ef444425",
+      borderWidth: 1,
+      borderColor: "#ef4444",
       borderRadius: radius.full,
-      paddingHorizontal: spacing.sm + spacing.xs,
-      paddingVertical: spacing.xs,
-      backgroundColor: colors.surfaceAlt,
+      paddingHorizontal: spacing.xs + 2,
+      paddingVertical: 2,
+    },
+    toxicBadgeText: {
+      fontSize: 9,
+      color: "#ef4444",
+      fontWeight: "700",
+    },
+    content: {
+      flex: 1,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.sm,
+      gap: spacing.xs,
+      justifyContent: "center",
+    },
+    scientificName: {
+      fontStyle: "italic",
+    },
+    description: {
+      lineHeight: 18,
+    },
+    badgeRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      alignItems: "center",
+      gap: spacing.xs,
+      marginTop: 2,
+    },
+    diffBadge: {
+      borderRadius: radius.full,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+      borderWidth: 1,
+    },
+    diffBadgeText: {
+      fontSize: 11,
+      fontWeight: "600",
+    },
+    climateBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 3,
+    },
+    climateText: {
+      fontSize: 11,
+      color: colors.textMuted,
     },
   });
 }
