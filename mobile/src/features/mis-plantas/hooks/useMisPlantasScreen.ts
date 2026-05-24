@@ -1,5 +1,6 @@
 import { useAuthSession } from "@/src/features/auth/hooks/useAuthSession";
 import { useAuthStore } from "@/src/store/auth.store";
+import { usePlantsStore } from "@/src/store/plants.store";
 import { fetchCatalogPlants } from "@/src/features/catalogo/services/catalogoApi.service";
 import {
   createUserPlant,
@@ -37,8 +38,8 @@ const imagePathSchema = z
   .trim()
   .min(1, "Agrega una imagen de tu planta.")
   .refine(
-    (value) => /^(https?:\/\/|file:\/\/|data:image\/)/i.test(value),
-    "Usa una URL válida (https://...) o una ruta file://.",
+    (value) => /^(https?:\/\/|file:\/\/|content:\/\/|data:image\/)/i.test(value),
+    "Selecciona una imagen de la galería o toma una foto.",
   );
 
 const editPlantSchema = z.object({
@@ -52,8 +53,8 @@ const editPlantSchema = z.object({
     .trim()
     .optional()
     .refine(
-      (value) => !value || /^(https?:\/\/|file:\/\/|data:image\/)/i.test(value),
-      "Usa una URL válida (https://...) o una ruta file://.",
+      (value) => !value || /^(https?:\/\/|file:\/\/|content:\/\/|data:image\/)/i.test(value),
+      "Selecciona una imagen de la galería o toma una foto.",
     ),
   healthStatus: z.enum(healthStatusOptions, {
     message: "Selecciona un estado de salud.",
@@ -148,10 +149,6 @@ export function resolvePlantImage(item: UserPlantListItem): string {
   return getCatalogPlantImage(item);
 }
 
-function isValidImageUri(uri: string): boolean {
-  return /^(https?:\/\/|file:\/\/|data:image\/)/i.test(uri.trim());
-}
-
 function formatDateInput(value: string | null | undefined): string {
   if (!value) return "";
   return value.slice(0, 10);
@@ -193,7 +190,6 @@ export function useMisPlantasScreen() {
   const [catalog, setCatalog] = useState<PlantCatalogItem[]>([]);
   const [editingPlantId, setEditingPlantId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [isSavingCreate, setIsSavingCreate] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -250,17 +246,12 @@ export function useMisPlantasScreen() {
 
   const selectedCatalogId = watchCreate("plantCatalogId");
   const selectedEditCatalogId = watchEdit("plantCatalogId");
-  const selectedFavorite = watchCreate("favorite");
-  const createImageInput = watchCreate("customImageUrl");
-  const editImageInput = watchEdit("customImageUrl");
 
   const createNicknameRef = useRef<TextInput | null>(null);
-  const createImageRef = useRef<TextInput | null>(null);
   const createLocationRef = useRef<TextInput | null>(null);
   const createNotesRef = useRef<TextInput | null>(null);
 
   const editNicknameRef = useRef<TextInput | null>(null);
-  const editImageRef = useRef<TextInput | null>(null);
   const editLocationRef = useRef<TextInput | null>(null);
   const editNotesRef = useRef<TextInput | null>(null);
 
@@ -269,16 +260,6 @@ export function useMisPlantasScreen() {
       plants.find((item) => getUserPlantId(item) === editingPlantId) ?? null
     );
   }, [editingPlantId, plants]);
-
-  const createImagePreview = useMemo(() => {
-    const candidate = (createImageInput ?? "").trim();
-    return isValidImageUri(candidate) ? candidate : "";
-  }, [createImageInput]);
-
-  const editImagePreview = useMemo(() => {
-    const candidate = (editImageInput ?? "").trim();
-    return isValidImageUri(candidate) ? candidate : "";
-  }, [editImageInput]);
 
   const hydrateEditForm = useCallback(
     (item: UserPlantListItem | null) => {
@@ -367,6 +348,7 @@ export function useMisPlantasScreen() {
 
       const nextPlants = plantsResponse.items ?? [];
       setPlants(nextPlants);
+      usePlantsStore.getState().setPlants(nextPlants);
       setCatalog(catalogItems);
       void cacheSet(plantsKey, nextPlants);
       void cacheSet(catalogKey, catalogItems);
@@ -377,11 +359,8 @@ export function useMisPlantasScreen() {
         nextPlants.find((item) => getUserPlantId(item) === editingPlantId) ??
         null;
       hydrateEditForm(edited);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "No se pudo cargar tu jardín.";
+    } catch {
       setLoadError("Sin conexión — mostrando datos guardados.");
-      if (__DEV__) console.error("[MisPlantas][loadAll]", message);
     } finally {
       setIsLoading(false);
     }
@@ -396,14 +375,7 @@ export function useMisPlantasScreen() {
     void loadAll();
   }, [loadAll]);
 
-  const refresh = async () => {
-    setIsRefreshing(true);
-    try {
-      await loadAll();
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
+  const refresh = loadAll;
 
   const closeEditModal = () => {
     setShowEditDatePicker(false);
@@ -498,17 +470,12 @@ export function useMisPlantasScreen() {
     }
   });
 
-  const healthyCount = plants.filter(
-    (item) => getHealthStatus(getUserPlantPayload(item)) === "good",
-  ).length;
-
   return {
     plants,
     catalog,
     editingPlantId,
     setEditingPlantId,
     isLoading,
-    isRefreshing,
     isSavingEdit,
     isSavingCreate,
     showCreateForm,
@@ -530,24 +497,17 @@ export function useMisPlantasScreen() {
     createErrors,
     selectedCatalogId,
     selectedEditCatalogId,
-    selectedFavorite,
-    createImagePreview,
-    editImagePreview,
     createNicknameRef,
-    createImageRef,
     createLocationRef,
     createNotesRef,
     editNicknameRef,
-    editImageRef,
     editLocationRef,
     editNotesRef,
-    editingPlant,
     hydrateEditForm,
     refresh,
     closeEditModal,
     closeCreateModal,
     onSaveEdit,
     onCreatePlant,
-    healthyCount,
   };
 }

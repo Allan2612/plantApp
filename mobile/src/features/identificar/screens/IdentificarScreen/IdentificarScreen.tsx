@@ -40,12 +40,16 @@ export default function IdentificarScreen() {
     handleClearPhoto,
     handleIdentify,
     handleSavePlant,
+    handleGoToGarden,
+    handleNewScan,
     detections,
     isDetecting,
     aiResult,
     aiImageUrl,
     isIdentifying,
     isSaving,
+    isSaved,
+    savedPlantName,
     description,
     setDescription,
     isOffline,
@@ -83,6 +87,8 @@ export default function IdentificarScreen() {
               isIdentifying={isIdentifying}
               isSaving={isSaving}
               isOffline={isOffline}
+              isSaved={isSaved}
+              savedPlantName={savedPlantName}
               aiResult={aiResult}
               aiImageUrl={aiImageUrl}
               description={description}
@@ -91,6 +97,8 @@ export default function IdentificarScreen() {
               onClear={handleClearPhoto}
               onIdentify={handleIdentify}
               onSavePlant={handleSavePlant}
+              onGoToGarden={handleGoToGarden}
+              onNewScan={handleNewScan}
             />
           ) : (
             <IdentificarEmptyState onOpenCamera={openCamera} onPickFromGallery={handlePickFromGallery} />

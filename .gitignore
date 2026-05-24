@@ -11,3 +11,10 @@ mobile/dist/
 .env
 backend-api/.env
 node_modules
+
+.claude/
+**/CLAUDE.md
+**/CLAUDE.md
+Claude.md
+.claude.local.json
+.claude.local/

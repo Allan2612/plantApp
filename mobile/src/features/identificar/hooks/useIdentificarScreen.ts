@@ -12,9 +12,11 @@ import LocalObjectDetectionService, {
 } from "@/src/features/identificar/services/localObjectDetection.service";
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { useToast } from "@/src/providers/ToastProvider";
+import { SavePlantData } from "@/src/features/identificar/components/SavePlantSheet/SavePlantSheet";
 import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "expo-router";
 
 export type PermissionStep = "camera" | "mediaLibrary" | "granted";
 
@@ -24,6 +26,7 @@ export function useIdentificarScreen() {
   const { isConnected } = useNetworkStatus();
   const profile = useAuthStore((state) => state.profile);
   const isOffline = isConnected === false;
+  const router = useRouter();
 
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [description, setDescription] = useState("");
@@ -33,6 +36,9 @@ export function useIdentificarScreen() {
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
   const [isIdentifying, setIsIdentifying] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [savedPlantName, setSavedPlantName] = useState<string | null>(null);
+  const [savedPlantId, setSavedPlantId] = useState<string | null>(null);
   const [pickedPhoto, setPickedPhoto] = useState<{ uri: string; width: number; height: number } | null>(null);
   const [galleryThumbnailUri, setGalleryThumbnailUri] = useState<string | null>(null);
 
@@ -81,6 +87,9 @@ export function useIdentificarScreen() {
     if (!photo) return;
     setIsCameraOpen(false);
     setAiResult(null);
+    setIsSaved(false);
+    setSavedPlantName(null);
+    setSavedPlantId(null);
     await runLocalDetection(photo.uri);
   }, [camera, runLocalDetection]);
 
@@ -100,6 +109,9 @@ export function useIdentificarScreen() {
     setPickedPhoto({ uri: asset.uri, width: asset.width, height: asset.height });
     setAiResult(null);
     setAiImageUrl(null);
+    setIsSaved(false);
+    setSavedPlantName(null);
+    setSavedPlantId(null);
     setDetections([]);
     await runLocalDetection(asset.uri);
   }, [camera, runLocalDetection]);
@@ -111,6 +123,9 @@ export function useIdentificarScreen() {
     setDescription("");
     setAiResult(null);
     setAiImageUrl(null);
+    setIsSaved(false);
+    setSavedPlantName(null);
+    setSavedPlantId(null);
     setIsCameraOpen(true);
   }, [camera]);
 
@@ -121,6 +136,9 @@ export function useIdentificarScreen() {
     setDescription("");
     setAiResult(null);
     setAiImageUrl(null);
+    setIsSaved(false);
+    setSavedPlantName(null);
+    setSavedPlantId(null);
   }, [camera]);
 
   const handleIdentify = useCallback(async () => {
@@ -147,44 +165,67 @@ export function useIdentificarScreen() {
     }
   }, [capturedPhoto, description, isDetecting, isIdentifying, showToast]);
 
-  const handleSavePlant = useCallback(async () => {
-    if (!aiResult?.isPlant || !aiResult.commonName || isSaving) return;
-    const backendUserId = profile?.user.id;
-    if (!backendUserId) {
-      showToast("Debes iniciar sesión para guardar plantas.", "error");
-      return;
+  const handleSavePlant = useCallback(
+    async (data: SavePlantData) => {
+      if (!aiResult?.isPlant || !aiResult.commonName || isSaving) return;
+      const backendUserId = profile?.user.id;
+      if (!backendUserId) {
+        showToast("Debes iniciar sesión para guardar plantas.", "error");
+        return;
+      }
+      setIsSaving(true);
+      try {
+        const catalogPlant = await createCatalogPlant({
+          name: aiResult.commonName,
+          scientificName: aiResult.scientificName ?? aiResult.commonName,
+          description: aiResult.description ?? "",
+          difficulty: aiResult.difficulty ?? "medium",
+          isToxic: aiResult.isToxic ?? false,
+          lightNotes: aiResult.lightNotes ?? undefined,
+          generalCareNotes: aiResult.careSummary ?? undefined,
+          imageUrl: aiImageUrl ?? undefined,
+        });
+
+        const savedPlant = await createUserPlant({
+          userId: backendUserId,
+          plantCatalogId: catalogPlant.id,
+          nickname: data.nickname,
+          locationHome: data.locationHome,
+          notes: aiResult.careSummary ?? undefined,
+        });
+
+        const raw = savedPlant as Record<string, unknown>;
+        const nested = raw.userPlant as Record<string, unknown> | undefined;
+        const newId =
+          typeof raw.id === "string" ? raw.id
+          : typeof nested?.id === "string" ? nested.id
+          : null;
+
+        setSavedPlantName(data.nickname);
+        setSavedPlantId(newId);
+        setIsSaved(true);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Error al guardar la planta";
+        showToast(message, "error");
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [aiImageUrl, aiResult, profile?.user.id, isSaving, showToast],
+  );
+
+  const handleGoToGarden = useCallback(() => {
+    if (savedPlantId) {
+      router.push(`/(tabs)/misplantas?highlight=${savedPlantId}` as never);
+    } else {
+      router.push("/(tabs)/misplantas" as never);
     }
+    handleClearPhoto();
+  }, [router, savedPlantId, handleClearPhoto]);
 
-    setIsSaving(true);
-
-    try {
-      const catalogPlant = await createCatalogPlant({
-        name: aiResult.commonName,
-        scientificName: aiResult.scientificName ?? aiResult.commonName,
-        description: aiResult.description ?? "",
-        difficulty: aiResult.difficulty ?? "medium",
-        isToxic: aiResult.isToxic ?? false,
-        lightNotes: aiResult.lightNotes ?? undefined,
-        generalCareNotes: aiResult.careSummary ?? undefined,
-        imageUrl: aiImageUrl ?? undefined,
-      });
-
-      await createUserPlant({
-        userId: backendUserId,
-        plantCatalogId: catalogPlant.id,
-        nickname: aiResult.commonName,
-        notes: aiResult.careSummary ?? undefined,
-      });
-
-      showToast(`${aiResult.commonName} guardada en Mis Plantas`, "success");
-      handleClearPhoto();
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Error al guardar la planta";
-      showToast(message, "error");
-    } finally {
-      setIsSaving(false);
-    }
-  }, [aiImageUrl, aiResult, profile?.user.id, handleClearPhoto, isSaving, showToast]);
+  const handleNewScan = useCallback(() => {
+    handleClearPhoto();
+  }, [handleClearPhoto]);
 
   return {
     cameraRef: camera.cameraRef,
@@ -218,6 +259,8 @@ export function useIdentificarScreen() {
     handleClearPhoto,
     handleIdentify,
     handleSavePlant,
+    handleGoToGarden,
+    handleNewScan,
 
     detections,
     isDetecting,
@@ -225,6 +268,8 @@ export function useIdentificarScreen() {
     aiImageUrl,
     isIdentifying,
     isSaving,
+    isSaved,
+    savedPlantName,
 
     description,
     setDescription,

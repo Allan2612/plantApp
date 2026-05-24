@@ -229,5 +229,48 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       textAlign: "center",
       lineHeight: 18,
     },
+
+    // Saved state
+    savedContainer: {
+      gap: spacing.lg,
+      alignItems: "center",
+      paddingVertical: spacing.xl,
+    },
+    savedIconCircle: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: colors.primary + "20",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    savedTitle: {
+      textAlign: "center",
+    },
+    savedSubtitle: {
+      textAlign: "center",
+      lineHeight: 22,
+    },
+    savedActions: {
+      width: "100%",
+      gap: spacing.sm,
+    },
+    viewGardenButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: spacing.sm,
+      height: 50,
+      borderRadius: radius.full,
+      backgroundColor: colors.primary,
+    },
+    viewGardenButtonText: {
+      color: "#FFFFFF",
+      fontWeight: "700",
+    },
+    newScanLink: {
+      alignItems: "center",
+      paddingVertical: spacing.sm,
+    },
   });
 }

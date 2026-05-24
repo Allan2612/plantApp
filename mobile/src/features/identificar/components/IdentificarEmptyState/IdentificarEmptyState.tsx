@@ -1,8 +1,7 @@
-import AppButton from "@/src/components/shared/AppButton/AppButton";
 import AppText from "@/src/components/shared/AppText/AppText";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { View } from "react-native";
+import { Pressable, TouchableOpacity, View } from "react-native";
 import { createStyles } from "./styles";
 
 interface IdentificarEmptyStateProps {
@@ -17,14 +16,36 @@ export default function IdentificarEmptyState({ onOpenCamera, onPickFromGallery 
 
   return (
     <View style={styles.container}>
-      <Ionicons name="leaf-outline" size={56} color={colors.primary} />
-      <AppText variant="heading" style={styles.centerText}>
-        Sin foto todavia
-      </AppText>
-      <AppText variant="caption" color={colors.textSecondary} style={styles.centerText}>
-        Abre la camara y centra la planta dentro del marco para tomar la foto.
-      </AppText>
-      <AppButton title="Abrir camara" onPress={onOpenCamera} />
+      <View style={styles.iconStack}>
+        <View style={styles.iconCircle}>
+          <Ionicons name="leaf" size={48} color={colors.primary} />
+        </View>
+        <View style={styles.cameraChip}>
+          <Ionicons name="camera" size={18} color="#FFFFFF" />
+        </View>
+      </View>
+
+      <View style={styles.textBlock}>
+        <AppText variant="heading" style={styles.centerText}>
+          Identifica tu planta
+        </AppText>
+        <AppText variant="body" color={colors.textSecondary} style={styles.centerText}>
+          Usa IA para reconocer cualquier planta y agregarla a tu jardín automáticamente.
+        </AppText>
+      </View>
+
+      <TouchableOpacity style={styles.primaryButton} onPress={onOpenCamera} activeOpacity={0.85}>
+        <Ionicons name="camera-outline" size={20} color="#FFFFFF" />
+        <AppText variant="label" style={styles.primaryButtonText}>
+          Tomar foto
+        </AppText>
+      </TouchableOpacity>
+
+      <Pressable onPress={onPickFromGallery} style={styles.secondaryLink}>
+        <AppText variant="caption" color={colors.primary}>
+          Elegir de galería
+        </AppText>
+      </Pressable>
     </View>
   );
 }
