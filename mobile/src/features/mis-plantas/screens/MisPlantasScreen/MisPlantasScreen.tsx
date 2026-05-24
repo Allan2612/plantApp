@@ -43,8 +43,7 @@ export default function MisPlantasScreen() {
   const router = useRouter();
   const { isConnected } = useNetworkStatus();
   const isOffline = isConnected === false;
-  const { highlight, edit } = useLocalSearchParams<{ highlight?: string; edit?: string }>();
-
+  const { highlight } = useLocalSearchParams<{ highlight?: string }>();
   const [isHighlightedId, setIsHighlightedId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -96,14 +95,6 @@ export default function MisPlantasScreen() {
     onCreatePlant,
   } = useMisPlantasScreen();
 
-  useEffect(() => {
-    if (!edit || !plants.length) return;
-    const plant = plants.find((p) => getUserPlantId(p) === edit);
-    if (plant) {
-      hydrateEditForm(plant);
-      setEditingPlantId(edit);
-    }
-  }, [edit, plants, hydrateEditForm, setEditingPlantId]);
 
   const goodCount = plants.filter(
     (p) => getHealthStatus(getUserPlantPayload(p)) === "good"

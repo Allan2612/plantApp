@@ -39,18 +39,6 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       justifyContent: "center",
       zIndex: 10,
     },
-    editButton: {
-      position: "absolute",
-      top: spacing.md,
-      right: spacing.md,
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: "rgba(0,0,0,0.45)",
-      alignItems: "center",
-      justifyContent: "center",
-      zIndex: 10,
-    },
     // Sheet overlapping the hero
     sheet: {
       marginTop: -spacing.lg,
@@ -134,6 +122,22 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
     infoText: {
       flex: 1,
       lineHeight: 20,
+    },
+    fab: {
+      position: "absolute",
+      bottom: spacing.xxl + spacing.xxl + spacing.md,
+      right: spacing.md,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      elevation: 4,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
     },
     // Not found
     notFoundContainer: {

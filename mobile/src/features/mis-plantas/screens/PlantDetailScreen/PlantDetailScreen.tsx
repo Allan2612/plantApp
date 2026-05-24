@@ -15,8 +15,11 @@ import { useAppTheme } from "@/src/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import EditPlantModal from "@/src/features/mis-plantas/components/EditPlantModal";
+import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { createStyles } from "./styles";
 
 const DIFFICULTY_LABEL: Record<string, string> = {
@@ -36,12 +39,15 @@ export default function PlantDetailScreen() {
   const { colors, spacing } = theme;
   const styles = createStyles(theme);
   const router = useRouter();
+  const { top: safeTop } = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const plants = usePlantsStore((s) => s.plants);
   const setPlants = usePlantsStore((s) => s.setPlants);
   const profile = useAuthStore((s) => s.profile);
+  const { isConnected } = useNetworkStatus();
   const [isLoading, setIsLoading] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const item = plants.find((p) => {
     const payload = getUserPlantPayload(p);
@@ -61,24 +67,28 @@ export default function PlantDetailScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.notFoundContainer}>
-        <ActivityIndicator color={colors.primary} />
+      <View style={styles.container}>
+        <View style={styles.notFoundContainer}>
+          <ActivityIndicator color={colors.primary} />
+        </View>
       </View>
     );
   }
 
   if (!item) {
     return (
-      <View style={styles.notFoundContainer}>
-        <Ionicons name="leaf-outline" size={48} color={colors.textSecondary} />
-        <AppText variant="body" color={colors.textSecondary}>
-          Planta no encontrada.
-        </AppText>
-        <TouchableOpacity onPress={() => router.back()}>
-          <AppText variant="caption" color={colors.primary}>
-            Volver al jardín
+      <View style={styles.container}>
+        <View style={styles.notFoundContainer}>
+          <Ionicons name="leaf-outline" size={48} color={colors.textSecondary} />
+          <AppText variant="body" color={colors.textSecondary}>
+            Planta no encontrada.
           </AppText>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.back()}>
+            <AppText variant="caption" color={colors.primary}>
+              Volver al jardín
+            </AppText>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -120,16 +130,6 @@ export default function PlantDetailScreen() {
               <Ionicons name="leaf-outline" size={72} color={colors.textSecondary} />
             </View>
           )}
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.8}>
-            <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.editButton}
-            onPress={() => router.push(`/(tabs)/misplantas?edit=${id}` as never)}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="create-outline" size={20} color="#FFFFFF" />
-          </TouchableOpacity>
         </View>
 
         {/* Sheet sliding up over the hero */}
@@ -249,6 +249,39 @@ export default function PlantDetailScreen() {
 
         </View>
       </ScrollView>
+
+      {/* Floating overlay buttons — outside ScrollView so sheet never covers them */}
+      <TouchableOpacity
+        style={[styles.backButton, { top: safeTop + spacing.sm }]}
+        onPress={() => router.back()}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => setShowEditModal(true)}
+        activeOpacity={0.85}
+      >
+        <Ionicons name="create-outline" size={24} color="#FFFFFF" />
+      </TouchableOpacity>
+
+      {item ? (
+        <EditPlantModal
+          visible={showEditModal}
+          item={item}
+          onClose={() => setShowEditModal(false)}
+          onSaved={() => {
+            const userId = profile?.user?.id;
+            if (userId) {
+              fetchUserPlants(userId)
+                .then((res) => setPlants(res.items))
+                .catch(() => {});
+            }
+          }}
+          isOffline={isConnected === false}
+        />
+      ) : null}
     </View>
   );
 }

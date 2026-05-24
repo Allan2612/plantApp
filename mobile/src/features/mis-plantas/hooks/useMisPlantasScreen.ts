@@ -42,7 +42,7 @@ const imagePathSchema = z
     "Selecciona una imagen de la galería o toma una foto.",
   );
 
-const editPlantSchema = z.object({
+export const editPlantSchema = z.object({
   plantCatalogId: z
     .string()
     .trim()
@@ -94,7 +94,7 @@ const createPlantSchema = z.object({
   favorite: z.boolean(),
 });
 
-type EditPlantValues = z.infer<typeof editPlantSchema>;
+export type EditPlantValues = z.infer<typeof editPlantSchema>;
 type CreatePlantValues = z.infer<typeof createPlantSchema>;
 
 export function getStringField(
@@ -149,7 +149,7 @@ export function resolvePlantImage(item: UserPlantListItem): string {
   return getCatalogPlantImage(item);
 }
 
-function formatDateInput(value: string | null | undefined): string {
+export function formatDateInput(value: string | null | undefined): string {
   if (!value) return "";
   return value.slice(0, 10);
 }
@@ -280,7 +280,7 @@ export function useMisPlantasScreen() {
       resetEdit({
         plantCatalogId: getStringField(payload, "plantCatalogId"),
         nickname: getStringField(payload, "nickname"),
-        customImageUrl: getStringField(payload, "customImageUrl"),
+        customImageUrl: resolvePlantImage(item),
         healthStatus: getHealthStatus(payload),
         locationHome: getStringField(payload, "locationHome"),
         acquiredDate: formatDateInput(getStringField(payload, "acquiredDate")),
