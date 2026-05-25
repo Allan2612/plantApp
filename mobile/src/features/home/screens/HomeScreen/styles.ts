@@ -177,6 +177,18 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       gap: spacing.xs,
       marginTop: spacing.xs,
     },
+    sectionEmptyPlaceholder: {
+      marginHorizontal: spacing.md,
+      marginBottom: spacing.lg,
+      paddingVertical: spacing.xl,
+      borderRadius: radius.lg,
+      backgroundColor: colors.surfaceAlt,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.surfaceDivider,
+      alignItems: "center",
+      justifyContent: "center",
+      gap: spacing.sm,
+    },
   });
 }
 

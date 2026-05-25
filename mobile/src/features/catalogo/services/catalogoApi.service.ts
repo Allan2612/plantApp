@@ -46,118 +46,42 @@ function isAbsoluteUrl(url: string): boolean {
   return /^https?:\/\//i.test(url);
 }
 
-function isRelativeImagePath(url: string): boolean {
-  return url.startsWith("/") || url.startsWith("./") || url.startsWith("../");
-}
-
-function resolveImageUrl(rawUrl: string, apiBaseUrl: string): string {
-  if (rawUrl.startsWith("//")) {
-    return `https:${rawUrl}`;
-  }
-
-  if (isRelativeImagePath(rawUrl)) {
-    const normalizedPath = rawUrl.startsWith("/")
-      ? rawUrl
-      : `/${rawUrl.replace(/^\.\/?/, "")}`;
-    return `${apiBaseUrl}${normalizedPath}`;
-  }
-
-  return rawUrl;
-}
-
-function normalizeWikimediaUrl(rawUrl: string): string {
-  try {
-    const parsed = new URL(rawUrl);
-    const isCommonsHost = /(^|\.)commons\.wikimedia\.org$/i.test(
-      parsed.hostname,
-    );
-
-    if (!isCommonsHost) {
-      return rawUrl;
-    }
-
-    // Transform Special:FilePath/<filename> → thumb.php?f=<filename>&width=800
-    // Special:FilePath returns a 302 redirect that expo-image/Glide can't follow reliably on Android.
-    // thumb.php serves the image directly (or a thumbnail) without a redirect.
-    const filePathPrefix = "/wiki/Special:FilePath/";
-    if (parsed.pathname.startsWith(filePathPrefix)) {
-      const fileName = parsed.pathname.slice(filePathPrefix.length);
-      return `https://commons.wikimedia.org/w/thumb.php?f=${fileName}&width=800`;
-    }
-
-    const fileWikiPrefix = "/wiki/File:";
-    if (parsed.pathname.startsWith(fileWikiPrefix)) {
-      const fileName = parsed.pathname.slice(fileWikiPrefix.length);
-      return `https://commons.wikimedia.org/w/thumb.php?f=${fileName}&width=800`;
-    }
-
-    return rawUrl;
-  } catch {
-    return rawUrl;
-  }
-}
-
-function safeEncodeUri(url: string): string {
-  // Collapse double-escaped octets like %2520 -> %20 without touching valid escapes.
-  let normalized = url;
-  for (let index = 0; index < 3; index += 1) {
-    const collapsed = normalized.replace(/%25([0-9a-f]{2})/gi, "%$1");
-    if (collapsed === normalized) {
-      break;
-    }
-    normalized = collapsed;
-  }
-
-  return normalized.replace(/ /g, "%20");
-}
-
 function normalizeImageUrl(value: unknown, apiBaseUrl: string): string | null {
   if (typeof value !== "string") return null;
 
   const trimmed = value.trim();
   if (!trimmed) return null;
 
-  const resolved = isAbsoluteUrl(trimmed)
+  if (trimmed.startsWith("//")) {
+    return `https:${trimmed}`;
+  }
+
+  if (isAbsoluteUrl(trimmed)) {
+    return trimmed;
+  }
+
+  const normalizedPath = trimmed.startsWith("/")
     ? trimmed
-    : resolveImageUrl(trimmed, apiBaseUrl);
-  const wikimediaResolved = normalizeWikimediaUrl(resolved);
-  return safeEncodeUri(wikimediaResolved);
+    : `/${trimmed.replace(/^\.\/?/, "")}`;
+  return `${apiBaseUrl}${normalizedPath}`;
 }
 
 function resolveCatalogImageUrl(
   item: CatalogApiItem,
   apiBaseUrl: string,
 ): string | null {
-  const candidates: unknown[] = [
-    item.imageUrl,
-    item.imageURL,
-    item.imageUri,
-    item.imageURI,
-    item.image_url,
-    item.image_uri,
-    item.image,
-    item.photoUrl,
-    item.photo_url,
-    item.thumbnail,
-    item.thumbnailUrl,
-    item.thumbnail_url,
-    item.customImageUrl,
-  ];
+  return normalizeImageUrl(item.imageUrl, apiBaseUrl);
+}
 
-  for (const [key, value] of Object.entries(item)) {
-    if (/image|photo|thumbnail|cover/i.test(key)) {
-      candidates.push(value);
-    }
-  }
-
-  for (const candidate of candidates) {
-    const normalized = normalizeImageUrl(candidate, apiBaseUrl);
-    if (normalized) {
-      return normalized;
-    }
-  }
-
-  return null;
+function normalizeCatalogItem(
+  item: CatalogApiItem,
+  apiBaseUrl: string,
+): PlantCatalogItem {
+  return {
+    ...item,
+    nicknames: Array.isArray(item.nicknames) ? item.nicknames : [],
+    imageUrl: resolveCatalogImageUrl(item, apiBaseUrl),
+  };
 }
 
 export async function fetchCatalogPlants(): Promise<PlantCatalogItem[]> {
@@ -168,10 +92,7 @@ export async function fetchCatalogPlants(): Promise<PlantCatalogItem[]> {
 
     try {
       const data = await httpGet<CatalogApiItem[]>(endpoint);
-      return data.map((item) => ({
-        ...item,
-        imageUrl: resolveCatalogImageUrl(item, baseUrl),
-      }));
+      return data.map((item) => normalizeCatalogItem(item, baseUrl));
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Error desconocido";
@@ -213,10 +134,7 @@ export async function createCatalogPlant(
         endpoint,
         payload,
       );
-      return {
-        ...created,
-        imageUrl: resolveCatalogImageUrl(created, baseUrl),
-      };
+      return normalizeCatalogItem(created, baseUrl);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Error desconocido";

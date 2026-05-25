@@ -21,6 +21,7 @@ Usa exactamente este formato:
   "confidence": 0.92,
   "common_name": "Monstera",
   "scientific_name": "Monstera deliciosa",
+  "nicknames": ["Costilla de Adán", "Piñanona", "Cerimán"],
   "description": "Planta tropical de interior con grandes hojas características.",
   "care_summary": "Riego moderado, luz indirecta brillante, temperatura 18-30°C.",
   "watering_notes": "Regar cuando el sustrato esté seco en los primeros 3 cm.",
@@ -30,11 +31,12 @@ Usa exactamente este formato:
 }
 
 Si la imagen NO contiene una planta, responde con:
-{"is_plant": false, "confidence": 0.0, "common_name": null, "scientific_name": null, "description": null, "care_summary": null, "watering_notes": null, "light_notes": null, "difficulty": null, "is_toxic": null}
+{"is_plant": false, "confidence": 0.0, "common_name": null, "scientific_name": null, "nicknames": [], "description": null, "care_summary": null, "watering_notes": null, "light_notes": null, "difficulty": null, "is_toxic": null}
 
 Reglas:
 - confidence: valor entre 0.0 y 1.0 que indica tu certeza en la identificación
 - difficulty: solo puede ser "easy", "medium" o "hard"
+- nicknames: array de 2 a 5 apodos coloquiales o nombres populares en español con los que la gente conoce la planta. Si no hay apodos populares, devuelve un array vacío [].
 - Responde SOLO el JSON, absolutamente nada más
 """
 
@@ -125,6 +127,16 @@ def identify_plant_from_base64(image_base64: str, user_context: str = "") -> dic
     valid_difficulties = {"easy", "medium", "hard"}
     if result.get("difficulty") not in valid_difficulties:
         result["difficulty"] = None
+
+    raw_nicknames = result.get("nicknames")
+    if isinstance(raw_nicknames, list):
+        result["nicknames"] = [
+            value.strip()
+            for value in raw_nicknames
+            if isinstance(value, str) and value.strip()
+        ]
+    else:
+        result["nicknames"] = []
 
     result.setdefault("is_plant", False)
     result["confidence"] = max(0.0, min(1.0, float(result.get("confidence", 0.0))))

@@ -2,7 +2,6 @@ import { useAuthStore } from "@/src/store/auth.store";
 import { createCatalogPlant } from "@/src/features/catalogo/services/catalogoApi.service";
 import { createUserPlant } from "@/src/features/mis-plantas/services/misPlantasApi.service";
 import {
-  fetchPlantImageUrl,
   identifyPlantFromUri,
   PlantIdentificationResult,
 } from "@/src/features/identificar/services/aiIdentification.service";
@@ -13,6 +12,7 @@ import LocalObjectDetectionService, {
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { useToast } from "@/src/providers/ToastProvider";
 import { SavePlantData } from "@/src/features/identificar/components/SavePlantSheet/SavePlantSheet";
+import { uploadCatalogPlantImage } from "@/src/services/imageUpload.service";
 import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
 import { useCallback, useEffect, useState } from "react";
@@ -33,7 +33,6 @@ export function useIdentificarScreen() {
   const [detections, setDetections] = useState<DetectionResult[]>([]);
   const [isDetecting, setIsDetecting] = useState(false);
   const [aiResult, setAiResult] = useState<PlantIdentificationResult | null>(null);
-  const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
   const [isIdentifying, setIsIdentifying] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -42,7 +41,6 @@ export function useIdentificarScreen() {
   const [pickedPhoto, setPickedPhoto] = useState<{ uri: string; width: number; height: number } | null>(null);
   const [galleryThumbnailUri, setGalleryThumbnailUri] = useState<string | null>(null);
 
-  // Single source of truth: camera photo takes priority over gallery pick
   const capturedPhoto = camera.lastPhoto ?? pickedPhoto;
 
   useEffect(() => {
@@ -94,7 +92,6 @@ export function useIdentificarScreen() {
   }, [camera, runLocalDetection]);
 
   const handlePickFromGallery = useCallback(async () => {
-    // Close the camera modal first and wait for it to fully dismiss
     setIsCameraOpen(false);
     await new Promise<void>((resolve) => setTimeout(resolve, 350));
 
@@ -108,7 +105,6 @@ export function useIdentificarScreen() {
     camera.clearLastPhoto();
     setPickedPhoto({ uri: asset.uri, width: asset.width, height: asset.height });
     setAiResult(null);
-    setAiImageUrl(null);
     setIsSaved(false);
     setSavedPlantName(null);
     setSavedPlantId(null);
@@ -122,7 +118,6 @@ export function useIdentificarScreen() {
     setDetections([]);
     setDescription("");
     setAiResult(null);
-    setAiImageUrl(null);
     setIsSaved(false);
     setSavedPlantName(null);
     setSavedPlantId(null);
@@ -135,7 +130,6 @@ export function useIdentificarScreen() {
     setDetections([]);
     setDescription("");
     setAiResult(null);
-    setAiImageUrl(null);
     setIsSaved(false);
     setSavedPlantName(null);
     setSavedPlantId(null);
@@ -146,15 +140,12 @@ export function useIdentificarScreen() {
 
     setIsIdentifying(true);
     setAiResult(null);
-    setAiImageUrl(null);
 
     try {
       const result = await identifyPlantFromUri(capturedPhoto.uri, description);
       setAiResult(result);
 
-      if (result.isPlant) {
-        fetchPlantImageUrl(result.scientificName, result.commonName).then(setAiImageUrl);
-      } else {
+      if (!result.isPlant) {
         showToast("No se detectó una planta en la imagen. Intenta con una foto más clara.", "error");
       }
     } catch (err) {
@@ -167,7 +158,7 @@ export function useIdentificarScreen() {
 
   const handleSavePlant = useCallback(
     async (data: SavePlantData) => {
-      if (!aiResult?.isPlant || !aiResult.commonName || isSaving) return;
+      if (!aiResult?.isPlant || !aiResult.commonName || !capturedPhoto || isSaving) return;
       const backendUserId = profile?.user.id;
       if (!backendUserId) {
         showToast("Debes iniciar sesión para guardar plantas.", "error");
@@ -178,13 +169,16 @@ export function useIdentificarScreen() {
         const catalogPlant = await createCatalogPlant({
           name: aiResult.commonName,
           scientificName: aiResult.scientificName ?? aiResult.commonName,
-          description: aiResult.description ?? "",
+          description: aiResult.description || `${aiResult.commonName} identificada por IA.`,
           difficulty: aiResult.difficulty ?? "medium",
           isToxic: aiResult.isToxic ?? false,
           lightNotes: aiResult.lightNotes ?? undefined,
           generalCareNotes: aiResult.careSummary ?? undefined,
-          imageUrl: aiImageUrl ?? undefined,
+          nicknames: aiResult.nicknames,
+          ownerUserId: backendUserId,
         });
+
+        const uploadedUrl = await uploadCatalogPlantImage(catalogPlant.id, capturedPhoto.uri);
 
         const savedPlant = await createUserPlant({
           userId: backendUserId,
@@ -192,6 +186,7 @@ export function useIdentificarScreen() {
           nickname: data.nickname,
           locationHome: data.locationHome,
           notes: aiResult.careSummary ?? undefined,
+          customImageUrl: uploadedUrl,
         });
 
         const raw = savedPlant as Record<string, unknown>;
@@ -211,7 +206,7 @@ export function useIdentificarScreen() {
         setIsSaving(false);
       }
     },
-    [aiImageUrl, aiResult, profile?.user.id, isSaving, showToast],
+    [aiResult, capturedPhoto, profile?.user.id, isSaving, showToast],
   );
 
   const handleGoToGarden = useCallback(() => {
@@ -265,7 +260,6 @@ export function useIdentificarScreen() {
     detections,
     isDetecting,
     aiResult,
-    aiImageUrl,
     isIdentifying,
     isSaving,
     isSaved,

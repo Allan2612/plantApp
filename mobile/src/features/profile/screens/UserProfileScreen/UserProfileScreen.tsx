@@ -54,8 +54,6 @@ export default function UserProfileScreen() {
     onSubmit,
   } = useUserProfileScreen();
 
-  console.log("[ProfileScreen] render: profileUser.id=", profileUser?.id ?? "null", "avatarId=", profileUser?.avatarId ?? "null", "avatarLocalUri=", avatarLocalUri, "isEditing=", isEditing);
-
   return (
     <ScreenWrapper>
       <KeyboardAvoidingView
@@ -251,12 +249,10 @@ export default function UserProfileScreen() {
                   name="avatarId"
                   render={({ field: { value } }) => {
                     const pickerValue = avatarLocalUri ?? getAvatarUri(value) ?? null;
-                    console.log("[ProfileScreen] avatar picker: avatarLocalUri=", avatarLocalUri, "formValue=", value, "getAvatarUri=", getAvatarUri(value), "pickerValue=", pickerValue);
                     return (
                       <PlantImagePicker
                         value={pickerValue}
                         onChange={(uri) => {
-                          console.log("[ProfileScreen] avatar onChange uri=", uri);
                           setAvatarLocalUri(uri);
                         }}
                         alertTitle="Foto de perfil"

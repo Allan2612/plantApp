@@ -511,6 +511,25 @@ def create_user_plant(payload: dict[str, Any]) -> dict[str, Any]:
     return _normalize_user_plant_payload(created)
 
 
+def _normalize_nicknames(raw_value: Any) -> list[str]:
+    if not isinstance(raw_value, list):
+        return []
+    seen: set[str] = set()
+    normalized: list[str] = []
+    for value in raw_value:
+        if not isinstance(value, str):
+            continue
+        trimmed = value.strip()
+        if not trimmed:
+            continue
+        key = trimmed.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        normalized.append(trimmed)
+    return normalized
+
+
 def create_catalog_plant(payload: dict[str, Any]) -> dict[str, Any]:
     name = str(payload.get("name") or "").strip()
     scientific_name = str(payload.get("scientificName") or "").strip()
@@ -527,17 +546,13 @@ def create_catalog_plant(payload: dict[str, Any]) -> dict[str, Any]:
     if difficulty not in {"easy", "medium", "hard"}:
         raise HTTPException(status_code=400, detail="difficulty debe ser easy, medium o hard")
 
-    existing_items = get_collection("plantsCatalog", filters=[("scientificName", "==", scientific_name)])
-    if existing_items:
-        raise HTTPException(
-            status_code=409,
-            detail="Ya existe una especie con ese nombre científico.",
-        )
+    owner_user_id = str(payload.get("ownerUserId") or "").strip() or None
 
     now_iso = datetime.utcnow().isoformat()
     document = {
         "name": name,
         "scientificName": scientific_name,
+        "nicknames": _normalize_nicknames(payload.get("nicknames")),
         "categoryIds": _normalize_catalog_category_ids(payload.get("categoryIds")),
         "iconType": "emoji",
         "iconEmoji": "🪴",
@@ -556,6 +571,7 @@ def create_catalog_plant(payload: dict[str, Any]) -> dict[str, Any]:
         "generalCareNotes": str(payload.get("generalCareNotes") or "") or None,
         "difficulty": difficulty,
         "imageUrl": str(payload.get("imageUrl") or "") or None,
+        "ownerUserId": owner_user_id,
         "createdAt": now_iso,
         "updatedAt": now_iso,
     }
@@ -564,6 +580,36 @@ def create_catalog_plant(payload: dict[str, Any]) -> dict[str, Any]:
     reference = db.collection("plantsCatalog").document()
     reference.set(document)
     return get_document("plantsCatalog", reference.id)
+
+
+def enrich_catalog_with_authors(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    owner_ids: set[str] = set()
+    for item in items:
+        owner_id = item.get("ownerUserId")
+        if isinstance(owner_id, str) and owner_id:
+            owner_ids.add(owner_id)
+
+    authors: dict[str, dict[str, Any]] = {}
+    for owner_id in owner_ids:
+        try:
+            user = get_document("users", owner_id)
+            authors[owner_id] = user
+        except HTTPException as exc:
+            if exc.status_code == 404:
+                continue
+            raise
+
+    enriched: list[dict[str, Any]] = []
+    for item in items:
+        owner_id = item.get("ownerUserId")
+        author = authors.get(owner_id) if isinstance(owner_id, str) else None
+        enriched.append({
+            **item,
+            "ownerUsername": author.get("username") if author else None,
+            "ownerDisplayName": author.get("displayName") if author else None,
+            "ownerAvatarId": author.get("avatarId") if author else None,
+        })
+    return enriched
 
 
 _ALLOWED_IMAGE_MIMETYPES: dict[str, str] = {

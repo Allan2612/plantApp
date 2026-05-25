@@ -28,6 +28,7 @@ from .models import (
 from .services import (
     create_catalog_plant,
     create_user_plant,
+    enrich_catalog_with_authors,
     get_collection,
     get_document,
     get_user_by_email,
@@ -196,7 +197,9 @@ def post_user_plant(payload: CreateUserPlantRequest) -> dict:
 @router.get("/api/catalog/plants", response_model=list[PlantCatalogModel])
 def read_catalog_plants() -> list[dict]:
     try:
-        return get_collection("plantsCatalog", order_by="name")
+        items = get_collection("plantsCatalog")
+        items.sort(key=lambda item: str(item.get("createdAt") or ""), reverse=True)
+        return enrich_catalog_with_authors(items)
     except HTTPException:
         raise
     except Exception:
@@ -219,7 +222,9 @@ def post_catalog_plant(payload: CreateCatalogPlantRequest) -> dict:
 def read_catalog_plant(plant_catalog_id: str) -> dict:
     validated_catalog_id = _validate_required_id(plant_catalog_id, "plant_catalog_id")
     try:
-        return get_document("plantsCatalog", validated_catalog_id)
+        item = get_document("plantsCatalog", validated_catalog_id)
+        enriched = enrich_catalog_with_authors([item])
+        return enriched[0]
     except HTTPException:
         raise
     except Exception:

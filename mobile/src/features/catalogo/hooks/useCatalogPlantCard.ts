@@ -1,13 +1,8 @@
 import { PlantCatalogItem } from "@/src/types/plant.types";
 import { useEffect, useState } from "react";
 
-const WIKIMEDIA_UA = "PlantApp/1.0 (plant identification app; educational)";
-
 export function buildImageSource(uri: string | null | undefined) {
   if (!uri) return null;
-  if (/wikimedia\.org|wikipedia\.org/i.test(uri)) {
-    return { uri, headers: { "User-Agent": WIKIMEDIA_UA } };
-  }
   return { uri };
 }
 

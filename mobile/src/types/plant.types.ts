@@ -10,6 +10,7 @@ export interface PlantCatalogItem {
   id: string;
   name: string;
   scientificName: string;
+  nicknames: string[];
   iconType: string;
   iconEmoji: string;
   description: string;
@@ -27,6 +28,10 @@ export interface PlantCatalogItem {
   generalCareNotes: string | null;
   difficulty: "easy" | "medium" | "hard";
   imageUrl: string | null;
+  ownerUserId: string | null;
+  ownerUsername: string | null;
+  ownerDisplayName: string | null;
+  ownerAvatarId: string | null;
 }
 
 export type PlantHealthStatus = "good" | "regular" | "bad";
@@ -67,5 +72,6 @@ export interface CreateCatalogPlantPayload {
   generalCareNotes?: string;
   imageUrl?: string;
   categoryIds?: string[];
-  imageLocalUri?: string;
+  nicknames?: string[];
+  ownerUserId?: string;
 }

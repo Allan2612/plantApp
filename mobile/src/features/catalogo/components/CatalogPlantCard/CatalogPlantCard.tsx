@@ -17,6 +17,17 @@ interface CatalogPlantCardProps {
   plant: PlantCatalogItem;
 }
 
+function getInitial(plant: PlantCatalogItem): string {
+  const source = plant.ownerDisplayName ?? plant.ownerUsername ?? "?";
+  return source.trim().charAt(0).toUpperCase() || "?";
+}
+
+function getAuthorLabel(plant: PlantCatalogItem): string {
+  if (plant.ownerDisplayName) return plant.ownerDisplayName;
+  if (plant.ownerUsername) return `@${plant.ownerUsername}`;
+  return "Comunidad";
+}
+
 export default function CatalogPlantCard({ plant }: CatalogPlantCardProps) {
   const theme = useAppTheme();
   const { colors } = theme;
@@ -26,6 +37,20 @@ export default function CatalogPlantCard({ plant }: CatalogPlantCardProps) {
 
   return (
     <View style={styles.card}>
+      <View style={styles.authorRow}>
+        <View style={styles.avatarCircle}>
+          <AppText style={styles.avatarText}>{getInitial(plant)}</AppText>
+        </View>
+        <View style={styles.authorTextBlock}>
+          <AppText variant="label" numberOfLines={1}>
+            {getAuthorLabel(plant)}
+          </AppText>
+          <AppText variant="caption" color={colors.textMuted}>
+            publicó esta planta
+          </AppText>
+        </View>
+      </View>
+
       <View style={styles.imageWrap}>
         {shouldRenderImage ? (
           <Image
@@ -33,24 +58,24 @@ export default function CatalogPlantCard({ plant }: CatalogPlantCardProps) {
             style={styles.image}
             contentFit="cover"
             transition={120}
-            accessibilityLabel={`Imagen de ${plant.name}`}
+            accessibilityLabel={`Foto de ${plant.name} publicada por ${getAuthorLabel(plant)}`}
             onError={onImageError}
           />
         ) : (
           <View style={styles.imageFallback}>
-            <Ionicons name="leaf" size={28} color={colors.primary} />
+            <Ionicons name="leaf" size={36} color={colors.primary} />
           </View>
         )}
         {plant.isToxic ? (
           <View style={styles.toxicBadge}>
-            <Ionicons name="warning-outline" size={9} color="#ef4444" />
+            <Ionicons name="warning-outline" size={10} color="#FFFFFF" />
             <AppText style={styles.toxicBadgeText}>Tóxica</AppText>
           </View>
         ) : null}
       </View>
 
       <View style={styles.content}>
-        <View>
+        <View style={styles.titleBlock}>
           <AppText variant="label" numberOfLines={1}>{plant.name}</AppText>
           <AppText
             variant="caption"
@@ -61,6 +86,17 @@ export default function CatalogPlantCard({ plant }: CatalogPlantCardProps) {
             {plant.scientificName}
           </AppText>
         </View>
+
+        {plant.nicknames && plant.nicknames.length > 0 ? (
+          <View style={styles.nicknamesRow}>
+            {plant.nicknames.slice(0, 4).map((nickname) => (
+              <View key={nickname} style={styles.nicknameChip}>
+                <AppText style={styles.nicknameChipText}>{nickname}</AppText>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
         {plant.description ? (
           <AppText
             variant="caption"
@@ -71,6 +107,7 @@ export default function CatalogPlantCard({ plant }: CatalogPlantCardProps) {
             {plant.description}
           </AppText>
         ) : null}
+
         <View style={styles.badgeRow}>
           <View style={[styles.diffBadge, { backgroundColor: diffColor + "18", borderColor: diffColor + "50" }]}>
             <AppText style={[styles.diffBadgeText, { color: diffColor }]}>

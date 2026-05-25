@@ -21,7 +21,6 @@ interface IdentificarPhotoPreviewProps {
   isSaved: boolean;
   savedPlantName: string | null;
   aiResult: PlantIdentificationResult | null;
-  aiImageUrl: string | null;
   description: string;
   onChangeDescription: (value: string) => void;
   onRetake: () => void;
@@ -62,7 +61,6 @@ export default function IdentificarPhotoPreview({
   isSaved,
   savedPlantName,
   aiResult,
-  aiImageUrl,
   description,
   onChangeDescription,
   onRetake,
@@ -75,12 +73,10 @@ export default function IdentificarPhotoPreview({
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
-  const [refImageError, setRefImageError] = useState(false);
   const [showSaveSheet, setShowSaveSheet] = useState(false);
 
   const viewState = resolveState(isIdentifying, isDetecting, aiResult, isSaved);
   const confidencePct = aiResult ? Math.round(aiResult.confidence * 100) : 0;
-  const showRefImage = Boolean(aiImageUrl && !refImageError);
 
   if (viewState === "saved") {
     return (
@@ -93,7 +89,7 @@ export default function IdentificarPhotoPreview({
             ¡Planta agregada!
           </AppText>
           <AppText variant="body" color={colors.textSecondary} style={styles.savedSubtitle}>
-            {savedPlantName ?? "Tu planta"} fue guardada en tu jardín.
+            {savedPlantName ?? "Tu planta"} fue guardada en tu jardín y publicada en el catálogo.
           </AppText>
           <View style={styles.savedActions}>
             <TouchableOpacity style={styles.viewGardenButton} onPress={onGoToGarden} activeOpacity={0.85}>
@@ -238,13 +234,19 @@ export default function IdentificarPhotoPreview({
             </View>
           </View>
 
-          {showRefImage ? (
-            <Image
-              source={{ uri: aiImageUrl! }}
-              style={{ width: "100%", height: 180, borderRadius: 10, marginVertical: 10 }}
-              resizeMode="cover"
-              onError={() => setRefImageError(true)}
-            />
+          {aiResult.nicknames.length > 0 ? (
+            <View style={styles.nicknamesBlock}>
+              <AppText variant="caption" color={colors.textMuted} style={styles.nicknamesLabel}>
+                También conocida como
+              </AppText>
+              <View style={styles.nicknamesRow}>
+                {aiResult.nicknames.map((nickname) => (
+                  <View key={nickname} style={styles.nicknameChip}>
+                    <AppText style={styles.nicknameChipText}>{nickname}</AppText>
+                  </View>
+                ))}
+              </View>
+            </View>
           ) : null}
 
           <View style={styles.confidenceRow}>

@@ -147,10 +147,8 @@ export function useUserProfileScreen() {
 
   const resolveSessionProfile = useCallback(async () => {
     if (!user?.uid) {
-      console.log("[Profile] resolveSessionProfile: no user uid, skipping");
       return null;
     }
-    console.log("[Profile] resolveSessionProfile: uid=", user.uid, "email=", user.email);
 
     const result = await fetchProfileForSession({
       uid: user.uid,
@@ -158,7 +156,6 @@ export function useUserProfileScreen() {
       displayName: user.displayName,
       providerId: user.providerData?.[0]?.providerId ?? null,
     });
-    console.log("[Profile] resolveSessionProfile result: backendUserId=", result?.backendUserId, "hasProfile=", !!result?.profile);
     return result;
   }, [user?.displayName, user?.email, user?.providerData, user?.uid]);
 
@@ -192,7 +189,6 @@ export function useUserProfileScreen() {
 
     const hydrateForm = (userPayload: BackendUser) => {
       const avatarId = getStringField(userPayload, "avatarId");
-      console.log("[Profile] hydrateForm: id=", userPayload.id, "avatarId=", avatarId);
       reset({
         displayName: getStringField(userPayload, "displayName"),
         firstName: getStringField(userPayload, "firstName"),
@@ -211,7 +207,6 @@ export function useUserProfileScreen() {
 
       // Show cached data immediately so the profile is visible offline
       const cached = cachedProfileRef.current;
-      console.log("[Profile] loadProfile: cached user=", cached?.user?.id ?? "none");
       if (cached?.user) {
         setProfileUser(cached.user);
         setBackendUserId(cached.user.id);
@@ -221,7 +216,6 @@ export function useUserProfileScreen() {
 
       const resolution = await resolveSessionProfile();
       const profile = resolution?.profile ?? null;
-      console.log("[Profile] loadProfile: network resolution backendUserId=", resolution?.backendUserId ?? "null", "profile user id=", profile?.user?.id ?? "null");
 
       if (!isMounted) return;
 
@@ -236,7 +230,6 @@ export function useUserProfileScreen() {
 
       const userPayload: BackendUser = profile.user;
       const resolvedId = resolution?.backendUserId ?? getStringField(userPayload, "id");
-      console.log("[Profile] loadProfile: setting backendUserId=", resolvedId, "avatarId=", userPayload.avatarId);
       setBackendUserId(resolvedId);
       setProfileUser(profile.user);
       setGlobalProfile(profile);
@@ -256,17 +249,13 @@ export function useUserProfileScreen() {
   }, [reset, resolveSessionProfile, setGlobalProfile, showToast, user?.uid]);
 
   const onSubmit = handleSubmit(async (values) => {
-    console.log("[Profile] onSubmit START: backendUserId state=", backendUserId);
     setIsSaving(true);
     try {
       // Always resolve fresh: fetchProfileForSession runs sync-auth which
       // creates the backend user if it doesn't exist yet, preventing 404 on PATCH.
       const resolution = await resolveSessionProfile();
-      console.log("[Profile] onSubmit resolution=", resolution?.backendUserId ?? "null");
       const targetUserId =
         resolution?.backendUserId?.trim() || backendUserId.trim();
-
-      console.log("[Profile] onSubmit targetUserId=", targetUserId || "EMPTY");
 
       if (!targetUserId) {
         throw new Error(
@@ -275,22 +264,16 @@ export function useUserProfileScreen() {
       }
 
       let finalValues = { ...values };
-      console.log("[Profile] onSubmit avatarLocalUri=", avatarLocalUri, "form avatarId=", values.avatarId);
       if (avatarLocalUri) {
-        console.log("[Profile] onSubmit uploading avatar...");
         const uploadedUrl = await uploadUserAvatar(targetUserId, avatarLocalUri);
-        console.log("[Profile] onSubmit avatar uploaded url=", uploadedUrl);
         finalValues = { ...finalValues, avatarId: uploadedUrl };
       }
 
-      console.log("[Profile] onSubmit calling PATCH userId=", targetUserId, "payload keys=", Object.keys(finalValues));
       await updateUserProfile(targetUserId, finalValues);
-      console.log("[Profile] onSubmit PATCH success");
 
       setBackendUserId(targetUserId);
 
       const refreshedProfile = await fetchUserProfile(targetUserId);
-      console.log("[Profile] onSubmit refreshed avatarId=", refreshedProfile?.user?.avatarId ?? "null");
       if (refreshedProfile?.user) {
         setProfileUser(refreshedProfile.user);
         setGlobalProfile(refreshedProfile);
@@ -300,7 +283,6 @@ export function useUserProfileScreen() {
       setAvatarLocalUri(null);
       setIsEditing(false);
     } catch (error) {
-      console.log("[Profile] onSubmit ERROR:", error instanceof Error ? error.message : String(error));
       const message =
         error instanceof Error
           ? error.message

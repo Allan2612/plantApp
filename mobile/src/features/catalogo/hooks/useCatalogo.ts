@@ -1,12 +1,6 @@
-import {
-  createCatalogPlant,
-  fetchCatalogPlants,
-} from "@/src/features/catalogo/services/catalogoApi.service";
+import { fetchCatalogPlants } from "@/src/features/catalogo/services/catalogoApi.service";
 import { cacheGet, cacheSet } from "@/src/services/offlineCache";
-import {
-  CreateCatalogPlantPayload,
-  PlantCatalogItem,
-} from "@/src/types/plant.types";
+import { PlantCatalogItem } from "@/src/types/plant.types";
 import { useCallback, useEffect, useState } from "react";
 
 const CATALOG_CACHE_KEY = "plantica:catalog";
@@ -15,7 +9,6 @@ export function useCatalogo() {
   const [items, setItems] = useState<PlantCatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadCatalog = useCallback(async () => {
@@ -56,32 +49,12 @@ export function useCatalogo() {
     void initialLoad();
   }, [initialLoad]);
 
-  const addCatalogPlant = useCallback(
-    async (payload: CreateCatalogPlantPayload) => {
-      setCreating(true);
-      try {
-        const created = await createCatalogPlant(payload);
-        setItems((previous) => {
-          const next = [...previous, created];
-          next.sort((left, right) => left.name.localeCompare(right.name, "es"));
-          return next;
-        });
-        return created;
-      } finally {
-        setCreating(false);
-      }
-    },
-    [],
-  );
-
   return {
     items,
     loading,
     refreshing,
-    creating,
     error,
     retry: initialLoad,
     refresh,
-    addCatalogPlant,
   };
 }

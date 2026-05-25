@@ -59,6 +59,7 @@ class CategoryModel(FirestoreBaseModel):
 class PlantCatalogModel(FirestoreBaseModel):
     name: str
     scientificName: str
+    nicknames: list[str] = Field(default_factory=list)
     categoryIds: list[str] = Field(default_factory=list)
     iconType: str
     iconEmoji: str
@@ -77,6 +78,10 @@ class PlantCatalogModel(FirestoreBaseModel):
     generalCareNotes: str | None = None
     difficulty: Literal["easy", "medium", "hard"]
     imageUrl: str | None = None
+    ownerUserId: str | None = None
+    ownerUsername: str | None = None
+    ownerDisplayName: str | None = None
+    ownerAvatarId: str | None = None
 
 
 class UserPlantModel(FirestoreBaseModel):
@@ -149,6 +154,8 @@ class CreateCatalogPlantRequest(BaseModel):
     generalCareNotes: str | None = None
     imageUrl: str | None = None
     categoryIds: list[str] | None = None
+    nicknames: list[str] | None = None
+    ownerUserId: str | None = None
 
 
 class SyncAuthUserRequest(BaseModel):
@@ -228,6 +235,7 @@ class PlantIdentificationResponse(BaseModel):
     confidence: float
     common_name: str | None = None
     scientific_name: str | None = None
+    nicknames: list[str] = Field(default_factory=list)
     description: str | None = None
     care_summary: str | None = None
     watering_notes: str | None = None

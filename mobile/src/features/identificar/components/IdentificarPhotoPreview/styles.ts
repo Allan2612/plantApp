@@ -214,6 +214,35 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       lineHeight: 18,
     },
 
+    nicknamesBlock: {
+      gap: 4,
+    },
+
+    nicknamesLabel: {
+      fontStyle: "italic",
+    },
+
+    nicknamesRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: spacing.xs,
+    },
+
+    nicknameChip: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 4,
+      borderRadius: radius.full,
+      backgroundColor: colors.primary + "18",
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.primary + "55",
+    },
+
+    nicknameChipText: {
+      color: colors.primary,
+      fontSize: 12,
+      fontWeight: "600",
+    },
+
     // No plant state
     noPlantCard: {
       gap: spacing.sm,

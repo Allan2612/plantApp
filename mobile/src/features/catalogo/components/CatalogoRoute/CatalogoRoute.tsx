@@ -4,28 +4,18 @@ import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 
 export default function CatalogoRoute() {
   const { isConnected } = useNetworkStatus();
-  const {
-    items,
-    loading,
-    refreshing,
-    creating,
-    error,
-    onRetry,
-    onRefresh,
-    onCreatePlant,
-  } = useCatalogoRoute();
+  const { items, loading, refreshing, error, onRetry, onRefresh } =
+    useCatalogoRoute();
 
   return (
     <CatalogoScreen
       items={items}
       loading={loading}
       refreshing={refreshing}
-      creating={creating}
       error={error}
       isOffline={isConnected === false}
       onRetry={onRetry}
       onRefresh={onRefresh}
-      onCreatePlant={onCreatePlant}
     />
   );
 }

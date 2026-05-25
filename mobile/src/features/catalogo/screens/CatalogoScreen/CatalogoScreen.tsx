@@ -3,50 +3,34 @@ import AppText from "@/src/components/shared/AppText/AppText";
 import EmptyState from "@/src/components/shared/EmptyState";
 import LoadingState from "@/src/components/shared/LoadingState";
 import ScreenWrapper from "@/src/components/shared/ScreenWrapper/ScreenWrapper";
-import CatalogPlantCreateModal from "@/src/features/catalogo/components/CatalogPlantCreateModal";
 import CatalogPlantCard from "@/src/features/catalogo/components/CatalogPlantCard";
-import { useCatalogoScreen } from "@/src/features/catalogo/hooks/useCatalogoScreen";
 import { useAppTheme } from "@/src/theme/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
-import {
-  CreateCatalogPlantPayload,
-  PlantCatalogItem,
-} from "@/src/types/plant.types";
-import { FlatList, TouchableOpacity, View } from "react-native";
+import { PlantCatalogItem } from "@/src/types/plant.types";
+import { FlatList, View } from "react-native";
 import { createStyles } from "./styles";
 
 interface CatalogoScreenProps {
   items: PlantCatalogItem[];
   loading: boolean;
   refreshing: boolean;
-  creating: boolean;
   error: string | null;
   isOffline: boolean;
   onRetry: () => void;
   onRefresh: () => void;
-  onCreatePlant: (payload: CreateCatalogPlantPayload) => Promise<void>;
 }
 
 export default function CatalogoScreen({
   items,
   loading,
   refreshing,
-  creating,
   error,
   isOffline,
   onRetry,
   onRefresh,
-  onCreatePlant,
 }: CatalogoScreenProps) {
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
-  const {
-    showCreateModal,
-    openCreateModal,
-    closeCreateModal,
-    handleCreatePlant,
-  } = useCatalogoScreen(onCreatePlant);
 
   if (loading) {
     return (
@@ -58,7 +42,7 @@ export default function CatalogoScreen({
     );
   }
 
-  if (error) {
+  if (error && items.length === 0) {
     return (
       <ScreenWrapper>
         <View style={styles.centerContent}>
@@ -74,13 +58,6 @@ export default function CatalogoScreen({
 
   return (
     <ScreenWrapper>
-      <CatalogPlantCreateModal
-        visible={showCreateModal}
-        isSubmitting={creating}
-        onClose={closeCreateModal}
-        onSubmit={handleCreatePlant}
-      />
-
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
@@ -90,29 +67,16 @@ export default function CatalogoScreen({
         onRefresh={onRefresh}
         ListHeaderComponent={
           <View style={styles.header}>
-            <View style={styles.headerTitleRow}>
-              <View>
-                <AppText variant="heading">Catálogo</AppText>
-                <AppText variant="caption" color={colors.textSecondary}>
-                  {items.length} {items.length === 1 ? "especie" : "especies"}
-                </AppText>
-              </View>
-              {!isOffline ? (
-                <TouchableOpacity
-                  style={styles.addIconButton}
-                  onPress={openCreateModal}
-                  disabled={creating}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons name="add" size={22} color="#FFFFFF" />
-                </TouchableOpacity>
-              ) : null}
-            </View>
+            <AppText variant="heading">Catálogo</AppText>
+            <AppText variant="caption" color={colors.textSecondary}>
+              {items.length} {items.length === 1 ? "publicación" : "publicaciones"} de la comunidad
+              {isOffline ? " (sin conexión)" : ""}
+            </AppText>
           </View>
         }
         ListEmptyComponent={
           <View style={styles.centerContent}>
-            <EmptyState message="No hay especies disponibles por ahora." />
+            <EmptyState message="Sé el primero en publicar una planta. Identifica una para compartirla." />
           </View>
         }
         ItemSeparatorComponent={() => <View style={styles.separator} />}

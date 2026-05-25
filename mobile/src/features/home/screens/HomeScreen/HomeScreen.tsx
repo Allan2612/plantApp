@@ -90,49 +90,58 @@ export default function HomeScreen() {
             <View style={styles.sectionHeader}>
               <AppText variant="subheading">Tendencias</AppText>
             </View>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.trendingRow}
-            >
-              {trendingItems.map((item) => (
-                <PressableCard
-                  key={item.id}
-                  style={styles.trendingCardWrapper}
-                  border={false}
-                >
-                  <View style={styles.trendingCard}>
-                    {item.imageUrl && !failedImages[`trending-${item.id}`] ? (
-                      <Image
-                        source={buildImageSource(item.imageUrl)}
-                        style={styles.trendingImage}
-                        contentFit="cover"
-                        transition={120}
-                        onError={() =>
-                          markImageAsFailed(
-                            `trending-${item.id}`,
-                            item.imageUrl,
-                          )
-                        }
-                      />
-                    ) : (
-                      <View style={styles.imageFallback}>
-                        <Ionicons
-                          name="leaf"
-                          size={theme.spacing.xl}
-                          color={colors.primary}
+            {trendingItems.length === 0 ? (
+              <View style={styles.sectionEmptyPlaceholder}>
+                <Ionicons name="leaf-outline" size={32} color={colors.primary} />
+                <AppText variant="body" color={colors.textSecondary}>
+                  Sin tendencias aún.
+                </AppText>
+              </View>
+            ) : (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.trendingRow}
+              >
+                {trendingItems.map((item) => (
+                  <PressableCard
+                    key={item.id}
+                    style={styles.trendingCardWrapper}
+                    border={false}
+                  >
+                    <View style={styles.trendingCard}>
+                      {item.imageUrl && !failedImages[`trending-${item.id}`] ? (
+                        <Image
+                          source={buildImageSource(item.imageUrl)}
+                          style={styles.trendingImage}
+                          contentFit="cover"
+                          transition={120}
+                          onError={() =>
+                            markImageAsFailed(
+                              `trending-${item.id}`,
+                              item.imageUrl,
+                            )
+                          }
                         />
+                      ) : (
+                        <View style={styles.imageFallback}>
+                          <Ionicons
+                            name="leaf"
+                            size={theme.spacing.xl}
+                            color={colors.primary}
+                          />
+                        </View>
+                      )}
+                      <View style={styles.trendingOverlay}>
+                        <AppText variant="label" color={colors.textOnOverlay}>
+                          {item.name}
+                        </AppText>
                       </View>
-                    )}
-                    <View style={styles.trendingOverlay}>
-                      <AppText variant="label" color={colors.textOnOverlay}>
-                        {item.name}
-                      </AppText>
                     </View>
-                  </View>
-                </PressableCard>
-              ))}
-            </ScrollView>
+                  </PressableCard>
+                ))}
+              </ScrollView>
+            )}
 
             {/* Catalog section */}
             <View style={[styles.sectionHeader, styles.plantsSectionHeader]}>
@@ -141,60 +150,69 @@ export default function HomeScreen() {
                 <AppText variant="caption" color={colors.primary}>Ver todo</AppText>
               </TouchableOpacity>
             </View>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.catalogRow}
-            >
-              {catalogItemsInverted.slice(0, 3).map((item) => (
-                <PressableCard
-                  key={item.id}
-                  style={styles.catalogCard}
-                  border={false}
-                >
-                  {item.imageUrl && !failedImages[`catalog-${item.id}`] ? (
-                    <Image
-                      source={buildImageSource(item.imageUrl)}
-                      style={styles.catalogImage}
-                      contentFit="cover"
-                      transition={120}
-                      accessibilityLabel={`Foto de ${item.name}`}
-                      onError={() =>
-                        markImageAsFailed(`catalog-${item.id}`, item.imageUrl)
-                      }
-                    />
-                  ) : (
-                    <View style={styles.catalogImageFallback}>
-                      <Ionicons
-                        name="leaf"
-                        size={theme.spacing.xl}
-                        color={colors.primary}
+            {catalogItemsInverted.length === 0 ? (
+              <View style={styles.sectionEmptyPlaceholder}>
+                <Ionicons name="leaf-outline" size={32} color={colors.primary} />
+                <AppText variant="body" color={colors.textSecondary}>
+                  Sin especies en el catálogo aún.
+                </AppText>
+              </View>
+            ) : (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.catalogRow}
+              >
+                {catalogItemsInverted.slice(0, 3).map((item) => (
+                  <PressableCard
+                    key={item.id}
+                    style={styles.catalogCard}
+                    border={false}
+                  >
+                    {item.imageUrl && !failedImages[`catalog-${item.id}`] ? (
+                      <Image
+                        source={buildImageSource(item.imageUrl)}
+                        style={styles.catalogImage}
+                        contentFit="cover"
+                        transition={120}
+                        accessibilityLabel={`Foto de ${item.name}`}
+                        onError={() =>
+                          markImageAsFailed(`catalog-${item.id}`, item.imageUrl)
+                        }
                       />
-                    </View>
-                  )}
-                  <View style={styles.catalogContent}>
-                    <AppText variant="label">{item.name}</AppText>
-                    <AppText
-                      variant="caption"
-                      color={colors.textSecondary}
-                      numberOfLines={1}
-                    >
-                      {item.scientificName}
-                    </AppText>
-                    <View style={styles.catalogDifficulty}>
-                      <Ionicons
-                        name="speedometer-outline"
-                        size={12}
-                        color={colors.primary}
-                      />
-                      <AppText variant="caption" color={colors.primary}>
-                        {mapDifficultyLabel(item.difficulty)}
+                    ) : (
+                      <View style={styles.catalogImageFallback}>
+                        <Ionicons
+                          name="leaf"
+                          size={theme.spacing.xl}
+                          color={colors.primary}
+                        />
+                      </View>
+                    )}
+                    <View style={styles.catalogContent}>
+                      <AppText variant="label">{item.name}</AppText>
+                      <AppText
+                        variant="caption"
+                        color={colors.textSecondary}
+                        numberOfLines={1}
+                      >
+                        {item.scientificName}
                       </AppText>
+                      <View style={styles.catalogDifficulty}>
+                        <Ionicons
+                          name="speedometer-outline"
+                          size={12}
+                          color={colors.primary}
+                        />
+                        <AppText variant="caption" color={colors.primary}>
+                          {mapDifficultyLabel(item.difficulty)}
+                        </AppText>
+                      </View>
                     </View>
-                  </View>
-                </PressableCard>
-              ))}
-            </ScrollView>
+                  </PressableCard>
+                ))}
+              </ScrollView>
+            )}
 
             {/* Plants list header */}
             <View style={[styles.sectionHeader, styles.plantsSectionHeader]}>
