@@ -9,6 +9,7 @@ import { createStyles } from "./styles";
 interface PlantImagePickerProps {
   value: string | null;
   onChange: (uri: string | null) => void;
+  alertTitle?: string;
 }
 
 async function launchCamera(): Promise<string | null> {
@@ -41,7 +42,7 @@ async function launchGallery(): Promise<string | null> {
   }
 }
 
-export default function PlantImagePicker({ value, onChange }: PlantImagePickerProps) {
+export default function PlantImagePicker({ value, onChange, alertTitle = "Imagen de la planta" }: PlantImagePickerProps) {
   const theme = useAppTheme();
   const styles = createStyles(theme);
 
@@ -74,7 +75,7 @@ export default function PlantImagePicker({ value, onChange }: PlantImagePickerPr
         : []),
       { text: "Cancelar", style: "cancel" as const },
     ];
-    Alert.alert("Imagen de la planta", undefined, buttons);
+    Alert.alert(alertTitle, undefined, buttons);
   };
 
   if (value) {

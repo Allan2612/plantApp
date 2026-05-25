@@ -1,4 +1,5 @@
 annotated-types==0.7.0
+python-multipart==0.0.20
 anyio==4.13.0
 CacheControl==0.14.4
 certifi==2026.2.25

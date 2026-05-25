@@ -16,11 +16,16 @@ export async function fetchUserProfile(
   if (!userId.trim()) return null;
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/users/${userId}/profile`);
+    const url = `${API_BASE_URL}/api/users/${userId}/profile`;
+    console.log("[API] fetchUserProfile GET", url);
+    const response = await fetch(url);
+    console.log("[API] fetchUserProfile status=", response.status);
     if (!response.ok) return null;
     const data = (await response.json()) as BackendUserProfile;
+    console.log("[API] fetchUserProfile ok, user.id=", data?.user?.id, "avatarId=", data?.user?.avatarId);
     return data;
-  } catch {
+  } catch (err) {
+    console.log("[API] fetchUserProfile error:", err);
     return null;
   }
 }
@@ -33,10 +38,15 @@ export async function fetchUserByEmail(
 
   try {
     const endpoint = `${API_BASE_URL}/api/users/by-email?email=${encodeURIComponent(normalizedEmail)}`;
+    console.log("[API] fetchUserByEmail GET", endpoint);
     const response = await fetch(endpoint);
+    console.log("[API] fetchUserByEmail status=", response.status);
     if (!response.ok) return null;
-    return (await response.json()) as BackendUser;
-  } catch {
+    const data = (await response.json()) as BackendUser;
+    console.log("[API] fetchUserByEmail ok, id=", data?.id);
+    return data;
+  } catch (err) {
+    console.log("[API] fetchUserByEmail error:", err);
     return null;
   }
 }
@@ -55,20 +65,27 @@ export async function fetchProfileForSession(
 ): Promise<SessionProfileResolution | null> {
   const firebaseUserId = sessionUser.uid;
   const firebaseEmail = sessionUser.email;
+  console.log("[API] fetchProfileForSession uid=", firebaseUserId, "email=", firebaseEmail);
 
   const profileByUid = await fetchUserProfile(firebaseUserId);
   if (profileByUid?.user?.id) {
+    console.log("[API] fetchProfileForSession found by uid: backendId=", profileByUid.user.id);
     return {
       profile: profileByUid,
       backendUserId: profileByUid.user.id,
     };
   }
 
-  if (!firebaseEmail?.trim()) return null;
+  if (!firebaseEmail?.trim()) {
+    console.log("[API] fetchProfileForSession no email, returning null");
+    return null;
+  }
 
   let backendUser = await fetchUserByEmail(firebaseEmail);
+  console.log("[API] fetchProfileForSession by email result:", backendUser?.id ?? "null");
 
   if (!backendUser?.id) {
+    console.log("[API] fetchProfileForSession calling syncUserFromAuth...");
     backendUser = await syncUserFromAuth({
       email: firebaseEmail,
       displayName: sessionUser.displayName ?? undefined,
@@ -76,13 +93,21 @@ export async function fetchProfileForSession(
       acceptedTerms: syncOptions?.acceptedTerms,
       avatarId: syncOptions?.avatarId,
     });
+    console.log("[API] fetchProfileForSession syncUserFromAuth result:", backendUser?.id ?? "null");
   }
 
-  if (!backendUser?.id) return null;
+  if (!backendUser?.id) {
+    console.log("[API] fetchProfileForSession no backendUser, returning null");
+    return null;
+  }
 
   const profileByBackendId = await fetchUserProfile(backendUser.id);
-  if (!profileByBackendId) return null;
+  if (!profileByBackendId) {
+    console.log("[API] fetchProfileForSession fetchUserProfile by backendId failed");
+    return null;
+  }
 
+  console.log("[API] fetchProfileForSession resolved backendUserId=", backendUser.id);
   return {
     profile: profileByBackendId,
     backendUserId: backendUser.id,

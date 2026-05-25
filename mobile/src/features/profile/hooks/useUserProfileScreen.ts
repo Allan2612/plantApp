@@ -10,7 +10,7 @@ import { useAuthStore } from "@/src/store/auth.store";
 import { BackendUser, UserVisibility } from "@/src/types/auth.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Ionicons } from "@expo/vector-icons";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -121,10 +121,6 @@ export function getAvatarUri(avatarId?: string | null): string | null {
   return null;
 }
 
-function isNotFoundError(error: unknown): boolean {
-  if (!(error instanceof Error)) return false;
-  return /404|no se encontro|not found/i.test(error.message);
-}
 
 export function useUserProfileScreen() {
   const { user } = useAuthSession();
@@ -143,16 +139,27 @@ export function useUserProfileScreen() {
     new Date(),
   );
   const [avatarLocalUri, setAvatarLocalUri] = useState<string | null>(null);
+  // Ref so the effect can read the latest cachedProfile without it being a
+  // dependency — prevents setGlobalProfile() inside the effect from looping
+  // back and re-running hydrateForm while the user is editing.
+  const cachedProfileRef = useRef(cachedProfile);
+  cachedProfileRef.current = cachedProfile;
 
   const resolveSessionProfile = useCallback(async () => {
-    if (!user?.uid) return null;
+    if (!user?.uid) {
+      console.log("[Profile] resolveSessionProfile: no user uid, skipping");
+      return null;
+    }
+    console.log("[Profile] resolveSessionProfile: uid=", user.uid, "email=", user.email);
 
-    return fetchProfileForSession({
+    const result = await fetchProfileForSession({
       uid: user.uid,
       email: user.email,
       displayName: user.displayName,
       providerId: user.providerData?.[0]?.providerId ?? null,
     });
+    console.log("[Profile] resolveSessionProfile result: backendUserId=", result?.backendUserId, "hasProfile=", !!result?.profile);
+    return result;
   }, [user?.displayName, user?.email, user?.providerData, user?.uid]);
 
   const {
@@ -184,12 +191,14 @@ export function useUserProfileScreen() {
     let isMounted = true;
 
     const hydrateForm = (userPayload: BackendUser) => {
+      const avatarId = getStringField(userPayload, "avatarId");
+      console.log("[Profile] hydrateForm: id=", userPayload.id, "avatarId=", avatarId);
       reset({
         displayName: getStringField(userPayload, "displayName"),
         firstName: getStringField(userPayload, "firstName"),
         lastName: getStringField(userPayload, "lastName"),
         username: getStringField(userPayload, "username"),
-        avatarId: getStringField(userPayload, "avatarId"),
+        avatarId,
         headline: getStringField(userPayload, "headline"),
         visibility: getVisibilityField(userPayload),
         birthDate: formatBirthDateForInput(getStringField(userPayload, "birthDate")),
@@ -201,21 +210,24 @@ export function useUserProfileScreen() {
       setIsLoadingProfile(true);
 
       // Show cached data immediately so the profile is visible offline
-      if (cachedProfile?.user) {
-        setProfileUser(cachedProfile.user);
-        setBackendUserId(cachedProfile.user.id);
-        hydrateForm(cachedProfile.user);
+      const cached = cachedProfileRef.current;
+      console.log("[Profile] loadProfile: cached user=", cached?.user?.id ?? "none");
+      if (cached?.user) {
+        setProfileUser(cached.user);
+        setBackendUserId(cached.user.id);
+        hydrateForm(cached.user);
         setIsLoadingProfile(false);
       }
 
       const resolution = await resolveSessionProfile();
       const profile = resolution?.profile ?? null;
+      console.log("[Profile] loadProfile: network resolution backendUserId=", resolution?.backendUserId ?? "null", "profile user id=", profile?.user?.id ?? "null");
 
       if (!isMounted) return;
 
       if (!profile?.user) {
         // Already showing cached data above — only show error if we had nothing
-        if (!cachedProfile?.user) {
+        if (!cachedProfileRef.current?.user) {
           showToast("No se pudo cargar el perfil del usuario.", "error");
         }
         setIsLoadingProfile(false);
@@ -223,7 +235,9 @@ export function useUserProfileScreen() {
       }
 
       const userPayload: BackendUser = profile.user;
-      setBackendUserId(resolution?.backendUserId ?? getStringField(userPayload, "id"));
+      const resolvedId = resolution?.backendUserId ?? getStringField(userPayload, "id");
+      console.log("[Profile] loadProfile: setting backendUserId=", resolvedId, "avatarId=", userPayload.avatarId);
+      setBackendUserId(resolvedId);
       setProfileUser(profile.user);
       setGlobalProfile(profile);
       hydrateForm(userPayload);
@@ -235,47 +249,48 @@ export function useUserProfileScreen() {
     return () => {
       isMounted = false;
     };
-  }, [cachedProfile, reset, resolveSessionProfile, setGlobalProfile, showToast, user?.uid]);
+  // cachedProfile intentionally omitted: setGlobalProfile() inside loadProfile()
+  // would update cachedProfile → re-trigger effect → hydrateForm() while editing.
+  // cachedProfileRef.current always holds the latest value without causing loops.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reset, resolveSessionProfile, setGlobalProfile, showToast, user?.uid]);
 
   const onSubmit = handleSubmit(async (values) => {
+    console.log("[Profile] onSubmit START: backendUserId state=", backendUserId);
     setIsSaving(true);
     try {
-      let targetUserId = backendUserId.trim();
-      if (!targetUserId) {
-        const resolution = await resolveSessionProfile();
-        targetUserId = resolution?.backendUserId?.trim() ?? "";
-      }
+      // Always resolve fresh: fetchProfileForSession runs sync-auth which
+      // creates the backend user if it doesn't exist yet, preventing 404 on PATCH.
+      const resolution = await resolveSessionProfile();
+      console.log("[Profile] onSubmit resolution=", resolution?.backendUserId ?? "null");
+      const targetUserId =
+        resolution?.backendUserId?.trim() || backendUserId.trim();
+
+      console.log("[Profile] onSubmit targetUserId=", targetUserId || "EMPTY");
 
       if (!targetUserId) {
         throw new Error(
-          "No se encontro el identificador del usuario en backend.",
+          "No se pudo conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.",
         );
       }
 
       let finalValues = { ...values };
+      console.log("[Profile] onSubmit avatarLocalUri=", avatarLocalUri, "form avatarId=", values.avatarId);
       if (avatarLocalUri) {
+        console.log("[Profile] onSubmit uploading avatar...");
         const uploadedUrl = await uploadUserAvatar(targetUserId, avatarLocalUri);
+        console.log("[Profile] onSubmit avatar uploaded url=", uploadedUrl);
         finalValues = { ...finalValues, avatarId: uploadedUrl };
       }
 
-      try {
-        await updateUserProfile(targetUserId, finalValues);
-      } catch (firstError) {
-        if (!isNotFoundError(firstError)) throw firstError;
-
-        const resolved = await resolveSessionProfile();
-        const recoveredUserId = resolved?.backendUserId?.trim() ?? "";
-        if (!recoveredUserId || recoveredUserId === targetUserId) {
-          throw firstError;
-        }
-
-        await updateUserProfile(recoveredUserId, finalValues);
-        targetUserId = recoveredUserId;
-      }
+      console.log("[Profile] onSubmit calling PATCH userId=", targetUserId, "payload keys=", Object.keys(finalValues));
+      await updateUserProfile(targetUserId, finalValues);
+      console.log("[Profile] onSubmit PATCH success");
 
       setBackendUserId(targetUserId);
 
       const refreshedProfile = await fetchUserProfile(targetUserId);
+      console.log("[Profile] onSubmit refreshed avatarId=", refreshedProfile?.user?.avatarId ?? "null");
       if (refreshedProfile?.user) {
         setProfileUser(refreshedProfile.user);
         setGlobalProfile(refreshedProfile);
@@ -285,6 +300,7 @@ export function useUserProfileScreen() {
       setAvatarLocalUri(null);
       setIsEditing(false);
     } catch (error) {
+      console.log("[Profile] onSubmit ERROR:", error instanceof Error ? error.message : String(error));
       const message =
         error instanceof Error
           ? error.message
