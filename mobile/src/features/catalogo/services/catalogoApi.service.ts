@@ -81,14 +81,18 @@ function normalizeCatalogItem(
     ...item,
     nicknames: Array.isArray(item.nicknames) ? item.nicknames : [],
     imageUrl: resolveCatalogImageUrl(item, apiBaseUrl),
+    likeCount: typeof item.likeCount === "number" ? item.likeCount : 0,
+    commentCount: typeof item.commentCount === "number" ? item.commentCount : 0,
+    isLikedByCurrentUser: Boolean(item.isLikedByCurrentUser),
   };
 }
 
-export async function fetchCatalogPlants(): Promise<PlantCatalogItem[]> {
+export async function fetchCatalogPlants(viewerId?: string): Promise<PlantCatalogItem[]> {
   const attempts: string[] = [];
 
   for (const baseUrl of buildApiBaseUrlCandidates()) {
-    const endpoint = `${baseUrl}/api/catalog/plants`;
+    const qs = viewerId ? `?viewer_id=${encodeURIComponent(viewerId)}` : "";
+    const endpoint = `${baseUrl}/api/catalog/plants${qs}`;
 
     try {
       const data = await httpGet<CatalogApiItem[]>(endpoint);

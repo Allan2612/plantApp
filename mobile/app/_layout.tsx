@@ -44,6 +44,13 @@ function RootStack() {
           presentation: "card",
         }}
       />
+      <Stack.Screen
+        name="user/[userId]"
+        options={{
+          headerShown: false,
+          presentation: "card",
+        }}
+      />
     </Stack>
   );
 }

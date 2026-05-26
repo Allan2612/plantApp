@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/src/store/auth.store";
 import { createCatalogPlant } from "@/src/features/catalogo/services/catalogoApi.service";
-import { createUserPlant } from "@/src/features/mis-plantas/services/misPlantasApi.service";
+import { createUserPlant, updateUserPlant } from "@/src/features/mis-plantas/services/misPlantasApi.service";
 import {
   identifyPlantFromUri,
   PlantIdentificationResult,
@@ -12,7 +12,7 @@ import LocalObjectDetectionService, {
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { useToast } from "@/src/providers/ToastProvider";
 import { SavePlantData } from "@/src/features/identificar/components/SavePlantSheet/SavePlantSheet";
-import { uploadCatalogPlantImage } from "@/src/services/imageUpload.service";
+import { uploadCatalogPlantImage, uploadUserPlantImage } from "@/src/services/imageUpload.service";
 import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
 import { useCallback, useEffect, useState } from "react";
@@ -166,35 +166,58 @@ export function useIdentificarScreen() {
       }
       setIsSaving(true);
       try {
-        const catalogPlant = await createCatalogPlant({
-          name: aiResult.commonName,
-          scientificName: aiResult.scientificName ?? aiResult.commonName,
-          description: aiResult.description || `${aiResult.commonName} identificada por IA.`,
-          difficulty: aiResult.difficulty ?? "medium",
-          isToxic: aiResult.isToxic ?? false,
-          lightNotes: aiResult.lightNotes ?? undefined,
-          generalCareNotes: aiResult.careSummary ?? undefined,
-          nicknames: aiResult.nicknames,
-          ownerUserId: backendUserId,
-        });
+        let newId: string | null = null;
 
-        const uploadedUrl = await uploadCatalogPlantImage(catalogPlant.id, capturedPhoto.uri);
+        if (data.publishToCatalog) {
+          const catalogPlant = await createCatalogPlant({
+            name: aiResult.commonName,
+            scientificName: aiResult.scientificName ?? aiResult.commonName,
+            description: aiResult.description || `${aiResult.commonName} identificada por IA.`,
+            difficulty: aiResult.difficulty ?? "medium",
+            isToxic: aiResult.isToxic ?? false,
+            lightNotes: aiResult.lightNotes ?? undefined,
+            generalCareNotes: aiResult.careSummary ?? undefined,
+            nicknames: aiResult.nicknames,
+            ownerUserId: backendUserId,
+          });
 
-        const savedPlant = await createUserPlant({
-          userId: backendUserId,
-          plantCatalogId: catalogPlant.id,
-          nickname: data.nickname,
-          locationHome: data.locationHome,
-          notes: aiResult.careSummary ?? undefined,
-          customImageUrl: uploadedUrl,
-        });
+          const uploadedUrl = await uploadCatalogPlantImage(catalogPlant.id, capturedPhoto.uri);
 
-        const raw = savedPlant as Record<string, unknown>;
-        const nested = raw.userPlant as Record<string, unknown> | undefined;
-        const newId =
-          typeof raw.id === "string" ? raw.id
-          : typeof nested?.id === "string" ? nested.id
-          : null;
+          const savedPlant = await createUserPlant({
+            userId: backendUserId,
+            plantCatalogId: catalogPlant.id,
+            nickname: data.nickname,
+            locationHome: data.locationHome,
+            notes: aiResult.careSummary ?? undefined,
+            customImageUrl: uploadedUrl,
+          });
+
+          const raw = savedPlant as Record<string, unknown>;
+          const nested = raw.userPlant as Record<string, unknown> | undefined;
+          newId =
+            typeof raw.id === "string" ? raw.id
+            : typeof nested?.id === "string" ? nested.id
+            : null;
+        } else {
+          const savedPlant = await createUserPlant({
+            userId: backendUserId,
+            nickname: data.nickname,
+            locationHome: data.locationHome,
+            notes: aiResult.careSummary ?? undefined,
+          });
+
+          const raw = savedPlant as Record<string, unknown>;
+          const nested = raw.userPlant as Record<string, unknown> | undefined;
+          newId =
+            typeof raw.id === "string" ? raw.id
+            : typeof nested?.id === "string" ? nested.id
+            : null;
+
+          if (newId) {
+            const uploadedUrl = await uploadUserPlantImage(newId, capturedPhoto.uri);
+            await updateUserPlant(newId, { customImageUrl: uploadedUrl });
+          }
+        }
 
         setSavedPlantName(data.nickname);
         setSavedPlantId(newId);

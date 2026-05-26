@@ -32,6 +32,37 @@ export interface PlantCatalogItem {
   ownerUsername: string | null;
   ownerDisplayName: string | null;
   ownerAvatarId: string | null;
+  likeCount: number;
+  commentCount: number;
+  isLikedByCurrentUser: boolean;
+}
+
+export interface PlantComment {
+  id: string;
+  plantCatalogId: string;
+  userId: string;
+  text: string;
+  createdAt: string | null;
+  authorUsername: string | null;
+  authorDisplayName: string | null;
+  authorAvatarId: string | null;
+}
+
+export interface PublicUserProfile {
+  id: string;
+  displayName: string;
+  username: string;
+  avatarId: string;
+  headline: string | null;
+  city: string | null;
+  plantCount: number;
+  createdAt: string | null;
+}
+
+export interface PublicProfileData {
+  user: PublicUserProfile;
+  catalogPosts: PlantCatalogItem[];
+  totalLikes: number;
 }
 
 export type PlantHealthStatus = "good" | "regular" | "bad";
@@ -48,7 +79,7 @@ export interface UpdateUserPlantPayload {
 
 export interface CreateUserPlantPayload {
   userId: string;
-  plantCatalogId: string;
+  plantCatalogId?: string;
   nickname: string;
   healthStatus?: PlantHealthStatus;
   locationHome?: string;

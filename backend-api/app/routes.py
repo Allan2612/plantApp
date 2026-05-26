@@ -8,14 +8,19 @@ from .models import (
     CareScheduleItemModel,
     CategoryModel,
     CreateCatalogPlantRequest,
+    CreateCommentRequest,
     CreateUserPlantRequest,
     ImageUploadResponse,
     PlantCatalogModel,
+    PlantCommentWithAuthorModel,
     PlantIdentificationRequest,
     PlantIdentificationResponse,
     PlantTagModel,
     ProfileResponse,
+    PublicProfileResponse,
     SyncAuthUserRequest,
+    ToggleLikeRequest,
+    ToggleLikeResponse,
     UpdateUserPlantRequest,
     UpdateUserRequest,
     UserPlantDetailResponse,
@@ -26,16 +31,21 @@ from .models import (
     UserStatModel,
 )
 from .services import (
+    add_plant_comment,
     create_catalog_plant,
     create_user_plant,
+    delete_plant_comment,
     enrich_catalog_with_authors,
     get_collection,
     get_document,
+    get_plant_comments,
+    get_public_user_profile,
     get_user_by_email,
     get_user_plant_detail_payload,
     get_user_plants_payload,
     get_user_profile_payload,
     sync_user_from_auth,
+    toggle_plant_like,
     update_user_fields,
     update_user_plant_fields,
     upload_image_to_storage,
@@ -195,11 +205,11 @@ def post_user_plant(payload: CreateUserPlantRequest) -> dict:
 
 
 @router.get("/api/catalog/plants", response_model=list[PlantCatalogModel])
-def read_catalog_plants() -> list[dict]:
+def read_catalog_plants(viewer_id: str | None = None) -> list[dict]:
     try:
         items = get_collection("plantsCatalog")
         items.sort(key=lambda item: str(item.get("createdAt") or ""), reverse=True)
-        return enrich_catalog_with_authors(items)
+        return enrich_catalog_with_authors(items, viewer_id=viewer_id)
     except HTTPException:
         raise
     except Exception:
@@ -219,11 +229,11 @@ def post_catalog_plant(payload: CreateCatalogPlantRequest) -> dict:
 
 
 @router.get("/api/catalog/plants/{plant_catalog_id}", response_model=PlantCatalogModel)
-def read_catalog_plant(plant_catalog_id: str) -> dict:
+def read_catalog_plant(plant_catalog_id: str, viewer_id: str | None = None) -> dict:
     validated_catalog_id = _validate_required_id(plant_catalog_id, "plant_catalog_id")
     try:
         item = get_document("plantsCatalog", validated_catalog_id)
-        enriched = enrich_catalog_with_authors([item])
+        enriched = enrich_catalog_with_authors([item], viewer_id=viewer_id)
         return enriched[0]
     except HTTPException:
         raise
@@ -232,6 +242,70 @@ def read_catalog_plant(plant_catalog_id: str) -> dict:
             "Error inesperado en read_catalog_plant. plant_catalog_id=%s",
             validated_catalog_id,
         )
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.post("/api/catalog/plants/{plant_catalog_id}/like", response_model=ToggleLikeResponse)
+def post_toggle_like(plant_catalog_id: str, payload: ToggleLikeRequest) -> dict:
+    validated_id = _validate_required_id(plant_catalog_id, "plant_catalog_id")
+    try:
+        return toggle_plant_like(validated_id, payload.userId)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error inesperado en post_toggle_like. plant_catalog_id=%s", validated_id)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.get("/api/catalog/plants/{plant_catalog_id}/comments", response_model=list[PlantCommentWithAuthorModel])
+def read_plant_comments(plant_catalog_id: str) -> list[dict]:
+    validated_id = _validate_required_id(plant_catalog_id, "plant_catalog_id")
+    try:
+        return get_plant_comments(validated_id)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error inesperado en read_plant_comments. plant_catalog_id=%s", validated_id)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.post("/api/catalog/plants/{plant_catalog_id}/comments", response_model=PlantCommentWithAuthorModel)
+def post_plant_comment(plant_catalog_id: str, payload: CreateCommentRequest) -> dict:
+    validated_id = _validate_required_id(plant_catalog_id, "plant_catalog_id")
+    try:
+        return add_plant_comment(validated_id, payload.userId, payload.text)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error inesperado en post_plant_comment. plant_catalog_id=%s", validated_id)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.delete("/api/catalog/plants/{plant_catalog_id}/comments/{comment_id}")
+def delete_catalog_comment(plant_catalog_id: str, comment_id: str, requestingUserId: str) -> dict:
+    validated_plant_id = _validate_required_id(plant_catalog_id, "plant_catalog_id")
+    validated_comment_id = _validate_required_id(comment_id, "comment_id")
+    if not requestingUserId.strip():
+        raise HTTPException(status_code=400, detail="requestingUserId es requerido")
+    try:
+        delete_plant_comment(validated_plant_id, validated_comment_id, requestingUserId.strip())
+        return {"ok": True}
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error inesperado en delete_catalog_comment. comment_id=%s", validated_comment_id)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.get("/api/users/{user_id}/public", response_model=PublicProfileResponse)
+def read_public_user_profile(user_id: str) -> dict:
+    validated_user_id = _validate_required_id(user_id, "user_id")
+    try:
+        return get_public_user_profile(validated_user_id)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error inesperado en read_public_user_profile. user_id=%s", validated_user_id)
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 

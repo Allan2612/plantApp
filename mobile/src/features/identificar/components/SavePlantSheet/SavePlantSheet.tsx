@@ -10,6 +10,7 @@ import {
   Keyboard,
   Modal,
   Pressable,
+  Switch,
   TextInput,
   TouchableWithoutFeedback,
   View,
@@ -19,6 +20,7 @@ import { createStyles } from "./styles";
 export interface SavePlantData {
   nickname: string;
   locationHome?: string;
+  publishToCatalog: boolean;
 }
 
 interface SavePlantSheetProps {
@@ -46,18 +48,20 @@ export default function SavePlantSheet({
 
   const [nickname, setNickname] = useState(aiResult.commonName ?? "");
   const [locationHome, setLocationHome] = useState("");
+  const [publishToCatalog, setPublishToCatalog] = useState(true);
 
   useEffect(() => {
     if (visible) {
       setNickname(aiResult.commonName ?? "");
       setLocationHome("");
+      setPublishToCatalog(true);
     }
   }, [visible, aiResult.commonName]);
 
   const handleSave = async () => {
     if (!nickname.trim()) return;
     try {
-      await onSave({ nickname: nickname.trim(), locationHome: locationHome.trim() || undefined });
+      await onSave({ nickname: nickname.trim(), locationHome: locationHome.trim() || undefined, publishToCatalog });
     } catch (err) {
       const message = err instanceof Error ? err.message : "No se pudo guardar la planta.";
       Alert.alert("Error al guardar", message);
@@ -140,6 +144,27 @@ export default function SavePlantSheet({
                 onSubmitEditing={handleSave}
               />
             </View>
+
+            <Pressable
+              style={styles.publishRow}
+              onPress={() => setPublishToCatalog((v) => !v)}
+              accessibilityRole="switch"
+              accessibilityState={{ checked: publishToCatalog }}
+            >
+              <View style={styles.publishTextBlock}>
+                <AppText variant="label">Publicar en catálogo</AppText>
+                <AppText variant="caption" color={theme.colors.textSecondary}>
+                  {publishToCatalog
+                    ? "Tu foto aparecerá en el catálogo de la comunidad"
+                    : "Solo tú verás esta planta en tu jardín"}
+                </AppText>
+              </View>
+              <Switch
+                value={publishToCatalog}
+                onValueChange={setPublishToCatalog}
+                trackColor={{ true: theme.colors.primary }}
+              />
+            </Pressable>
 
             <AppButton
               title={

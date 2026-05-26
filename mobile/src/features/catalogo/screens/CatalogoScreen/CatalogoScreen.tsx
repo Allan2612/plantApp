@@ -4,8 +4,10 @@ import EmptyState from "@/src/components/shared/EmptyState";
 import LoadingState from "@/src/components/shared/LoadingState";
 import ScreenWrapper from "@/src/components/shared/ScreenWrapper/ScreenWrapper";
 import CatalogPlantCard from "@/src/features/catalogo/components/CatalogPlantCard";
+import PlantCommentsSheet from "@/src/features/catalogo/components/PlantCommentsSheet";
 import { useAppTheme } from "@/src/theme/ThemeContext";
 import { PlantCatalogItem } from "@/src/types/plant.types";
+import { useState } from "react";
 import { FlatList, View } from "react-native";
 import { createStyles } from "./styles";
 
@@ -31,6 +33,7 @@ export default function CatalogoScreen({
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
+  const [commentPlant, setCommentPlant] = useState<PlantCatalogItem | null>(null);
 
   if (loading) {
     return (
@@ -80,8 +83,20 @@ export default function CatalogoScreen({
           </View>
         }
         ItemSeparatorComponent={() => <View style={styles.separator} />}
-        renderItem={({ item }) => <CatalogPlantCard plant={item} />}
+        renderItem={({ item }) => (
+          <CatalogPlantCard
+            plant={item}
+            onCommentPress={setCommentPlant}
+          />
+        )}
       />
+
+      {commentPlant ? (
+        <PlantCommentsSheet
+          plant={commentPlant}
+          onClose={() => setCommentPlant(null)}
+        />
+      ) : null}
     </ScreenWrapper>
   );
 }

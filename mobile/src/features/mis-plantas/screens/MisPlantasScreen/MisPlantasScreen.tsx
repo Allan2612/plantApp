@@ -60,6 +60,7 @@ export default function MisPlantasScreen() {
     editingPlantId,
     setEditingPlantId,
     isLoading,
+    refreshing,
     isSavingEdit,
     isSavingCreate,
     showCreateForm,
@@ -89,6 +90,7 @@ export default function MisPlantasScreen() {
     editNotesRef,
     hydrateEditForm,
     refresh,
+    onRefresh,
     closeEditModal,
     closeCreateModal,
     onSaveEdit,
@@ -178,6 +180,8 @@ export default function MisPlantasScreen() {
         }
         ListFooterComponent={<View style={{ height: 80 }} />}
         showsVerticalScrollIndicator={false}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
       />
 
       {/* FAB */}

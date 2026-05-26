@@ -54,10 +54,7 @@ export async function createUserPlant(
   if (!payload.userId.trim()) {
     throw new Error("userId es requerido para crear la planta.");
   }
-  if (!payload.plantCatalogId.trim()) {
-    throw new Error("plantCatalogId es requerido para crear la planta.");
-  }
-  if (!payload.nickname.trim()) {
+if (!payload.nickname.trim()) {
     throw new Error("nickname es requerido para crear la planta.");
   }
 

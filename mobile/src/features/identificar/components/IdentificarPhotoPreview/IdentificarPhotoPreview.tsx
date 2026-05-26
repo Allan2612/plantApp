@@ -89,7 +89,7 @@ export default function IdentificarPhotoPreview({
             ¡Planta agregada!
           </AppText>
           <AppText variant="body" color={colors.textSecondary} style={styles.savedSubtitle}>
-            {savedPlantName ?? "Tu planta"} fue guardada en tu jardín y publicada en el catálogo.
+            {savedPlantName ?? "Tu planta"} fue guardada en tu jardín.
           </AppText>
           <View style={styles.savedActions}>
             <TouchableOpacity style={styles.viewGardenButton} onPress={onGoToGarden} activeOpacity={0.85}>

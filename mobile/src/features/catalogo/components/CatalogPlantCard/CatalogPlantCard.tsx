@@ -4,7 +4,8 @@ import { useAppTheme } from "@/src/theme/ThemeContext";
 import { PlantCatalogItem } from "@/src/types/plant.types";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { View } from "react-native";
+import { useRouter } from "expo-router";
+import { TouchableOpacity, View } from "react-native";
 import { createStyles } from "./styles";
 
 const DIFF_COLOR: Record<string, string> = {
@@ -15,6 +16,7 @@ const DIFF_COLOR: Record<string, string> = {
 
 interface CatalogPlantCardProps {
   plant: PlantCatalogItem;
+  onCommentPress?: (plant: PlantCatalogItem) => void;
 }
 
 function getInitial(plant: PlantCatalogItem): string {
@@ -28,16 +30,38 @@ function getAuthorLabel(plant: PlantCatalogItem): string {
   return "Comunidad";
 }
 
-export default function CatalogPlantCard({ plant }: CatalogPlantCardProps) {
+export default function CatalogPlantCard({ plant, onCommentPress }: CatalogPlantCardProps) {
   const theme = useAppTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
-  const { difficultyLabel, shouldRenderImage, onImageError } = useCatalogPlantCard(plant);
+  const router = useRouter();
+  const {
+    difficultyLabel,
+    shouldRenderImage,
+    onImageError,
+    liked,
+    likeCount,
+    commentCount,
+    isLiking,
+    handleLike,
+    canLike,
+  } = useCatalogPlantCard(plant);
   const diffColor = DIFF_COLOR[plant.difficulty ?? "medium"] ?? "#f59e0b";
+
+  const handleAuthorPress = () => {
+    if (plant.ownerUserId) {
+      router.push(`/user/${plant.ownerUserId}` as never);
+    }
+  };
 
   return (
     <View style={styles.card}>
-      <View style={styles.authorRow}>
+      <TouchableOpacity
+        style={styles.authorRow}
+        onPress={handleAuthorPress}
+        activeOpacity={plant.ownerUserId ? 0.7 : 1}
+        disabled={!plant.ownerUserId}
+      >
         <View style={styles.avatarCircle}>
           <AppText style={styles.avatarText}>{getInitial(plant)}</AppText>
         </View>
@@ -49,7 +73,10 @@ export default function CatalogPlantCard({ plant }: CatalogPlantCardProps) {
             publicó esta planta
           </AppText>
         </View>
-      </View>
+        {plant.ownerUserId ? (
+          <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
+        ) : null}
+      </TouchableOpacity>
 
       <View style={styles.imageWrap}>
         {shouldRenderImage ? (
@@ -58,7 +85,7 @@ export default function CatalogPlantCard({ plant }: CatalogPlantCardProps) {
             style={styles.image}
             contentFit="cover"
             transition={120}
-            accessibilityLabel={`Foto de ${plant.name} publicada por ${getAuthorLabel(plant)}`}
+            accessibilityLabel={`Foto de ${plant.name}`}
             onError={onImageError}
           />
         ) : (
@@ -122,6 +149,37 @@ export default function CatalogPlantCard({ plant }: CatalogPlantCardProps) {
               </AppText>
             </View>
           ) : null}
+        </View>
+
+        <View style={styles.socialRow}>
+          <TouchableOpacity
+            style={styles.socialBtn}
+            onPress={handleLike}
+            activeOpacity={0.75}
+            disabled={!canLike || isLiking}
+          >
+            <Ionicons
+              name={liked ? "heart" : "heart-outline"}
+              size={18}
+              color={liked ? "#ef4444" : colors.textSecondary}
+            />
+            {likeCount > 0 ? (
+              <AppText style={[styles.socialCount, liked ? { color: "#ef4444" } : null]}>
+                {likeCount}
+              </AppText>
+            ) : null}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.socialBtn}
+            onPress={() => onCommentPress?.(plant)}
+            activeOpacity={0.75}
+          >
+            <Ionicons name="chatbubble-outline" size={17} color={colors.textSecondary} />
+            {commentCount > 0 ? (
+              <AppText style={styles.socialCount}>{commentCount}</AppText>
+            ) : null}
+          </TouchableOpacity>
         </View>
       </View>
     </View>

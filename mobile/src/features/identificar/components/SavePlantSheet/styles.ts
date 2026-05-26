@@ -64,5 +64,20 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       paddingHorizontal: spacing.sm,
       fontSize: 15,
     },
+    publishRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.sm,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.sm,
+      borderRadius: radius.md,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.surfaceDivider,
+      backgroundColor: colors.surfaceAlt,
+    },
+    publishTextBlock: {
+      flex: 1,
+      gap: 2,
+    },
   });
 }

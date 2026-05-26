@@ -112,6 +112,33 @@ export async function httpPostMultipart<TResponse>(
   }
 }
 
+export async function httpDelete<TResponse = void>(
+  url: string,
+  init?: RequestInit,
+): Promise<TResponse> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), HTTP_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, {
+      method: "DELETE",
+      ...init,
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw await buildHttpError(response);
+    }
+
+    const text = await response.text();
+    return (text ? JSON.parse(text) : undefined) as TResponse;
+  } catch (error) {
+    throw new Error(normalizeErrorMessage(error));
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 export async function httpPost<TResponse, TPayload extends object>(
   url: string,
   payload: TPayload,

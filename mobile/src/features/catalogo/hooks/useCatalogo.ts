@@ -1,4 +1,5 @@
 import { fetchCatalogPlants } from "@/src/features/catalogo/services/catalogoApi.service";
+import { useAuthStore } from "@/src/store/auth.store";
 import { cacheGet, cacheSet } from "@/src/services/offlineCache";
 import { PlantCatalogItem } from "@/src/types/plant.types";
 import { useCallback, useEffect, useState } from "react";
@@ -6,6 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 const CATALOG_CACHE_KEY = "plantica:catalog";
 
 export function useCatalogo() {
+  const viewerId = useAuthStore((state) => state.profile?.user?.id ?? undefined);
   const [items, setItems] = useState<PlantCatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -14,7 +16,7 @@ export function useCatalogo() {
   const loadCatalog = useCallback(async () => {
     setError(null);
     try {
-      const data = await fetchCatalogPlants();
+      const data = await fetchCatalogPlants(viewerId);
       setItems(data);
       void cacheSet(CATALOG_CACHE_KEY, data);
     } catch (err) {
@@ -24,7 +26,7 @@ export function useCatalogo() {
       }
       setError("Sin conexión — mostrando datos guardados.");
     }
-  }, []);
+  }, [viewerId]);
 
   const initialLoad = useCallback(async () => {
     setLoading(true);

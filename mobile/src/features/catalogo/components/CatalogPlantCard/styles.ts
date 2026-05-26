@@ -125,5 +125,26 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       fontSize: 11,
       color: colors.textMuted,
     },
+    socialRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.sm,
+      marginTop: spacing.xs,
+      paddingTop: spacing.xs,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.surfaceDivider,
+    },
+    socialBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      paddingVertical: 4,
+      paddingRight: spacing.sm,
+    },
+    socialCount: {
+      fontSize: 12,
+      color: colors.textSecondary,
+      fontWeight: "600",
+    },
   });
 }

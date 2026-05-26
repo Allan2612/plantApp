@@ -82,6 +82,55 @@ class PlantCatalogModel(FirestoreBaseModel):
     ownerUsername: str | None = None
     ownerDisplayName: str | None = None
     ownerAvatarId: str | None = None
+    likeCount: int = 0
+    commentCount: int = 0
+    isLikedByCurrentUser: bool = False
+
+
+class PlantCommentWithAuthorModel(BaseModel):
+    id: str
+    plantCatalogId: str
+    userId: str
+    text: str
+    createdAt: str | None = None
+    authorUsername: str | None = None
+    authorDisplayName: str | None = None
+    authorAvatarId: str | None = None
+
+
+class CreateCommentRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    userId: str
+    text: str
+
+
+class ToggleLikeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    userId: str
+
+
+class ToggleLikeResponse(BaseModel):
+    liked: bool
+    likeCount: int
+
+
+class PublicUserModel(BaseModel):
+    id: str
+    displayName: str
+    username: str
+    avatarId: str
+    headline: str | None = None
+    city: str | None = None
+    plantCount: int = 0
+    createdAt: str | None = None
+
+
+class PublicProfileResponse(BaseModel):
+    user: PublicUserModel
+    catalogPosts: list[PlantCatalogModel]
+    totalLikes: int
 
 
 class UserPlantModel(FirestoreBaseModel):
@@ -130,7 +179,7 @@ class CreateUserPlantRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     userId: str
-    plantCatalogId: str
+    plantCatalogId: str | None = None
     nickname: str
     healthStatus: Literal["good", "regular", "bad"] | None = None
     locationHome: str | None = None

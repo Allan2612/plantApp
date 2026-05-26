@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { TextInput } from "react-native";
+import { useFocusEffect } from "expo-router";
 import { z } from "zod";
 
 const healthStatusOptions = ["good", "regular", "bad"] as const;
@@ -203,6 +204,8 @@ export function useMisPlantasScreen() {
     new Date(),
   );
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const hasMountedRef = useRef(false);
 
   const {
     control: editControl,
@@ -376,6 +379,25 @@ export function useMisPlantasScreen() {
     void loadAll();
   }, [loadAll]);
 
+  useFocusEffect(
+    useCallback(() => {
+      if (!hasMountedRef.current) {
+        hasMountedRef.current = true;
+        return;
+      }
+      void loadAll();
+    }, [loadAll]),
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await loadAll();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadAll]);
+
   const refresh = loadAll;
 
   const closeEditModal = () => {
@@ -488,6 +510,7 @@ export function useMisPlantasScreen() {
     editingPlantId,
     setEditingPlantId,
     isLoading,
+    refreshing,
     isSavingEdit,
     isSavingCreate,
     showCreateForm,
@@ -517,6 +540,7 @@ export function useMisPlantasScreen() {
     editNotesRef,
     hydrateEditForm,
     refresh,
+    onRefresh,
     closeEditModal,
     closeCreateModal,
     onSaveEdit,

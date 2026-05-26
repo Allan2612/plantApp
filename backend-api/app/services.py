@@ -452,18 +452,17 @@ def sync_user_from_auth(payload: dict[str, Any]) -> dict[str, Any]:
 
 def create_user_plant(payload: dict[str, Any]) -> dict[str, Any]:
     user_id = str(payload.get("userId") or "").strip()
-    plant_catalog_id = str(payload.get("plantCatalogId") or "").strip()
+    plant_catalog_id = str(payload.get("plantCatalogId") or "").strip() or None
     nickname = str(payload.get("nickname") or "").strip()
 
     if not user_id:
         raise HTTPException(status_code=400, detail="userId es requerido")
-    if not plant_catalog_id:
-        raise HTTPException(status_code=400, detail="plantCatalogId es requerido")
     if not nickname:
         raise HTTPException(status_code=400, detail="nickname es requerido")
 
     user = get_document("users", user_id)
-    get_document("plantsCatalog", plant_catalog_id)
+    if plant_catalog_id:
+        get_document("plantsCatalog", plant_catalog_id)
 
     health_status = str(payload.get("healthStatus") or "good").strip().lower()
     if health_status not in {"good", "regular", "bad"}:
@@ -572,6 +571,8 @@ def create_catalog_plant(payload: dict[str, Any]) -> dict[str, Any]:
         "difficulty": difficulty,
         "imageUrl": str(payload.get("imageUrl") or "") or None,
         "ownerUserId": owner_user_id,
+        "likeCount": 0,
+        "commentCount": 0,
         "createdAt": now_iso,
         "updatedAt": now_iso,
     }
@@ -582,7 +583,11 @@ def create_catalog_plant(payload: dict[str, Any]) -> dict[str, Any]:
     return get_document("plantsCatalog", reference.id)
 
 
-def enrich_catalog_with_authors(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def enrich_catalog_with_authors(
+    items: list[dict[str, Any]],
+    *,
+    viewer_id: str | None = None,
+) -> list[dict[str, Any]]:
     owner_ids: set[str] = set()
     for item in items:
         owner_id = item.get("ownerUserId")
@@ -599,17 +604,158 @@ def enrich_catalog_with_authors(items: list[dict[str, Any]]) -> list[dict[str, A
                 continue
             raise
 
+    liked_plant_ids: set[str] = set()
+    if viewer_id:
+        try:
+            viewer_likes = get_collection("plantLikes", filters=[("userId", "==", viewer_id)])
+            liked_plant_ids = {like["plantCatalogId"] for like in viewer_likes if isinstance(like.get("plantCatalogId"), str)}
+        except Exception:
+            logger.warning("Fallo al cargar likes de viewer_id=%s", viewer_id)
+
     enriched: list[dict[str, Any]] = []
     for item in items:
         owner_id = item.get("ownerUserId")
         author = authors.get(owner_id) if isinstance(owner_id, str) else None
+        plant_id = item.get("id")
         enriched.append({
             **item,
             "ownerUsername": author.get("username") if author else None,
             "ownerDisplayName": author.get("displayName") if author else None,
             "ownerAvatarId": author.get("avatarId") if author else None,
+            "likeCount": int(item.get("likeCount") or 0),
+            "commentCount": int(item.get("commentCount") or 0),
+            "isLikedByCurrentUser": plant_id in liked_plant_ids if isinstance(plant_id, str) else False,
         })
     return enriched
+
+
+def toggle_plant_like(plant_catalog_id: str, user_id: str) -> dict[str, Any]:
+    db = get_firestore_client()
+    like_id = f"{plant_catalog_id}_{user_id}"
+    like_ref = db.collection("plantLikes").document(like_id)
+    like_snapshot = like_ref.get()
+    catalog_ref = db.collection("plantsCatalog").document(plant_catalog_id)
+
+    if not catalog_ref.get().exists:
+        raise HTTPException(status_code=404, detail="Publicación no encontrada.")
+
+    if like_snapshot.exists:
+        like_ref.delete()
+        catalog_ref.update({"likeCount": max(0, int((catalog_ref.get().to_dict() or {}).get("likeCount") or 0) - 1)})
+        liked = False
+    else:
+        now_iso = datetime.utcnow().isoformat()
+        like_ref.set({"plantCatalogId": plant_catalog_id, "userId": user_id, "createdAt": now_iso})
+        catalog_ref.update({"likeCount": int((catalog_ref.get().to_dict() or {}).get("likeCount") or 0) + 1})
+        liked = True
+
+    updated = catalog_ref.get().to_dict() or {}
+    return {"liked": liked, "likeCount": int(updated.get("likeCount") or 0)}
+
+
+def get_plant_comments(plant_catalog_id: str) -> list[dict[str, Any]]:
+    comments = _get_collection_safe(
+        "plantComments",
+        filters=[("plantCatalogId", "==", plant_catalog_id)],
+        order_by="createdAt",
+    )
+
+    user_ids: set[str] = {c["userId"] for c in comments if isinstance(c.get("userId"), str)}
+    authors: dict[str, dict[str, Any]] = {}
+    for uid in user_ids:
+        try:
+            authors[uid] = get_document("users", uid)
+        except HTTPException as exc:
+            if exc.status_code == 404:
+                continue
+            raise
+
+    enriched = []
+    for comment in comments:
+        uid = comment.get("userId")
+        author = authors.get(uid) if isinstance(uid, str) else None
+        enriched.append({
+            **comment,
+            "authorUsername": author.get("username") if author else None,
+            "authorDisplayName": author.get("displayName") if author else None,
+            "authorAvatarId": author.get("avatarId") if author else None,
+        })
+    return enriched
+
+
+def add_plant_comment(plant_catalog_id: str, user_id: str, text: str) -> dict[str, Any]:
+    text = text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="El comentario no puede estar vacío.")
+    if len(text) > 500:
+        raise HTTPException(status_code=400, detail="El comentario no puede superar 500 caracteres.")
+
+    get_document("plantsCatalog", plant_catalog_id)
+    get_document("users", user_id)
+
+    db = get_firestore_client()
+    now_iso = datetime.utcnow().isoformat()
+    ref = db.collection("plantComments").document()
+    ref.set({"plantCatalogId": plant_catalog_id, "userId": user_id, "text": text, "createdAt": now_iso})
+
+    db.collection("plantsCatalog").document(plant_catalog_id).update({
+        "commentCount": int(((db.collection("plantsCatalog").document(plant_catalog_id).get().to_dict()) or {}).get("commentCount") or 0) + 1
+    })
+
+    try:
+        author = get_document("users", user_id)
+    except HTTPException:
+        author = None
+
+    return {
+        **get_document("plantComments", ref.id),
+        "authorUsername": author.get("username") if author else None,
+        "authorDisplayName": author.get("displayName") if author else None,
+        "authorAvatarId": author.get("avatarId") if author else None,
+    }
+
+
+def delete_plant_comment(plant_catalog_id: str, comment_id: str, requesting_user_id: str) -> None:
+    comment = get_document("plantComments", comment_id)
+    if comment.get("plantCatalogId") != plant_catalog_id:
+        raise HTTPException(status_code=404, detail="Comentario no encontrado en esta publicación.")
+    if comment.get("userId") != requesting_user_id:
+        raise HTTPException(status_code=403, detail="No puedes eliminar comentarios de otros usuarios.")
+
+    db = get_firestore_client()
+    db.collection("plantComments").document(comment_id).delete()
+
+    catalog_ref = db.collection("plantsCatalog").document(plant_catalog_id)
+    current = int((catalog_ref.get().to_dict() or {}).get("commentCount") or 0)
+    catalog_ref.update({"commentCount": max(0, current - 1)})
+
+
+def get_public_user_profile(user_id: str) -> dict[str, Any]:
+    user = get_document("users", user_id)
+    posts = _get_collection_safe(
+        "plantsCatalog",
+        filters=[("ownerUserId", "==", user_id)],
+        order_by="createdAt",
+    )
+    posts.sort(key=lambda p: str(p.get("createdAt") or ""), reverse=True)
+
+    enriched_posts = enrich_catalog_with_authors(posts)
+    total_likes = sum(int(p.get("likeCount") or 0) for p in enriched_posts)
+
+    return {
+        "user": {
+            "id": user.get("id", user_id),
+            "displayName": str(user.get("displayName") or ""),
+            "username": str(user.get("username") or ""),
+            "avatarId": str(user.get("avatarId") or "midori"),
+            "headline": user.get("headline") or None,
+            "city": user.get("city") or None,
+            "plantCount": int(user.get("plantCount") or 0),
+            "createdAt": user.get("createdAt"),
+        },
+        "catalogPosts": enriched_posts,
+        "totalLikes": total_likes,
+    }
 
 
 _ALLOWED_IMAGE_MIMETYPES: dict[str, str] = {
