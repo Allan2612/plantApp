@@ -146,8 +146,15 @@ export default function SavePlantSheet({
             </View>
 
             <Pressable
-              style={styles.publishRow}
+              style={({ pressed }) => [
+                styles.publishRow,
+                publishToCatalog
+                  ? { backgroundColor: theme.colors.primary + "15", borderColor: theme.colors.primary + "40" }
+                  : null,
+                pressed ? { opacity: 0.75 } : null,
+              ]}
               onPress={() => setPublishToCatalog((v) => !v)}
+              android_ripple={null}
               accessibilityRole="switch"
               accessibilityState={{ checked: publishToCatalog }}
             >
@@ -162,7 +169,9 @@ export default function SavePlantSheet({
               <Switch
                 value={publishToCatalog}
                 onValueChange={setPublishToCatalog}
-                trackColor={{ true: theme.colors.primary }}
+                trackColor={{ false: theme.colors.surfaceDivider, true: theme.colors.primary }}
+                thumbColor={publishToCatalog ? theme.colors.primaryLight : theme.colors.textMuted}
+                ios_backgroundColor={theme.colors.surfaceDivider}
               />
             </Pressable>
 

@@ -7,6 +7,22 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       flex: 1,
       backgroundColor: colors.background,
     },
+    navBar: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.surfaceDivider,
+      backgroundColor: colors.background,
+    },
+    navBackBtn: {
+      padding: spacing.sm,
+    },
+    navTitle: {
+      flex: 1,
+      marginLeft: spacing.xs,
+    },
     centerBox: {
       flex: 1,
       alignItems: "center",
@@ -14,74 +30,95 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       paddingHorizontal: spacing.lg,
       gap: spacing.sm,
     },
-    headerCard: {
-      backgroundColor: colors.surface,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: colors.surfaceDivider,
-      paddingHorizontal: spacing.md,
+    // Profile header
+    profileHeader: {
+      backgroundColor: colors.background,
       paddingTop: spacing.lg,
       paddingBottom: spacing.md,
+      paddingHorizontal: spacing.lg,
       alignItems: "center",
-      gap: spacing.sm,
+      gap: spacing.xs,
+      borderBottomWidth: 0,
     },
     avatarCircle: {
-      width: 72,
-      height: 72,
-      borderRadius: 36,
-      backgroundColor: colors.primary + "25",
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: colors.primary + "20",
       alignItems: "center",
       justifyContent: "center",
+      borderWidth: 3,
+      borderColor: colors.primary + "40",
+      marginBottom: spacing.xs,
     },
     avatarText: {
       color: colors.primary,
       fontWeight: "700",
-      fontSize: 28,
+      fontSize: 32,
     },
     displayName: {
       textAlign: "center",
     },
     username: {
       textAlign: "center",
+      marginTop: 1,
     },
     headline: {
       textAlign: "center",
       paddingHorizontal: spacing.md,
-    },
-    statsRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: spacing.xl,
-      paddingVertical: spacing.xs,
-    },
-    statItem: {
-      alignItems: "center",
-      gap: 2,
-    },
-    statValue: {
-      fontWeight: "700",
+      marginTop: spacing.xs,
     },
     metaRow: {
       flexDirection: "row",
       alignItems: "center",
-      gap: spacing.xs,
+      gap: 4,
+      marginTop: 2,
     },
-    postsHeader: {
+    // Stats bar
+    statsBar: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: spacing.md,
+      borderRadius: radius.lg,
+      backgroundColor: colors.background,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.surfaceDivider,
+      overflow: "hidden",
+      alignSelf: "stretch",
+      marginHorizontal: spacing.md,
+    },
+    statItem: {
+      flex: 1,
+      alignItems: "center",
+      paddingVertical: spacing.sm,
+      gap: 2,
+    },
+    statDivider: {
+      width: StyleSheet.hairlineWidth,
+      alignSelf: "stretch",
+      backgroundColor: colors.surfaceDivider,
+    },
+    statValue: {
+      fontWeight: "700",
+    },
+    // Posts section
+    sectionHeader: {
       paddingHorizontal: spacing.md,
       paddingTop: spacing.md,
-      paddingBottom: spacing.sm,
+      paddingBottom: spacing.xs,
     },
     listContent: {
       paddingHorizontal: spacing.md,
       paddingBottom: spacing.xxl,
-      gap: spacing.sm,
     },
     separator: {
       height: spacing.sm,
     },
     emptyBox: {
       alignItems: "center",
-      paddingVertical: spacing.xl,
+      paddingVertical: spacing.xxl,
       gap: spacing.sm,
+      paddingHorizontal: spacing.lg,
     },
   });
 }

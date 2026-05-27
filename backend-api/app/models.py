@@ -61,22 +61,22 @@ class PlantCatalogModel(FirestoreBaseModel):
     scientificName: str
     nicknames: list[str] = Field(default_factory=list)
     categoryIds: list[str] = Field(default_factory=list)
-    iconType: str
-    iconEmoji: str
-    description: str
+    iconType: str = "emoji"
+    iconEmoji: str = "🪴"
+    description: str = ""
     origin: str | None = None
     climate: str | None = None
     growthTimeDays: int | None = None
     maxHeightCm: int | None = None
     floweringType: str | None = None
-    isToxic: bool
+    isToxic: bool = False
     waterAmountMl: int | None = None
     careFrequencyPerWeek: int | None = None
     fertilizerType: str | None = None
     fertilizerFrequencyDays: int | None = None
     lightNotes: str | None = None
     generalCareNotes: str | None = None
-    difficulty: Literal["easy", "medium", "hard"]
+    difficulty: str = "medium"
     imageUrl: str | None = None
     ownerUserId: str | None = None
     ownerUsername: str | None = None
