@@ -44,6 +44,20 @@ const imagePathSchema = z
     "Selecciona una imagen de la galería o toma una foto.",
   );
 
+const plantVisibilityOptions = ["public", "private"] as const;
+export const plantVisibilityLabels: Record<
+  (typeof plantVisibilityOptions)[number],
+  string
+> = {
+  public: "Pública",
+  private: "Privada",
+};
+
+export const plantVisibilitySelectOptions = plantVisibilityOptions.map((value) => ({
+  value,
+  label: plantVisibilityLabels[value],
+}));
+
 export const editPlantSchema = z.object({
   plantCatalogId: z
     .string()
@@ -60,6 +74,9 @@ export const editPlantSchema = z.object({
     ),
   healthStatus: z.enum(healthStatusOptions, {
     message: "Selecciona un estado de salud.",
+  }),
+  visibility: z.enum(plantVisibilityOptions, {
+    message: "Selecciona la visibilidad.",
   }),
   locationHome: z.string().trim().optional(),
   acquiredDate: z
@@ -113,6 +130,14 @@ export function getHealthStatus(
   const value = source.healthStatus;
   if (value === "good" || value === "regular" || value === "bad") return value;
   return "good";
+}
+
+export function getPlantVisibility(
+  source: Record<string, unknown>,
+): EditPlantValues["visibility"] {
+  const value = source.visibility;
+  if (value === "public" || value === "private") return value;
+  return "public";
 }
 
 export function getUserPlantPayload(
@@ -221,6 +246,7 @@ export function useMisPlantasScreen() {
       nickname: "",
       customImageUrl: "",
       healthStatus: "good",
+      visibility: "public",
       locationHome: "",
       acquiredDate: "",
       notes: "",
@@ -273,6 +299,7 @@ export function useMisPlantasScreen() {
           nickname: "",
           customImageUrl: "",
           healthStatus: "good",
+          visibility: "public",
           locationHome: "",
           acquiredDate: "",
           notes: "",
@@ -286,6 +313,7 @@ export function useMisPlantasScreen() {
         nickname: getStringField(payload, "nickname"),
         customImageUrl: resolvePlantImage(item),
         healthStatus: getHealthStatus(payload),
+        visibility: getPlantVisibility(payload),
         locationHome: getStringField(payload, "locationHome"),
         acquiredDate: formatDateInput(getStringField(payload, "acquiredDate")),
         notes: getStringField(payload, "notes"),
@@ -434,6 +462,7 @@ export function useMisPlantasScreen() {
         nickname: values.nickname,
         customImageUrl: imageUrl,
         healthStatus: values.healthStatus,
+        visibility: values.visibility,
         locationHome: values.locationHome || undefined,
         acquiredDate: values.acquiredDate || undefined,
         notes: values.notes || undefined,

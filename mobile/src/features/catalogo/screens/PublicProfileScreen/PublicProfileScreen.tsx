@@ -28,7 +28,7 @@ export default function PublicProfileScreen() {
   const { colors } = theme;
   const styles = createStyles(theme);
   const insets = useSafeAreaInsets();
-  const { data, loading, error, retry } = usePublicProfile(userId ?? "");
+  const { data, loading, error, retry, adjustCommentCount } = usePublicProfile(userId ?? "");
   const [commentPlant, setCommentPlant] = useState<PlantCatalogItem | null>(null);
 
   const NavBar = (title: string) => (
@@ -97,6 +97,13 @@ export default function PublicProfileScreen() {
           </View>
         ) : null}
 
+        {user.phone ? (
+          <View style={styles.metaRow}>
+            <Ionicons name="call-outline" size={12} color={colors.textMuted} />
+            <AppText variant="caption" color={colors.textMuted}>{user.phone}</AppText>
+          </View>
+        ) : null}
+
         {user.createdAt ? (
           <View style={styles.metaRow}>
             <Ionicons name="calendar-outline" size={12} color={colors.textMuted} />
@@ -158,6 +165,7 @@ export default function PublicProfileScreen() {
         <PlantCommentsSheet
           plant={commentPlant}
           onClose={() => setCommentPlant(null)}
+          onCountChange={(delta) => adjustCommentCount(commentPlant.id, delta)}
         />
       ) : null}
     </View>

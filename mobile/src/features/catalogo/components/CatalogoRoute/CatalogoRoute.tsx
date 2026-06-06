@@ -4,7 +4,7 @@ import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 
 export default function CatalogoRoute() {
   const { isConnected } = useNetworkStatus();
-  const { items, loading, refreshing, error, onRetry, onRefresh } =
+  const { items, loading, refreshing, error, onRetry, onRefresh, adjustCommentCount } =
     useCatalogoRoute();
 
   return (
@@ -16,6 +16,7 @@ export default function CatalogoRoute() {
       isOffline={isConnected === false}
       onRetry={onRetry}
       onRefresh={onRefresh}
+      adjustCommentCount={adjustCommentCount}
     />
   );
 }

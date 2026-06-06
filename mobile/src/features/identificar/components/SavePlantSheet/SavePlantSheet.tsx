@@ -21,6 +21,11 @@ export interface SavePlantData {
   nickname: string;
   locationHome?: string;
   publishToCatalog: boolean;
+  careRules: {
+    type: "watering" | "fertilizing" | "pruning" | "rotation";
+    intervalDays: number;
+    notes: string | null;
+  }[];
 }
 
 interface SavePlantSheetProps {
@@ -49,19 +54,38 @@ export default function SavePlantSheet({
   const [nickname, setNickname] = useState(aiResult.commonName ?? "");
   const [locationHome, setLocationHome] = useState("");
   const [publishToCatalog, setPublishToCatalog] = useState(true);
+  const [careRules, setCareRules] = useState<SavePlantData["careRules"]>(
+    aiResult.careSchedule.map((r) => ({
+      type: r.type,
+      intervalDays: r.intervalDays,
+      notes: r.notes,
+    })),
+  );
 
   useEffect(() => {
     if (visible) {
       setNickname(aiResult.commonName ?? "");
       setLocationHome("");
       setPublishToCatalog(true);
+      setCareRules(
+        aiResult.careSchedule.map((r) => ({
+          type: r.type,
+          intervalDays: r.intervalDays,
+          notes: r.notes,
+        })),
+      );
     }
-  }, [visible, aiResult.commonName]);
+  }, [visible, aiResult.commonName, aiResult.careSchedule]);
 
   const handleSave = async () => {
     if (!nickname.trim()) return;
     try {
-      await onSave({ nickname: nickname.trim(), locationHome: locationHome.trim() || undefined, publishToCatalog });
+      await onSave({
+        nickname: nickname.trim(),
+        locationHome: locationHome.trim() || undefined,
+        publishToCatalog,
+        careRules,
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : "No se pudo guardar la planta.";
       Alert.alert("Error al guardar", message);
@@ -143,6 +167,36 @@ export default function SavePlantSheet({
                 returnKeyType="done"
                 onSubmitEditing={handleSave}
               />
+            </View>
+
+            <View style={styles.fieldBlock}>
+              <AppText variant="label">Cuidados sugeridos</AppText>
+              {careRules.length === 0 ? (
+                <AppText variant="caption" color={theme.colors.textSecondary}>
+                  La IA no propuso cuidados. Puedes añadirlos después.
+                </AppText>
+              ) : (
+                <View style={styles.rulesWrap}>
+                  {careRules.map((r, idx) => {
+                    const label =
+                      r.type === "watering" ? "Regar"
+                      : r.type === "fertilizing" ? "Abonar"
+                      : r.type === "pruning" ? "Podar"
+                      : "Rotar";
+                    return (
+                      <View key={`${r.type}-${idx}`} style={styles.ruleChip}>
+                        <AppText variant="caption">{`${label} cada ${r.intervalDays} días`}</AppText>
+                        <Pressable
+                          onPress={() => setCareRules((arr) => arr.filter((_, i) => i !== idx))}
+                          hitSlop={6}
+                        >
+                          <Ionicons name="close" size={14} color={theme.colors.textSecondary} />
+                        </Pressable>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
             </View>
 
             <Pressable

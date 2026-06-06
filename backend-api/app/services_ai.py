@@ -27,16 +27,26 @@ Usa exactamente este formato:
   "watering_notes": "Regar cuando el sustrato esté seco en los primeros 3 cm.",
   "light_notes": "Luz indirecta brillante. Tolera sombra parcial.",
   "difficulty": "easy",
-  "is_toxic": true
+  "is_toxic": true,
+  "care_schedule": [
+    {"type": "watering", "intervalDays": 3, "notes": "Cuando el sustrato esté seco 3cm"},
+    {"type": "fertilizing", "intervalDays": 30, "notes": "NPK balanceado primavera/verano"}
+  ]
 }
 
 Si la imagen NO contiene una planta, responde con:
-{"is_plant": false, "confidence": 0.0, "common_name": null, "scientific_name": null, "nicknames": [], "description": null, "care_summary": null, "watering_notes": null, "light_notes": null, "difficulty": null, "is_toxic": null}
+{"is_plant": false, "confidence": 0.0, "common_name": null, "scientific_name": null, "nicknames": [], "description": null, "care_summary": null, "watering_notes": null, "light_notes": null, "difficulty": null, "is_toxic": null, "care_schedule": []}
 
 Reglas:
-- confidence: valor entre 0.0 y 1.0 que indica tu certeza en la identificación
-- difficulty: solo puede ser "easy", "medium" o "hard"
-- nicknames: array de 2 a 5 apodos coloquiales o nombres populares en español con los que la gente conoce la planta. Si no hay apodos populares, devuelve un array vacío [].
+- confidence: valor entre 0.0 y 1.0
+- difficulty: solo "easy", "medium" o "hard"
+- nicknames: array de 2 a 5 apodos en español; si no hay, []
+- care_schedule: lista de cuidados recurrentes aplicables a la especie.
+  * type debe ser uno de: "watering", "fertilizing", "pruning", "rotation"
+  * intervalDays entero entre 1 y 365 (frecuencia recomendada)
+  * notes opcional, breve y útil
+  * Incluye solo los cuidados realmente aplicables; no fuerces 4
+  * Si is_plant=false, devuelve []
 - Responde SOLO el JSON, absolutamente nada más
 """
 
@@ -67,7 +77,7 @@ def identify_plant_from_base64(image_base64: str, user_context: str = "") -> dic
             }
         ],
         "temperature": 0.1,
-        "max_tokens": 1024,
+        "max_tokens": 1536,
     }
 
     headers = {
@@ -140,5 +150,36 @@ def identify_plant_from_base64(image_base64: str, user_context: str = "") -> dic
 
     result.setdefault("is_plant", False)
     result["confidence"] = max(0.0, min(1.0, float(result.get("confidence", 0.0))))
+
+    raw_schedule = result.get("care_schedule")
+    valid_types = {"watering", "fertilizing", "pruning", "rotation"}
+    cleaned_schedule: list[dict] = []
+    if isinstance(raw_schedule, list):
+        for entry in raw_schedule:
+            if not isinstance(entry, dict):
+                continue
+            entry_type = entry.get("type")
+            if entry_type not in valid_types:
+                continue
+            interval_raw = entry.get("intervalDays")
+            try:
+                interval = int(interval_raw)
+            except (TypeError, ValueError):
+                continue
+            if interval < 1:
+                continue
+            interval = min(interval, 365)
+            notes = entry.get("notes")
+            if isinstance(notes, str):
+                notes = notes.strip() or None
+            else:
+                notes = None
+            cleaned_schedule.append({
+                "type": entry_type,
+                "intervalDays": interval,
+                "notes": notes,
+                "anchorDate": None,
+            })
+    result["care_schedule"] = cleaned_schedule
 
     return result

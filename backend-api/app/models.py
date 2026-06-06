@@ -28,6 +28,7 @@ class UserModel(FirestoreBaseModel):
     status: Literal["active", "inactive"]
     plantCount: int
     city: str | None = None
+    phone: str | None = None
 
 
 class UserStatModel(FirestoreBaseModel):
@@ -123,6 +124,7 @@ class PublicUserModel(BaseModel):
     avatarId: str
     headline: str | None = None
     city: str | None = None
+    phone: str | None = None
     plantCount: int = 0
     createdAt: str | None = None
 
@@ -146,6 +148,7 @@ class UserPlantModel(FirestoreBaseModel):
     acquiredDate: str | None = None
     lastWateredAt: str | None = None
     notes: str | None = None
+    visibility: Literal["public", "private"] = "public"
 
 
 class UpdateUserRequest(BaseModel):
@@ -161,6 +164,7 @@ class UpdateUserRequest(BaseModel):
     birthDate: str | None = None
     themePreference: Literal["light", "dark", "system"] | None = None
     city: str | None = None
+    phone: str | None = None
 
 
 class UpdateUserPlantRequest(BaseModel):
@@ -173,6 +177,53 @@ class UpdateUserPlantRequest(BaseModel):
     acquiredDate: str | None = None
     notes: str | None = None
     customImageUrl: str | None = None
+    visibility: Literal["public", "private"] | None = None
+
+
+class CareRuleModel(FirestoreBaseModel):
+    userId: str
+    userPlantId: str
+    type: Literal["watering", "fertilizing", "pruning", "rotation"]
+    intervalDays: int
+    notes: str | None = None
+    anchorDate: str
+    lastGeneratedUntil: str | None = None
+    active: bool = True
+
+
+class CareRuleInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    type: Literal["watering", "fertilizing", "pruning", "rotation"]
+    intervalDays: int
+    notes: str | None = None
+    anchorDate: str | None = None
+
+
+class CompleteCareTaskRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    completedAt: str | None = None
+    notes: str | None = None
+    value: str | None = None
+
+
+class CreateCareTaskRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    userId: str
+    userPlantId: str
+    type: Literal["watering", "fertilizing", "pruning", "rotation"]
+    scheduledFor: str
+    notes: str | None = None
+
+
+class UpdateCareTaskRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    scheduledFor: str | None = None
+    notes: str | None = None
+    status: Literal["pending", "completed", "skipped"] | None = None
 
 
 class CreateUserPlantRequest(BaseModel):
@@ -187,6 +238,7 @@ class CreateUserPlantRequest(BaseModel):
     notes: str | None = None
     customImageUrl: str | None = None
     favorite: bool | None = None
+    careRules: list[CareRuleInput] | None = None
 
 
 class CreateCatalogPlantRequest(BaseModel):
@@ -231,6 +283,7 @@ class CareScheduleItemModel(FirestoreBaseModel):
     status: Literal["pending", "completed", "skipped"]
     scheduledFor: str
     notes: str | None = None
+    ruleId: str | None = None
 
 
 class CareHistoryItemModel(FirestoreBaseModel):
@@ -291,6 +344,7 @@ class PlantIdentificationResponse(BaseModel):
     light_notes: str | None = None
     difficulty: Literal["easy", "medium", "hard"] | None = None
     is_toxic: bool | None = None
+    care_schedule: list[CareRuleInput] = Field(default_factory=list)
 
 
 class ImageUploadResponse(BaseModel):

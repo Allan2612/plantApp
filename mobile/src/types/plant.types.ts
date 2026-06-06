@@ -55,6 +55,7 @@ export interface PublicUserProfile {
   avatarId: string;
   headline: string | null;
   city: string | null;
+  phone: string | null;
   plantCount: number;
   createdAt: string | null;
 }
@@ -75,6 +76,7 @@ export interface UpdateUserPlantPayload {
   acquiredDate?: string;
   notes?: string;
   customImageUrl?: string;
+  visibility?: "public" | "private";
 }
 
 export interface CreateUserPlantPayload {
@@ -87,6 +89,12 @@ export interface CreateUserPlantPayload {
   notes?: string;
   customImageUrl?: string;
   favorite?: boolean;
+  careRules?: {
+    type: "watering" | "fertilizing" | "pruning" | "rotation";
+    intervalDays: number;
+    notes?: string | null;
+    anchorDate?: string | null;
+  }[];
 }
 
 export type CatalogDifficulty = "easy" | "medium" | "hard";

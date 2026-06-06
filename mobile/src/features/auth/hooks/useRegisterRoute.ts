@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const USERNAME_REGEX = /^[a-zA-Z0-9_-]{3,20}$/;
 const STRONG_PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+const PHONE_REGEX = /^[\d\s+()-]{8,20}$/;
 
 type RegisterFieldErrors = {
   displayName?: string;
@@ -13,6 +14,7 @@ type RegisterFieldErrors = {
   email?: string;
   password?: string;
   confirmPassword?: string;
+  phone?: string;
   acceptedTerms?: string;
 };
 
@@ -26,6 +28,7 @@ export function useRegisterRoute() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -65,13 +68,20 @@ export function useRegisterRoute() {
       errors.confirmPassword = "Las contraseñas no coinciden.";
     }
 
+    const normalizedPhone = phone.trim();
+    if (!normalizedPhone) {
+      errors.phone = "Ingresa tu numero de telefono.";
+    } else if (!PHONE_REGEX.test(normalizedPhone)) {
+      errors.phone = "Numero invalido. Usa entre 8 y 20 digitos.";
+    }
+
     if (!acceptedTerms) {
       errors.acceptedTerms =
         "Debes aceptar los terminos de uso y la politica de privacidad.";
     }
 
     return errors;
-  }, [acceptedTerms, confirmPassword, displayName, email, password, username]);
+  }, [acceptedTerms, confirmPassword, displayName, email, password, phone, username]);
 
   const firstFieldError = useMemo(() => {
     return (
@@ -80,6 +90,7 @@ export function useRegisterRoute() {
       fieldErrors.email ||
       fieldErrors.password ||
       fieldErrors.confirmPassword ||
+      fieldErrors.phone ||
       fieldErrors.acceptedTerms ||
       null
     );
@@ -102,6 +113,7 @@ export function useRegisterRoute() {
       password,
       normalizedDisplayName,
       normalizedUsername,
+      phone.trim(),
       acceptedTerms,
     );
 
@@ -120,6 +132,7 @@ export function useRegisterRoute() {
     email,
     password,
     confirmPassword,
+    phone,
     acceptedTerms,
     loading,
     error,
@@ -129,6 +142,7 @@ export function useRegisterRoute() {
     onEmailChange: setEmail,
     onPasswordChange: setPassword,
     onConfirmPasswordChange: setConfirmPassword,
+    onPhoneChange: setPhone,
     onToggleAcceptedTerms: () => setAcceptedTerms((prev) => !prev),
     onSubmit,
     onGoToLogin: () => router.replace("/(auth)/login" as never),

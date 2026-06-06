@@ -15,6 +15,12 @@ export interface PlantIdentificationResult {
   lightNotes: string | null;
   difficulty: "easy" | "medium" | "hard" | null;
   isToxic: boolean | null;
+  careSchedule: {
+    type: "watering" | "fertilizing" | "pruning" | "rotation";
+    intervalDays: number;
+    notes: string | null;
+    anchorDate: string | null;
+  }[];
 }
 
 interface RawIdentificationResponse {
@@ -29,6 +35,12 @@ interface RawIdentificationResponse {
   light_notes: string | null;
   difficulty: "easy" | "medium" | "hard" | null;
   is_toxic: boolean | null;
+  care_schedule?: {
+    type: string;
+    intervalDays: number;
+    notes: string | null;
+    anchorDate: string | null;
+  }[] | null;
 }
 
 function mapResponse(raw: RawIdentificationResponse): PlantIdentificationResult {
@@ -44,6 +56,16 @@ function mapResponse(raw: RawIdentificationResponse): PlantIdentificationResult 
     lightNotes: raw.light_notes,
     difficulty: raw.difficulty,
     isToxic: raw.is_toxic,
+    careSchedule: Array.isArray(raw.care_schedule)
+      ? raw.care_schedule
+          .filter((r) => r && typeof r === "object")
+          .map((r) => ({
+            type: r.type as "watering" | "fertilizing" | "pruning" | "rotation",
+            intervalDays: r.intervalDays,
+            notes: r.notes ?? null,
+            anchorDate: r.anchorDate ?? null,
+          }))
+      : [],
   };
 }
 

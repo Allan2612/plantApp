@@ -79,5 +79,21 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       flex: 1,
       gap: 2,
     },
+    rulesWrap: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 6,
+      marginTop: 4,
+    },
+    ruleChip: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 999,
+      borderWidth: 1,
+      borderColor: colors.surfaceDivider,
+    },
   });
 }

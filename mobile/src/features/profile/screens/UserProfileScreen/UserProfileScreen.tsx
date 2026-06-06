@@ -166,6 +166,16 @@ export default function UserProfileScreen() {
                 </View>
                 <View style={styles.infoItem}>
                   <AppText variant="caption" style={styles.infoLabel}>
+                    Telefono
+                  </AppText>
+                  <AppText variant="body">
+                    {profileUser.phone?.trim()
+                      ? profileUser.phone
+                      : "No definido"}
+                  </AppText>
+                </View>
+                <View style={styles.infoItem}>
+                  <AppText variant="caption" style={styles.infoLabel}>
                     Visibilidad
                   </AppText>
                   <AppText variant="body">
@@ -395,6 +405,21 @@ export default function UserProfileScreen() {
                     onChangeText={onChange}
                     error={errors.city?.message}
                     placeholder="Ciudad"
+                  />
+                )}
+              />
+
+              <Controller
+                control={control}
+                name="phone"
+                render={({ field: { value, onChange } }) => (
+                  <InputText
+                    label="Telefono"
+                    value={value ?? ""}
+                    onChangeText={onChange}
+                    error={errors.phone?.message}
+                    placeholder="Ej: 8888-8888"
+                    keyboardType="phone-pad"
                   />
                 )}
               />

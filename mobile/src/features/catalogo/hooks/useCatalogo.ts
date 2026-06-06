@@ -2,7 +2,8 @@ import { fetchCatalogPlants } from "@/src/features/catalogo/services/catalogoApi
 import { useAuthStore } from "@/src/store/auth.store";
 import { cacheGet, cacheSet } from "@/src/services/offlineCache";
 import { PlantCatalogItem } from "@/src/types/plant.types";
-import { useCallback, useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const CATALOG_CACHE_KEY = "plantica:catalog";
 
@@ -51,6 +52,30 @@ export function useCatalogo() {
     void initialLoad();
   }, [initialLoad]);
 
+  const hasMountedRef = useRef(false);
+  useFocusEffect(
+    useCallback(() => {
+      if (!hasMountedRef.current) {
+        hasMountedRef.current = true;
+        return;
+      }
+      void loadCatalog();
+    }, [loadCatalog]),
+  );
+
+  const adjustCommentCount = useCallback(
+    (plantId: string, delta: number) => {
+      setItems((prev) =>
+        prev.map((p) =>
+          p.id === plantId
+            ? { ...p, commentCount: Math.max(0, p.commentCount + delta) }
+            : p,
+        ),
+      );
+    },
+    [],
+  );
+
   return {
     items,
     loading,
@@ -58,5 +83,6 @@ export function useCatalogo() {
     error,
     retry: initialLoad,
     refresh,
+    adjustCommentCount,
   };
 }

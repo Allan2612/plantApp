@@ -8,6 +8,7 @@ export default function RegisterRoute() {
     email,
     password,
     confirmPassword,
+    phone,
     acceptedTerms,
     loading,
     error,
@@ -17,6 +18,7 @@ export default function RegisterRoute() {
     onEmailChange,
     onPasswordChange,
     onConfirmPasswordChange,
+    onPhoneChange,
     onToggleAcceptedTerms,
     onSubmit,
     onGoToLogin,
@@ -29,6 +31,7 @@ export default function RegisterRoute() {
       email={email}
       password={password}
       confirmPassword={confirmPassword}
+      phone={phone}
       acceptedTerms={acceptedTerms}
       loading={loading}
       error={error}
@@ -38,6 +41,7 @@ export default function RegisterRoute() {
       onEmailChange={onEmailChange}
       onPasswordChange={onPasswordChange}
       onConfirmPasswordChange={onConfirmPasswordChange}
+      onPhoneChange={onPhoneChange}
       onToggleAcceptedTerms={onToggleAcceptedTerms}
       onSubmit={onSubmit}
       onGoToLogin={onGoToLogin}

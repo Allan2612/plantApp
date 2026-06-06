@@ -5,8 +5,12 @@ from fastapi import HTTPException
 
 from .models import (
     CareHistoryItemModel,
+    CareRuleInput,
+    CareRuleModel,
     CareScheduleItemModel,
     CategoryModel,
+    CompleteCareTaskRequest,
+    CreateCareTaskRequest,
     CreateCatalogPlantRequest,
     CreateCommentRequest,
     CreateUserPlantRequest,
@@ -21,6 +25,7 @@ from .models import (
     SyncAuthUserRequest,
     ToggleLikeRequest,
     ToggleLikeResponse,
+    UpdateCareTaskRequest,
     UpdateUserPlantRequest,
     UpdateUserRequest,
     UserPlantDetailResponse,
@@ -52,6 +57,17 @@ from .services import (
 )
 from .firebase import get_firestore_client
 from .services_ai import identify_plant_from_base64
+from .services_care import (
+    complete_care_task,
+    create_care_rules_for_plant,
+    create_manual_care_task,
+    delete_care_rule,
+    delete_care_task,
+    list_care_rules_for_plant,
+    materialize_pending_tasks,
+    update_care_rule,
+    update_care_task,
+)
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -337,14 +353,24 @@ def read_user_plant_tags(user_id: str) -> list[dict]:
 
 
 @router.get("/api/users/{user_id}/care-schedule", response_model=list[CareScheduleItemModel])
-def read_user_care_schedule(user_id: str) -> list[dict]:
+def read_user_care_schedule(
+    user_id: str,
+    from_date: str | None = None,
+    to_date: str | None = None,
+) -> list[dict]:
     validated_user_id = _validate_required_id(user_id, "user_id")
     try:
-        return get_collection(
+        materialize_pending_tasks(validated_user_id, horizon_days=30)
+        items = get_collection(
             "careSchedule",
             filters=[("userId", "==", validated_user_id)],
-            order_by="scheduledFor",
         )
+        if from_date:
+            items = [it for it in items if (it.get("scheduledFor") or "") >= from_date]
+        if to_date:
+            items = [it for it in items if (it.get("scheduledFor") or "") <= to_date]
+        items.sort(key=lambda it: it.get("scheduledFor") or "")
+        return items
     except HTTPException:
         raise
     except Exception:
@@ -352,6 +378,120 @@ def read_user_care_schedule(user_id: str) -> list[dict]:
             "Error inesperado en read_user_care_schedule. user_id=%s",
             validated_user_id,
         )
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.get(
+    "/api/user-plants/{user_plant_id}/care-rules",
+    response_model=list[CareRuleModel],
+)
+def read_care_rules(user_plant_id: str) -> list[dict]:
+    validated = _validate_required_id(user_plant_id, "user_plant_id")
+    try:
+        return list_care_rules_for_plant(validated)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error en read_care_rules. user_plant_id=%s", validated)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.post(
+    "/api/user-plants/{user_plant_id}/care-rules",
+    response_model=CareRuleModel,
+)
+def post_care_rule(user_plant_id: str, payload: CareRuleInput) -> dict:
+    validated = _validate_required_id(user_plant_id, "user_plant_id")
+    try:
+        plant = get_document("userPlants", validated)
+        user_id = plant.get("userId")
+        if not user_id:
+            raise HTTPException(status_code=400, detail="planta sin userId")
+        rules = create_care_rules_for_plant(user_id, validated, [payload])
+        materialize_pending_tasks(user_id, horizon_days=30)
+        return rules[0]
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error en post_care_rule. user_plant_id=%s", validated)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.patch("/api/care-rules/{rule_id}", response_model=CareRuleModel)
+def patch_care_rule(rule_id: str, payload: dict) -> dict:
+    validated = _validate_required_id(rule_id, "rule_id")
+    try:
+        return update_care_rule(validated, payload)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error en patch_care_rule. rule_id=%s", validated)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.delete("/api/care-rules/{rule_id}")
+def delete_care_rule_endpoint(rule_id: str) -> dict:
+    validated = _validate_required_id(rule_id, "rule_id")
+    try:
+        delete_care_rule(validated)
+        return {"ok": True}
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error en delete_care_rule. rule_id=%s", validated)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.post("/api/care-schedule", response_model=CareScheduleItemModel)
+def post_care_task(payload: CreateCareTaskRequest) -> dict:
+    try:
+        return create_manual_care_task(payload.model_dump())
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error en post_care_task")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.patch("/api/care-schedule/{task_id}", response_model=CareScheduleItemModel)
+def patch_care_task(task_id: str, payload: UpdateCareTaskRequest) -> dict:
+    validated = _validate_required_id(task_id, "task_id")
+    try:
+        return update_care_task(validated, payload.model_dump())
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error en patch_care_task. task_id=%s", validated)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.delete("/api/care-schedule/{task_id}")
+def delete_care_task_endpoint(task_id: str) -> dict:
+    validated = _validate_required_id(task_id, "task_id")
+    try:
+        delete_care_task(validated)
+        return {"ok": True}
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error en delete_care_task. task_id=%s", validated)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+@router.post("/api/care-schedule/{task_id}/complete")
+def post_complete_task(task_id: str, payload: CompleteCareTaskRequest) -> dict:
+    validated = _validate_required_id(task_id, "task_id")
+    try:
+        return complete_care_task(
+            validated,
+            completed_at=payload.completedAt,
+            notes=payload.notes,
+            value=payload.value,
+        )
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error en post_complete_task. task_id=%s", validated)
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 

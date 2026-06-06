@@ -52,19 +52,27 @@ function normalizeImageUrl(url: string): string {
     return "";
   }
 
-  try {
-    return encodeURI(decodeURI(trimmed));
-  } catch {
-    return trimmed;
-  }
+  // No re-encodear: Firebase Storage requiere %2F literal en path.
+  // decodeURI + encodeURI rompía URLs con segmentos pre-encodeados.
+  return trimmed;
 }
 
 function resolveGardenImage(item: UserPlantListItem): string {
   const userPlant = getUserPlantPayload(item);
   const catalog = getCatalogPayload(item);
   const customImage = getStringField(userPlant, "customImageUrl").trim();
-  if (customImage) return normalizeImageUrl(customImage);
-  return normalizeImageUrl(getStringField(catalog, "imageUrl"));
+  if (customImage) {
+    const normalized = normalizeImageUrl(customImage);
+    if (normalized) return normalized;
+    return customImage;
+  }
+  const catalogImage = getStringField(catalog, "imageUrl").trim();
+  if (catalogImage) {
+    const normalized = normalizeImageUrl(catalogImage);
+    if (normalized) return normalized;
+    return catalogImage;
+  }
+  return "";
 }
 
 function mapHealthLabel(value: string): string {
@@ -86,7 +94,9 @@ export function useHomeScreen() {
   const providerId = user?.providerData?.[0]?.providerId ?? null;
 
   const catalogItems = items.filter((item) => Boolean(item.imageUrl));
-  const trendingItems = catalogItems.slice(0, 3);
+  const trendingItems = [...catalogItems]
+    .sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0))
+    .slice(0, 3);
   const catalogItemsInverted = [...catalogItems].reverse();
 
   useEffect(() => {

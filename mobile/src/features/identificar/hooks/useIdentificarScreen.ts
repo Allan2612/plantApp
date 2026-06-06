@@ -1,6 +1,8 @@
 import { useAuthStore } from "@/src/store/auth.store";
-import { createCatalogPlant } from "@/src/features/catalogo/services/catalogoApi.service";
-import { createUserPlant, updateUserPlant } from "@/src/features/mis-plantas/services/misPlantasApi.service";
+import { usePlantsStore } from "@/src/store/plants.store";
+import { cacheSet } from "@/src/services/offlineCache";
+import { createCatalogPlant, fetchCatalogPlants } from "@/src/features/catalogo/services/catalogoApi.service";
+import { createUserPlant, fetchUserPlants, updateUserPlant } from "@/src/features/mis-plantas/services/misPlantasApi.service";
 import {
   identifyPlantFromUri,
   PlantIdentificationResult,
@@ -190,6 +192,7 @@ export function useIdentificarScreen() {
             locationHome: data.locationHome,
             notes: aiResult.careSummary ?? undefined,
             customImageUrl: uploadedUrl,
+            careRules: data.careRules,
           });
 
           const raw = savedPlant as Record<string, unknown>;
@@ -204,6 +207,7 @@ export function useIdentificarScreen() {
             nickname: data.nickname,
             locationHome: data.locationHome,
             notes: aiResult.careSummary ?? undefined,
+            careRules: data.careRules,
           });
 
           const raw = savedPlant as Record<string, unknown>;
@@ -222,6 +226,24 @@ export function useIdentificarScreen() {
         setSavedPlantName(data.nickname);
         setSavedPlantId(newId);
         setIsSaved(true);
+
+        try {
+          const refreshed = await fetchUserPlants(backendUserId);
+          const nextPlants = refreshed.items ?? [];
+          usePlantsStore.getState().setPlants(nextPlants);
+          await cacheSet(`plantica:plants:${backendUserId}`, nextPlants);
+        } catch {
+          // ignore refresh failure; misplantas focus reload will retry
+        }
+
+        if (data.publishToCatalog) {
+          try {
+            const catalog = await fetchCatalogPlants(backendUserId);
+            await cacheSet("plantica:catalog", catalog);
+          } catch {
+            // ignore; catalog focus reload will retry
+          }
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : "Error al guardar la planta";
         showToast(message, "error");

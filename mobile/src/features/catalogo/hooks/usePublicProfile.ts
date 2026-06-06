@@ -22,5 +22,19 @@ export function usePublicProfile(userId: string) {
 
   useEffect(() => { void load(); }, [load]);
 
-  return { data, loading, error, retry: load };
+  const adjustCommentCount = useCallback((plantId: string, delta: number) => {
+    setData((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        catalogPosts: prev.catalogPosts.map((p) =>
+          p.id === plantId
+            ? { ...p, commentCount: Math.max(0, p.commentCount + delta) }
+            : p,
+        ),
+      };
+    });
+  }, []);
+
+  return { data, loading, error, retry: load, adjustCommentCount };
 }

@@ -139,6 +139,18 @@ export function createStyles({ colors, spacing, radius }: AppTheme) {
       shadowOpacity: 0.2,
       shadowRadius: 4,
     },
+    rulesButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      alignSelf: "flex-start",
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      borderRadius: 999,
+      borderWidth: 1,
+      borderColor: colors.primary,
+      marginTop: spacing.sm,
+    },
     // Not found
     notFoundContainer: {
       flex: 1,

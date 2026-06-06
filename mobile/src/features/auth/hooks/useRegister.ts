@@ -26,6 +26,7 @@ export function useRegister() {
     password: string,
     displayName: string,
     username: string,
+    phone: string,
     acceptedTerms: boolean,
   ) => {
     setLoading(true);
@@ -59,6 +60,7 @@ export function useRegister() {
       await updateUserProfile(resolution.backendUserId, {
         displayName,
         username,
+        phone: phone || undefined,
       });
 
       const refreshedResolution = await fetchProfileForSession({

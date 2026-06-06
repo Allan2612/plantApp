@@ -23,6 +23,7 @@ import { createStyles } from "./styles";
 interface PlantCommentsSheetProps {
   plant: PlantCatalogItem;
   onClose: () => void;
+  onCountChange?: (delta: number) => void;
 }
 
 function getInitial(name: string | null | undefined): string {
@@ -35,7 +36,7 @@ function formatDate(iso: string | null | undefined): string {
   return d.toLocaleDateString("es-CR", { day: "numeric", month: "short" });
 }
 
-export default function PlantCommentsSheet({ plant, onClose }: PlantCommentsSheetProps) {
+export default function PlantCommentsSheet({ plant, onClose, onCountChange }: PlantCommentsSheetProps) {
   const theme = useAppTheme();
   const styles = createStyles(theme);
   const userId = useAuthStore((state) => state.profile?.user?.id ?? null);
@@ -66,6 +67,7 @@ export default function PlantCommentsSheet({ plant, onClose }: PlantCommentsShee
     try {
       const newComment = await addPlantComment(plant.id, userId, trimmed);
       setComments((prev) => [...prev, newComment]);
+      onCountChange?.(+1);
       setText("");
       Keyboard.dismiss();
     } catch (err) {
@@ -86,6 +88,7 @@ export default function PlantCommentsSheet({ plant, onClose }: PlantCommentsShee
           try {
             await deletePlantComment(plant.id, comment.id, userId);
             setComments((prev) => prev.filter((c) => c.id !== comment.id));
+            onCountChange?.(-1);
           } catch (err) {
             Alert.alert("Error", err instanceof Error ? err.message : "No se pudo eliminar.");
           }

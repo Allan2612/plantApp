@@ -179,6 +179,7 @@ def update_user_fields(user_id: str, payload: dict[str, Any]) -> dict[str, Any]:
             "birthDate",
             "themePreference",
             "city",
+            "phone",
         },
     )
     return _patch_document("users", user_id, updates)
@@ -195,6 +196,7 @@ def update_user_plant_fields(user_plant_id: str, payload: dict[str, Any]) -> dic
             "acquiredDate",
             "notes",
             "customImageUrl",
+            "visibility",
         },
     )
 
@@ -340,6 +342,7 @@ def _normalize_user_payload(user: dict[str, Any]) -> dict[str, Any]:
         "status": status,
         "plantCount": int(user.get("plantCount") or 0),
         "city": "" if user.get("city") is None else str(user.get("city")),
+        "phone": "" if user.get("phone") is None else str(user.get("phone")),
         "createdAt": created_at or now_iso,
         "updatedAt": updated_at or now_iso,
     }
@@ -439,6 +442,7 @@ def sync_user_from_auth(payload: dict[str, Any]) -> dict[str, Any]:
         "status": "active",
         "plantCount": 0,
         "city": "",
+        "phone": "",
         "createdAt": now_iso,
         "updatedAt": now_iso,
     }
@@ -489,6 +493,7 @@ def create_user_plant(payload: dict[str, Any]) -> dict[str, Any]:
         "acquiredDate": str(payload.get("acquiredDate") or "") or None,
         "lastWateredAt": None,
         "notes": str(payload.get("notes") or "") or None,
+        "visibility": "public",
         "createdAt": now_iso,
         "updatedAt": now_iso,
     }
@@ -507,6 +512,22 @@ def create_user_plant(payload: dict[str, Any]) -> dict[str, Any]:
 
     db.collection("users").document(user_id).update(user_updates)
     created = get_document("userPlants", user_plant_id)
+
+    care_rules_raw = payload.get("careRules") or []
+    if care_rules_raw:
+        from .services_care import (
+            create_care_rules_for_plant,
+            materialize_pending_tasks,
+        )
+        from .models import CareRuleInput
+        validated_rules = [CareRuleInput(**rule) for rule in care_rules_raw]
+        create_care_rules_for_plant(
+            user_id=user_id,
+            user_plant_id=user_plant_id,
+            rules=validated_rules,
+        )
+        materialize_pending_tasks(user_id, horizon_days=30)
+
     return _normalize_user_plant_payload(created)
 
 
@@ -750,6 +771,7 @@ def get_public_user_profile(user_id: str) -> dict[str, Any]:
             "avatarId": str(user.get("avatarId") or "midori"),
             "headline": user.get("headline") or None,
             "city": user.get("city") or None,
+            "phone": user.get("phone") or None,
             "plantCount": int(user.get("plantCount") or 0),
             "createdAt": user.get("createdAt"),
         },

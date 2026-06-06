@@ -19,6 +19,7 @@ interface CatalogoScreenProps {
   isOffline: boolean;
   onRetry: () => void;
   onRefresh: () => void;
+  adjustCommentCount?: (plantId: string, delta: number) => void;
 }
 
 export default function CatalogoScreen({
@@ -29,6 +30,7 @@ export default function CatalogoScreen({
   isOffline,
   onRetry,
   onRefresh,
+  adjustCommentCount,
 }: CatalogoScreenProps) {
   const theme = useAppTheme();
   const { colors } = theme;
@@ -95,6 +97,9 @@ export default function CatalogoScreen({
         <PlantCommentsSheet
           plant={commentPlant}
           onClose={() => setCommentPlant(null)}
+          onCountChange={(delta) =>
+            adjustCommentCount?.(commentPlant.id, delta)
+          }
         />
       ) : null}
     </ScreenWrapper>

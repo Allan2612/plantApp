@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import EditPlantModal from "@/src/features/mis-plantas/components/EditPlantModal";
+import EditRulesSheet from "@/src/features/calendario/components/EditRulesSheet";
 import { useNetworkStatus } from "@/src/hooks/useNetworkStatus";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, TouchableOpacity, View } from "react-native";
@@ -48,6 +49,7 @@ export default function PlantDetailScreen() {
   const { isConnected } = useNetworkStatus();
   const [isLoading, setIsLoading] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showRules, setShowRules] = useState(false);
 
   const item = plants.find((p) => {
     const payload = getUserPlantPayload(p);
@@ -247,6 +249,15 @@ export default function PlantDetailScreen() {
             </View>
           ) : null}
 
+          <TouchableOpacity
+            style={styles.rulesButton}
+            onPress={() => setShowRules(true)}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="calendar-outline" size={16} color={colors.primary} />
+            <AppText variant="label" color={colors.primary}>Cuidados programados</AppText>
+          </TouchableOpacity>
+
         </View>
       </ScrollView>
 
@@ -280,6 +291,13 @@ export default function PlantDetailScreen() {
             }
           }}
           isOffline={isConnected === false}
+        />
+      ) : null}
+      {item ? (
+        <EditRulesSheet
+          visible={showRules}
+          userPlantId={getStringField(getUserPlantPayload(item), "id")}
+          onClose={() => setShowRules(false)}
         />
       ) : null}
     </View>

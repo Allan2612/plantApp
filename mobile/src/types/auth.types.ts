@@ -30,6 +30,7 @@ export interface BackendUser {
   status: string;
   plantCount: number;
   city?: string | null;
+  phone?: string | null;
 }
 
 export interface BackendUserProfile {
@@ -52,6 +53,7 @@ export interface UpdateUserPayload {
   birthDate?: string;
   themePreference?: ThemePreference;
   city?: string;
+  phone?: string;
 }
 
 export interface SyncAuthUserPayload {

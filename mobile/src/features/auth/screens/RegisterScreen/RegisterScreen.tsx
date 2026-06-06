@@ -14,6 +14,7 @@ type RegisterFieldErrors = {
   email?: string;
   password?: string;
   confirmPassword?: string;
+  phone?: string;
   acceptedTerms?: string;
 };
 
@@ -23,6 +24,7 @@ interface RegisterScreenProps {
   email: string;
   password: string;
   confirmPassword: string;
+  phone: string;
   acceptedTerms: boolean;
   loading: boolean;
   error: string | null;
@@ -32,6 +34,7 @@ interface RegisterScreenProps {
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
   onConfirmPasswordChange: (value: string) => void;
+  onPhoneChange: (value: string) => void;
   onToggleAcceptedTerms: () => void;
   onSubmit: () => void;
   onGoToLogin: () => void;
@@ -43,6 +46,7 @@ export default function RegisterScreen({
   email,
   password,
   confirmPassword,
+  phone,
   acceptedTerms,
   loading,
   error,
@@ -52,6 +56,7 @@ export default function RegisterScreen({
   onEmailChange,
   onPasswordChange,
   onConfirmPasswordChange,
+  onPhoneChange,
   onToggleAcceptedTerms,
   onSubmit,
   onGoToLogin,
@@ -63,6 +68,7 @@ export default function RegisterScreen({
   const emailRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
   const confirmPasswordRef = useRef<TextInput>(null);
+  const phoneRef = useRef<TextInput>(null);
 
   return (
     <AuthScreenLayout
@@ -138,6 +144,21 @@ export default function RegisterScreen({
           placeholder="Repite tu contraseña"
           secureTextEntry
           textContentType="newPassword"
+          returnKeyType="next"
+          onSubmitEditing={() => phoneRef.current?.focus()}
+          blurOnSubmit={false}
+        />
+
+        <AuthInput
+          ref={phoneRef}
+          label="Telefono"
+          value={phone}
+          onChangeText={onPhoneChange}
+          errorText={fieldErrors?.phone}
+          placeholder="Ej: 8888-8888"
+          keyboardType="phone-pad"
+          autoComplete="tel"
+          textContentType="telephoneNumber"
           returnKeyType="done"
           onSubmitEditing={onSubmit}
         />

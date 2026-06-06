@@ -11,10 +11,12 @@ import {
   formatDateDisplay,
   formatDateInput,
   getHealthStatus,
+  getPlantVisibility,
   getStringField,
   getUserPlantId,
   getUserPlantPayload,
   healthSelectOptions,
+  plantVisibilitySelectOptions,
   resolvePlantImage,
   toIsoDate,
 } from "@/src/features/mis-plantas/hooks/useMisPlantasScreen";
@@ -27,7 +29,7 @@ import { PlantCatalogItem } from "@/src/types/plant.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Modal,
@@ -38,6 +40,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
+import { AppTheme } from "@/src/theme/designSystem";
 
 interface EditPlantModalProps {
   visible: boolean;
@@ -63,6 +67,11 @@ export default function EditPlantModal({
   const [isSaving, setIsSaving] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerValue, setDatePickerValue] = useState<Date>(new Date());
+  const [imageLocalUri, setImageLocalUri] = useState<string | null>(null);
+  const [imageRemoved, setImageRemoved] = useState(false);
+
+  const initialImage = useMemo(() => resolvePlantImage(item), [item]);
+  const pickerValue = imageLocalUri ?? (imageRemoved ? null : initialImage || null);
 
   const nicknameRef = useRef<import("react-native").TextInput | null>(null);
   const locationRef = useRef<import("react-native").TextInput | null>(null);
@@ -82,6 +91,7 @@ export default function EditPlantModal({
       nickname: "",
       customImageUrl: "",
       healthStatus: "good",
+      visibility: "public",
       locationHome: "",
       acquiredDate: "",
       notes: "",
@@ -103,11 +113,14 @@ export default function EditPlantModal({
     if (!visible) return;
     const payload = getUserPlantPayload(item);
     const acquiredDate = formatDateInput(getStringField(payload, "acquiredDate"));
+    setImageLocalUri(null);
+    setImageRemoved(false);
     reset({
       plantCatalogId: getStringField(payload, "plantCatalogId"),
       nickname: getStringField(payload, "nickname"),
       customImageUrl: resolvePlantImage(item),
       healthStatus: getHealthStatus(payload),
+      visibility: getPlantVisibility(payload),
       locationHome: getStringField(payload, "locationHome"),
       acquiredDate,
       notes: getStringField(payload, "notes"),
@@ -128,15 +141,19 @@ export default function EditPlantModal({
     }
     setIsSaving(true);
     try {
-      let imageUrl = values.customImageUrl || undefined;
-      if (imageUrl) {
-        imageUrl = await uploadUserPlantImage(plantId, imageUrl);
+      let imagePatch: { customImageUrl?: string } = {};
+      if (imageLocalUri) {
+        const uploaded = await uploadUserPlantImage(plantId, imageLocalUri);
+        imagePatch = { customImageUrl: uploaded };
+      } else if (imageRemoved) {
+        imagePatch = { customImageUrl: "" };
       }
       await updateUserPlant(plantId, {
         plantCatalogId: values.plantCatalogId,
         nickname: values.nickname,
-        customImageUrl: imageUrl,
+        ...imagePatch,
         healthStatus: values.healthStatus,
+        visibility: values.visibility,
         locationHome: values.locationHome || undefined,
         acquiredDate: values.acquiredDate || undefined,
         notes: values.notes || undefined,
@@ -199,21 +216,18 @@ export default function EditPlantModal({
 
             <View style={styles.fieldBlock}>
               <AppText variant="label" style={{ color: colors.textPrimary }}>Imagen de tu planta</AppText>
-              <Controller
-                control={control}
-                name="customImageUrl"
-                render={({ field: { value, onChange } }) => (
-                  <PlantImagePicker
-                    value={value ?? null}
-                    onChange={(uri) => onChange(uri ?? "")}
-                  />
-                )}
+              <PlantImagePicker
+                value={pickerValue}
+                onChange={(uri) => {
+                  if (uri) {
+                    setImageLocalUri(uri);
+                    setImageRemoved(false);
+                  } else {
+                    setImageLocalUri(null);
+                    setImageRemoved(true);
+                  }
+                }}
               />
-              {errors.customImageUrl?.message ? (
-                <AppText variant="caption" style={{ color: colors.danger }}>
-                  {errors.customImageUrl.message}
-                </AppText>
-              ) : null}
             </View>
 
             <Controller
@@ -226,6 +240,22 @@ export default function EditPlantModal({
                   {errors.healthStatus?.message ? (
                     <AppText variant="caption" style={{ color: colors.danger }}>
                       {errors.healthStatus.message}
+                    </AppText>
+                  ) : null}
+                </View>
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="visibility"
+              render={({ field: { value, onChange } }) => (
+                <View style={styles.fieldBlock}>
+                  <AppText variant="label" style={{ color: colors.textPrimary }}>Visibilidad</AppText>
+                  <SingleSelect options={plantVisibilitySelectOptions} value={value} onChange={onChange} />
+                  {errors.visibility?.message ? (
+                    <AppText variant="caption" style={{ color: colors.danger }}>
+                      {errors.visibility.message}
                     </AppText>
                   ) : null}
                 </View>
@@ -306,8 +336,6 @@ export default function EditPlantModal({
     </Modal>
   );
 }
-
-import { AppTheme } from "@/src/theme/designSystem";
 
 function createStyles({ colors, spacing, radius }: AppTheme) {
   return StyleSheet.create({

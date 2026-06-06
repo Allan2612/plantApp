@@ -48,6 +48,14 @@ const userFormSchema = z.object({
       "La fecha debe usar formato AAAA-MM-DD.",
     ),
   city: z.string().trim().optional(),
+  phone: z
+    .string()
+    .trim()
+    .optional()
+    .refine(
+      (value) => !value || /^[\d\s+()-]{8,20}$/.test(value),
+      "Numero invalido. Usa entre 8 y 20 digitos.",
+    ),
 });
 
 export type UserFormValues = z.infer<typeof userFormSchema>;
@@ -176,6 +184,7 @@ export function useUserProfileScreen() {
       visibility: visibilityOptions[0].value,
       birthDate: "",
       city: "",
+      phone: "",
     },
   });
 
@@ -199,6 +208,7 @@ export function useUserProfileScreen() {
         visibility: getVisibilityField(userPayload),
         birthDate: formatBirthDateForInput(getStringField(userPayload, "birthDate")),
         city: getStringField(userPayload, "city"),
+        phone: getStringField(userPayload, "phone"),
       });
     };
 
@@ -245,7 +255,7 @@ export function useUserProfileScreen() {
   // cachedProfile intentionally omitted: setGlobalProfile() inside loadProfile()
   // would update cachedProfile → re-trigger effect → hydrateForm() while editing.
   // cachedProfileRef.current always holds the latest value without causing loops.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [reset, resolveSessionProfile, setGlobalProfile, showToast, user?.uid]);
 
   const onSubmit = handleSubmit(async (values) => {
