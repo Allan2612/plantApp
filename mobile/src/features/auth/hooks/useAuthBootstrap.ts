@@ -22,6 +22,15 @@ export function useAuthBootstrap() {
         return;
       }
 
+      // Offline-first: si ya hay un perfil cacheado (persistido), autentica de
+      // inmediato para no quedar en "checking" (pantalla negra) ni desloguear
+      // cuando el backend está dormido o sin red.
+      const cachedProfile = useAuthStore.getState().profile;
+      if (cachedProfile) {
+        setFirebaseUser(user);
+        setSessionStatus("authenticated");
+      }
+
       try {
         const resolution = await fetchProfileForSession({
           uid: user.uid,
@@ -30,19 +39,25 @@ export function useAuthBootstrap() {
           providerId: user.providerData?.[0]?.providerId ?? null,
         });
 
-        if (!resolution?.profile) {
+        if (resolution?.profile) {
+          setFirebaseUser(user);
+          setProfile(resolution.profile);
+          setSessionStatus("authenticated");
+        } else if (!cachedProfile) {
+          // Sin perfil en backend y sin cache → sesión inválida.
           await logoutUser();
           resetAuthState();
-          return;
         }
-
-        setFirebaseUser(user);
-        setProfile(resolution.profile);
-        setSessionStatus("authenticated");
       } catch (error) {
         console.warn("[Auth][bootstrap] profile resolution failed", error);
-        await logoutUser();
-        resetAuthState();
+        // Fallo transitorio (backend dormido / sin red): si hay cache, se
+        // mantiene la sesión; si no, se marca no autenticado (sin hard logout
+        // para permitir reintento al recuperar conexión).
+        if (!cachedProfile) {
+          setFirebaseUser(null);
+          setProfile(null);
+          setSessionStatus("unauthenticated");
+        }
       }
     });
 

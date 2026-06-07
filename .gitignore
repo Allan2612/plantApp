@@ -1,20 +1,81 @@
-serviceAccountKey.json
-backend-api/serviceAccountKey.json
-backend-api/serviceAccountKey.json.json
-.venv/
-backend-api/.venv/
-backend-api/__pycache__/
-backend-api/app/__pycache__/
-mobile/node_modules/
-mobile/.expo/
-mobile/dist/
-.env
-backend-api/.env
-node_modules
+# dependencies
+node_modules/
 
+# monorepo
+.turbo/
+/mobile/.gitignore
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+.pytest_cache/
+venv
+*__pycache__
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env
+.env.*
+.env*.local
+.env.example
+
+# Firebase service account keys — NUNCA commitear
+*serviceAccountKey*.json
+*service-account*.json
+*serviceAccount*.json
+serviceAccountKey.json
+
+# typescript
+*.tsbuildinfo
+
+app-example
+
+# Claude Code local workspace config (mentor skill, personal)
 .claude/
 **/CLAUDE.md
 **/CLAUDE.md
 Claude.md
 .claude.local.json
 .claude.local/
+
+# Personal learning & progress docs
+/docs/backend-learning-roadmap.md
+/docs/backend-phases.md
+
+# generated native folders
+/ios
+/android
+
+# local reference files
+Proyecto Programacion Movil 2026.pdf
+Claude.md
+backend-api/requirements.txt

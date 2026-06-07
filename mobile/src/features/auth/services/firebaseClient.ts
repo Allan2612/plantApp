@@ -21,17 +21,20 @@ const getReactNativePersistence = (
   }
 ).getReactNativePersistence;
 
-const REQUIRED_FIREBASE_KEYS = [
-  "EXPO_PUBLIC_FIREBASE_API_KEY",
-  "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN",
-  "EXPO_PUBLIC_FIREBASE_PROJECT_ID",
-  "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET",
-  "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
-  "EXPO_PUBLIC_FIREBASE_APP_ID",
-] as const;
-
+// Se valida el objeto `firebaseConfig` (que usa referencias LITERALES a
+// process.env, las únicas que Metro inyecta en el bundle de producción) y NO
+// `process.env[key]` dinámico, que queda undefined en el APK y reportaba
+// falsamente que faltaban las variables.
 function getMissingFirebaseEnvKeys(): string[] {
-  return REQUIRED_FIREBASE_KEYS.filter((key) => !process.env[key]?.trim());
+  const entries: [string, string][] = [
+    ["EXPO_PUBLIC_FIREBASE_API_KEY", firebaseConfig.apiKey],
+    ["EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN", firebaseConfig.authDomain],
+    ["EXPO_PUBLIC_FIREBASE_PROJECT_ID", firebaseConfig.projectId],
+    ["EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET", firebaseConfig.storageBucket],
+    ["EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID", firebaseConfig.messagingSenderId],
+    ["EXPO_PUBLIC_FIREBASE_APP_ID", firebaseConfig.appId],
+  ];
+  return entries.filter(([, value]) => !value?.trim()).map(([key]) => key);
 }
 
 function assertFirebaseConfig(): void {
