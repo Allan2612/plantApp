@@ -63,23 +63,24 @@ export function getFirebaseAuthOrThrow(): Auth {
 
   const app = getFirebaseAppOrThrow();
 
+  // Intenta inicializar con persistencia en AsyncStorage. Si el helper
+  // `getReactNativePersistence` no está disponible (puede pasar en builds de
+  // producción por minificación/Hermes) o initializeAuth falla, cae a
+  // getAuth(app) para que el login NUNCA quede roto por la persistencia.
   try {
-    if (!getReactNativePersistence) {
-      throw new Error(
-        "No se pudo inicializar persistencia de auth en React Native.",
-      );
-    }
-
-    firebaseAuthInstance = initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage) as Persistence,
-    });
-    return firebaseAuthInstance;
-  } catch (error) {
-    const authErrorCode = (error as { code?: string }).code;
-    if (authErrorCode === "auth/already-initialized") {
-      firebaseAuthInstance = getAuth(app);
+    if (getReactNativePersistence) {
+      firebaseAuthInstance = initializeAuth(app, {
+        persistence: getReactNativePersistence(AsyncStorage) as Persistence,
+      });
       return firebaseAuthInstance;
     }
-    throw error;
+  } catch (error) {
+    const authErrorCode = (error as { code?: string }).code;
+    if (authErrorCode !== "auth/already-initialized") {
+      // Cualquier otro fallo de persistencia: continúa al fallback getAuth.
+    }
   }
+
+  firebaseAuthInstance = getAuth(app);
+  return firebaseAuthInstance;
 }

@@ -51,7 +51,14 @@ function assertIdTokenOrThrow(idToken: string): void {
 function mapAndThrow(scope: string, error: unknown): never {
   const firebaseError = error as { code?: string; message?: string };
   logHandledAuthError(scope, firebaseError.code, firebaseError.message);
-  throw new Error(mapFirebaseAuthCode(firebaseError.code));
+  const mapped = mapFirebaseAuthCode(firebaseError.code);
+  // Si no hubo código Firebase reconocible, adjunta la pista cruda para no
+  // quedar a ciegas con el mensaje genérico (diagnóstico en builds).
+  if (!firebaseError.code) {
+    const hint = firebaseError.message?.trim();
+    throw new Error(hint ? `${mapped} (${hint})` : mapped);
+  }
+  throw new Error(mapped);
 }
 
 export function subscribeAuthState(listener: (user: User | null) => void) {
