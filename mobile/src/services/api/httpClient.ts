@@ -3,7 +3,9 @@ import {
   normalizeErrorMessage,
 } from "@/src/services/errors/errorMessages";
 
-const HTTP_TIMEOUT_MS = 8000;
+// Render (plan free) duerme el servicio tras inactividad y el cold start tarda
+// decenas de segundos. 8s abortaba la primera petición; 25s la tolera.
+const HTTP_TIMEOUT_MS = 25000;
 const HTTP_UPLOAD_TIMEOUT_MS = 30000;
 
 function parseBackendMessage(payload: unknown): string | null {

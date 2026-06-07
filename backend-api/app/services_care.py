@@ -77,50 +77,60 @@ def materialize_pending_tasks(user_id: str, horizon_days: int = 30) -> int:
     for rule_snap in rules:
         rule = rule_snap.to_dict()
         rule_id = rule_snap.id
-        interval = int(rule.get("intervalDays") or 0)
-        if interval <= 0:
-            continue
+        # Una regla con datos corruptos (intervalDays/anchorDate inválidos) no
+        # debe tumbar todo el endpoint: se registra y se salta.
+        try:
+            interval = int(rule.get("intervalDays") or 0)
+            if interval <= 0:
+                continue
 
-        anchor_raw = rule.get("anchorDate") or _today_iso_date()
-        anchor = _parse_iso_date(anchor_raw).date()
-        last_until_raw = rule.get("lastGeneratedUntil")
-        if last_until_raw:
-            cursor = _parse_iso_date(last_until_raw).date() + timedelta(days=interval)
-            # Re-alinear al múltiplo de intervalo desde anchor
-            delta_days = (cursor - anchor).days
-            if delta_days < 0:
-                cursor = anchor
+            anchor_raw = rule.get("anchorDate") or _today_iso_date()
+            anchor = _parse_iso_date(anchor_raw).date()
+            last_until_raw = rule.get("lastGeneratedUntil")
+            if last_until_raw:
+                cursor = _parse_iso_date(last_until_raw).date() + timedelta(days=interval)
+                # Re-alinear al múltiplo de intervalo desde anchor
+                delta_days = (cursor - anchor).days
+                if delta_days < 0:
+                    cursor = anchor
+                else:
+                    remainder = delta_days % interval
+                    if remainder != 0:
+                        cursor = cursor + timedelta(days=(interval - remainder))
             else:
-                remainder = delta_days % interval
-                if remainder != 0:
-                    cursor = cursor + timedelta(days=(interval - remainder))
-        else:
-            cursor = anchor
+                cursor = anchor
 
-        while cursor <= end_date:
-            scheduled_for = cursor.isoformat()
-            doc_id = f"{rule_id}_{scheduled_for}"
-            existing = db.collection(_CARE_SCHEDULE).document(doc_id).get()
-            if not existing.exists:
-                db.collection(_CARE_SCHEDULE).document(doc_id).set({
-                    "id": doc_id,
-                    "userId": rule.get("userId"),
-                    "userPlantId": rule.get("userPlantId"),
-                    "type": rule.get("type"),
-                    "status": "pending",
-                    "scheduledFor": scheduled_for,
-                    "notes": rule.get("notes"),
-                    "ruleId": rule_id,
-                    "createdAt": _now_iso(),
-                    "updatedAt": _now_iso(),
-                })
-                created += 1
-            cursor = cursor + timedelta(days=interval)
+            while cursor <= end_date:
+                scheduled_for = cursor.isoformat()
+                doc_id = f"{rule_id}_{scheduled_for}"
+                existing = db.collection(_CARE_SCHEDULE).document(doc_id).get()
+                if not existing.exists:
+                    db.collection(_CARE_SCHEDULE).document(doc_id).set({
+                        "id": doc_id,
+                        "userId": rule.get("userId"),
+                        "userPlantId": rule.get("userPlantId"),
+                        "type": rule.get("type"),
+                        "status": "pending",
+                        "scheduledFor": scheduled_for,
+                        "notes": rule.get("notes"),
+                        "ruleId": rule_id,
+                        "createdAt": _now_iso(),
+                        "updatedAt": _now_iso(),
+                    })
+                    created += 1
+                cursor = cursor + timedelta(days=interval)
 
-        db.collection(_CARE_RULES).document(rule_id).update({
-            "lastGeneratedUntil": end_date.isoformat(),
-            "updatedAt": _now_iso(),
-        })
+            db.collection(_CARE_RULES).document(rule_id).update({
+                "lastGeneratedUntil": end_date.isoformat(),
+                "updatedAt": _now_iso(),
+            })
+        except Exception:
+            logger.exception(
+                "Regla de cuidado inválida, se omite. rule_id=%s user_id=%s",
+                rule_id,
+                user_id,
+            )
+            continue
 
     return created
 

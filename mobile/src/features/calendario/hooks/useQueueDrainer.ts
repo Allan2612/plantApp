@@ -54,6 +54,8 @@ export function useQueueDrainer() {
         const fresh = await fetchUserCareSchedule(userId);
         setTasks(fresh);
         await saveCachedTasks(userId, fresh);
+      } catch {
+        // Error de red o 500 del backend: se conserva la cache local.
       } finally {
         draining.current = false;
       }

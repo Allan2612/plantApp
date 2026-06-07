@@ -51,6 +51,20 @@ function RootStack() {
           presentation: "card",
         }}
       />
+      <Stack.Screen
+        name="mensajeria"
+        options={{
+          headerShown: false,
+          presentation: "card",
+        }}
+      />
+      <Stack.Screen
+        name="chat/[threadId]"
+        options={{
+          headerShown: false,
+          presentation: "card",
+        }}
+      />
     </Stack>
   );
 }

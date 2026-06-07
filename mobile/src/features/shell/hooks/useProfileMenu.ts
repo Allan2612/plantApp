@@ -45,6 +45,14 @@ export function useProfileMenu() {
         },
       },
       {
+        label: "Mensajería",
+        icon: "chatbubble-outline",
+        onPress: () => {
+          setVisible(false);
+          router.push("/mensajeria" as never);
+        },
+      },
+      {
         label: "Configuración",
         icon: "settings-outline",
         onPress: () => {

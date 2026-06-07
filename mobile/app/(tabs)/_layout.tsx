@@ -1,6 +1,7 @@
 import AnimatedTabBar from "@/src/features/shell/components/AnimatedTabBar/AnimatedTabBar";
 import AppHeader from "@/src/features/shell/components/AppHeader/AppHeader";
 import OfflineBanner from "@/src/components/shared/OfflineBanner";
+import { ChatProvider } from "@/src/features/mensajeria/providers/ChatProvider";
 import { ScrollAnimProvider } from "@/src/features/shell/hooks/ScrollAnimContext";
 import { useAuthSession } from "@/src/features/auth/hooks/useAuthSession";
 import { useAppTheme } from "@/src/theme/ThemeContext";
@@ -24,9 +25,10 @@ export default function TabsLayout() {
   }
 
   return (
-    <ScrollAnimProvider>
-      <View style={styles.root}>
-        <OfflineBanner />
+    <ChatProvider>
+      <ScrollAnimProvider>
+        <View style={styles.root}>
+          <OfflineBanner />
         <Tabs
           screenOptions={{
             headerShown: false,
@@ -104,7 +106,8 @@ export default function TabsLayout() {
           />
         </Tabs>
         <AppHeader />
-      </View>
-    </ScrollAnimProvider>
+        </View>
+      </ScrollAnimProvider>
+    </ChatProvider>
   );
 }
