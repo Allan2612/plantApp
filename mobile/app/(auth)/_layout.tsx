@@ -1,0 +1,21 @@
+import { useAuthSession } from "@/src/features/auth/hooks/useAuthSession";
+import { Redirect, Stack, type Href } from "expo-router";
+
+export default function AuthLayout() {
+  const { isChecking, isAuthenticated, isEmailVerified } = useAuthSession();
+
+  if (isChecking) return null;
+
+  if (isAuthenticated && isEmailVerified) {
+    return <Redirect href={"/(tabs)/home" as Href} />;
+  }
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="login" />
+      <Stack.Screen name="register" />
+      <Stack.Screen name="forgot-password" />
+      <Stack.Screen name="verify-email" />
+    </Stack>
+  );
+}
